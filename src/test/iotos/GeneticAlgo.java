@@ -138,6 +138,8 @@ public class GeneticAlgo implements TopologyGraphSelector{
                                 Map<Integer,ApplicationRequirements> flowAR,
                                 Map<Integer,Integer> flowSources,
                                 int sourceNodeId){
+        // TODO: handle concurrent get path request, 
+        // the last path request at here may not get correct path about more earlier flow
         System.out.println("=============================");
         System.out.println("flowPaths = ");
         for(int flowID : flowPaths.keySet()){ 
