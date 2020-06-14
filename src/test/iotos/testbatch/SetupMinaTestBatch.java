@@ -1,0 +1,158 @@
+package test.iotos.testbatch;
+
+import it.unibo.deis.lia.ramp.core.internode.sdn.applicationRequirements.ApplicationRequirements;
+import it.unibo.deis.lia.ramp.core.internode.sdn.applicationRequirements.TrafficType;
+import test.iotos.testbatch.SetupTestBatch;
+
+public class SetupMinaTestBatch implements SetupTestBatch{
+    public int getNumberOfClient(){
+        return 29;
+    }
+    public boolean getReceive(String nodeID){
+        boolean receive = false;
+        switch (nodeID) {
+            case "1":
+                receive = true;
+                break;
+            case "11":
+                receive = true;
+                break;
+            case "13":
+                receive = true;
+                break;
+            case "14":
+                receive = true;
+                break;
+            case "10":
+                receive = true;
+                break;
+            case "26":
+                receive = true;
+                break;
+        }
+        return receive;
+    }
+    public String getAppTarget(String nodeID){
+        String targetID = "0";
+        switch (nodeID) {
+            case "25":
+                targetID = "1";
+                break;
+            case "26":
+                targetID = "1";
+                break;
+            case "19":
+                targetID = "11";
+                break;
+            case "21":
+                targetID = "13";
+                break;
+            case "10":
+                targetID = "1";
+                break;
+            case "24":
+                targetID = "14";
+                break;
+            case "23":
+                targetID = "10";
+                break;
+            case "16":
+                targetID = "26";
+                break;
+        }
+        return targetID;
+    }
+
+    public ApplicationRequirements getApplicationRequirement(String nodeID){
+        ApplicationRequirements applicationRequirements = null;
+        TrafficType trafficType = TrafficType.CONTROL_STREAM;
+        int payloadSize = 0;
+        int GenPacketPerSeconds = 0;
+        double requireDelay = 0.0;
+        double requireThroughput = 0.0;
+        int duration = 0;
+
+        switch (nodeID) {
+            case "25":
+                trafficType = TrafficType.FILE_TRANSFER;
+                payloadSize = 16;
+                GenPacketPerSeconds = 500;
+                requireDelay = 2000.0;
+                requireThroughput = 8000.0;
+                duration = 300;
+                break;
+            case "26":
+                trafficType = TrafficType.FILE_TRANSFER;
+                payloadSize = 20;
+                GenPacketPerSeconds = 400;
+                requireDelay = 2000.0;
+                requireThroughput = 8000.0;
+                duration = 300;
+                break;
+            case "19":
+                    trafficType = TrafficType.FILE_TRANSFER;
+                    payloadSize = 16;
+                    GenPacketPerSeconds = 500;
+                    requireDelay = 2000.0;
+                    requireThroughput = 8000.0;
+                    duration = 300;
+                break;
+            case "21":
+                trafficType = TrafficType.FILE_TRANSFER;
+                payloadSize = 16;
+                GenPacketPerSeconds = 300;
+                requireDelay = 2000.0;
+                requireThroughput = 8000.0;
+                duration = 300;
+                break;
+            case "10":
+                trafficType = TrafficType.VIDEO_STREAM;
+                payloadSize = 16;
+                GenPacketPerSeconds = 300;
+                requireDelay = 2000.0;
+                requireThroughput = 4800.0;
+                duration = 300;
+                break;
+            case "24":
+                trafficType = TrafficType.VIDEO_STREAM;
+                payloadSize = 20;
+                GenPacketPerSeconds = 200;
+                requireDelay = 2000.0;
+                requireThroughput = 4000.0;
+                duration = 300;
+                break;
+            case "23":
+                trafficType = TrafficType.VIDEO_STREAM;
+                payloadSize = 20;
+                GenPacketPerSeconds = 200;
+                requireDelay = 2000.0;
+                requireThroughput = 4000.0;
+                duration = 300;
+                break;
+            case "16":
+                trafficType = TrafficType.VIDEO_STREAM;
+                payloadSize = 8;
+                GenPacketPerSeconds = 300;
+                requireDelay = 2000.0;
+                requireThroughput = 1600.0;
+                duration = 300;
+                break;
+        }
+        applicationRequirements = new ApplicationRequirements(
+            trafficType,
+            payloadSize,
+            GenPacketPerSeconds,
+            requireDelay,
+            requireThroughput,
+            duration
+        );
+
+
+        return applicationRequirements;
+    }
+
+    @Override
+    public String getTestBatchName() {
+        return "mina-topo";
+    }
+}

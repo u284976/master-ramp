@@ -1,0 +1,8 @@
+2020-04-29 02:26:58: TcpDispatcher sent unicast packet: destS.getRemoteSocketAddress() /127.0.1.1:42271
+2020-04-29 02:26:59: TcpDispatcher sent unicast packet: destS.getRemoteSocketAddress() /192.168.126.1:1979
+2020-04-29 02:27:10: TcpDispatcher sent unicast packet: destS.getRemoteSocketAddress() /127.0.1.1:42271
+2020-04-29 02:27:10: FileSharingService: fsService.txt sent to 10
+2020-04-29 02:30:09: TcpDispatcher sent unicast packet: destS.getRemoteSocketAddress() /127.0.1.1:41735
+2020-04-29 02:30:09: TcpDispatcher sent unicast packet: destS.getRemoteSocketAddress() /192.168.126.1:1979
+2020-04-29 02:30:12: TcpDispatcher sent unicast packet: destS.getRemoteSocketAddress() /127.0.1.1:41735
+2020-04-29 02:30:12: FileSharingService: fsService.txt sent to 10

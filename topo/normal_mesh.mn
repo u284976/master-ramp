@@ -1,0 +1,244 @@
+{
+    "application": {
+        "apType": "ovs",
+        "authentication": "none",
+        "dpctl": "",
+        "enableWmediumd": "0",
+        "ipBase": "10.0.0.0/8",
+        "mode": "g",
+        "netflow": {
+            "nflowAddId": "0",
+            "nflowTarget": "",
+            "nflowTimeout": "600"
+        },
+        "openFlowVersions": {
+            "ovsOf10": "1",
+            "ovsOf11": "0",
+            "ovsOf12": "0",
+            "ovsOf13": "0"
+        },
+        "passwd": "",
+        "sflow": {
+            "sflowHeader": "128",
+            "sflowPolling": "30",
+            "sflowSampling": "400",
+            "sflowTarget": ""
+        },
+        "startCLI": "0",
+        "switchType": "ovs",
+        "terminalType": "xterm"
+    },
+    "aps": [],
+    "controllers": [],
+    "hosts": [],
+    "links": [
+        {
+            "dest": "sta2",
+            "opts": {},
+            "src": "sta1"
+        },
+        {
+            "dest": "sta3",
+            "opts": {},
+            "src": "sta1"
+        },
+        {
+            "dest": "sta4",
+            "opts": {},
+            "src": "sta2"
+        },
+        {
+            "dest": "sta5",
+            "opts": {},
+            "src": "sta2"
+        },
+        {
+            "dest": "sta5",
+            "opts": {},
+            "src": "sta3"
+        },
+        {
+            "dest": "sta5",
+            "opts": {},
+            "src": "sta4"
+        },
+        {
+            "dest": "sta6",
+            "opts": {},
+            "src": "sta3"
+        },
+        {
+            "dest": "sta7",
+            "opts": {},
+            "src": "sta3"
+        },
+        {
+            "dest": "sta8",
+            "opts": {},
+            "src": "sta4"
+        },
+        {
+            "dest": "sta8",
+            "opts": {},
+            "src": "sta5"
+        },
+        {
+            "dest": "sta7",
+            "opts": {},
+            "src": "sta6"
+        },
+        {
+            "dest": "sta8",
+            "opts": {},
+            "src": "sta7"
+        }
+    ],
+    "stations": [
+        {
+            "number": "3",
+            "opts": {
+                "channel": "1",
+                "hostname": "sta3",
+                "mode": "g",
+                "nodeNum": 3,
+                "passwd": "",
+                "range": "default",
+                "sched": "station",
+                "ssid": "sta3-ssid",
+                "user": "",
+                "wlans": 1,
+                "wpans": 0
+            },
+            "x": "465.0",
+            "y": "389.0"
+        },
+        {
+            "number": "5",
+            "opts": {
+                "channel": "1",
+                "hostname": "sta5",
+                "mode": "g",
+                "nodeNum": 5,
+                "passwd": "",
+                "range": "default",
+                "sched": "station",
+                "ssid": "sta5-ssid",
+                "user": "",
+                "wlans": 1,
+                "wpans": 0
+            },
+            "x": "560.0",
+            "y": "225.0"
+        },
+        {
+            "number": "7",
+            "opts": {
+                "channel": "1",
+                "hostname": "sta7",
+                "mode": "g",
+                "nodeNum": 7,
+                "passwd": "",
+                "range": "default",
+                "sched": "station",
+                "ssid": "sta7-ssid",
+                "user": "",
+                "wlans": 1,
+                "wpans": 0
+            },
+            "x": "800.0",
+            "y": "391.0"
+        },
+        {
+            "number": "2",
+            "opts": {
+                "channel": "1",
+                "hostname": "sta2",
+                "mode": "g",
+                "nodeNum": 2,
+                "passwd": "",
+                "range": "default",
+                "sched": "station",
+                "ssid": "sta2-ssid",
+                "user": "",
+                "wlans": 1,
+                "wpans": 0
+            },
+            "x": "425.0",
+            "y": "96.0"
+        },
+        {
+            "number": "4",
+            "opts": {
+                "channel": "1",
+                "hostname": "sta4",
+                "mode": "g",
+                "nodeNum": 4,
+                "passwd": "",
+                "range": "default",
+                "sched": "station",
+                "ssid": "sta4-ssid",
+                "user": "",
+                "wlans": 1,
+                "wpans": 0
+            },
+            "x": "744.0",
+            "y": "59.0"
+        },
+        {
+            "number": "6",
+            "opts": {
+                "channel": "1",
+                "hostname": "sta6",
+                "mode": "g",
+                "nodeNum": 6,
+                "passwd": "",
+                "range": "default",
+                "sched": "station",
+                "ssid": "sta6-ssid",
+                "user": "",
+                "wlans": 1,
+                "wpans": 0
+            },
+            "x": "687.0",
+            "y": "520.0"
+        },
+        {
+            "number": "1",
+            "opts": {
+                "channel": "1",
+                "hostname": "sta1",
+                "mode": "g",
+                "nodeNum": 1,
+                "passwd": "",
+                "range": "default",
+                "sched": "station",
+                "ssid": "sta1-ssid",
+                "user": "",
+                "wlans": 1,
+                "wpans": 0
+            },
+            "x": "355.0",
+            "y": "252.0"
+        },
+        {
+            "number": "8",
+            "opts": {
+                "channel": "1",
+                "hostname": "sta8",
+                "mode": "g",
+                "nodeNum": 8,
+                "passwd": "",
+                "range": "default",
+                "sched": "station",
+                "ssid": "sta8-ssid",
+                "user": "",
+                "wlans": 1,
+                "wpans": 0
+            },
+            "x": "912.0",
+            "y": "218.0"
+        }
+    ],
+    "switches": [],
+    "version": "2"
+}
