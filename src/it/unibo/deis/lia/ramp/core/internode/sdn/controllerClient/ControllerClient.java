@@ -425,7 +425,8 @@ public class ControllerClient extends Thread implements ControllerClientInterfac
 
         this.updateManager.stopUpdateManager();
         this.controllerServiceDiscoverer.stopControllerServiceDiscoverer();
-
+        this.clientMeasurer.stopMeasure();
+        
         controllerClient = null;
     }
 

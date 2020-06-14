@@ -8,6 +8,7 @@ import it.unibo.deis.lia.ramp.core.internode.sdn.controllerClient.ControllerClie
 import it.unibo.deis.lia.ramp.core.internode.sdn.controllerService.ControllerService;
 import it.unibo.deis.lia.ramp.service.management.ServiceManager;
 import test.iotos.testbatch.SetupMeshTestBatch;
+import test.iotos.testbatch.SetupSimpleTest;
 import test.iotos.testbatch.SetupTestBatch;
 
 public class SDNController{
@@ -44,6 +45,7 @@ public class SDNController{
 				try {
 					if (ramp != null && controllerService != null) {
 						System.out.println("ShutdownHook is being executed: gracefully stopping RAMP...");
+						ServiceManager.getInstance(false).removeService("application1");
 						controllerService.stopService();
 						ramp.stopRamp();
 					}

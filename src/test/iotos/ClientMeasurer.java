@@ -58,6 +58,16 @@ public class ClientMeasurer extends Thread{
         occupied = false;
     }
 
+    public void stopMeasure(){
+        active = false;
+        try {
+            ServiceManager.getInstance(false).removeService("measure_" + rampID);
+            service.close();
+            clientMeasurer = null;    
+        } catch (Exception e) {
+        }
+    }
+
     @Override
     public void run(){
 
@@ -70,16 +80,7 @@ public class ClientMeasurer extends Thread{
             }
         }
 
-        /**
-         * close handle
-         */
-        try {
-            ServiceManager.getInstance(false).removeService("measure_" + rampID);
-            service.close();
-            clientMeasurer = null;    
-        } catch (Exception e) {
-            // e.printStackTrace();
-        }
+        
         
     }
 

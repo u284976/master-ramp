@@ -138,6 +138,16 @@ public class GeneticAlgo implements TopologyGraphSelector{
                                 Map<Integer,ApplicationRequirements> flowAR,
                                 Map<Integer,Integer> flowSources,
                                 int sourceNodeId){
+        System.out.println("=============================");
+        System.out.println("flowPaths = ");
+        for(int flowID : flowPaths.keySet()){ 
+            System.out.println(Integer.toString(flowID)+ ":");
+            for(String s : flowPaths.get(flowID).getPath()){
+                System.out.println(s);
+            }
+        }
+        System.out.println("=============================");
+        
         /**
          * add attribute in topo's node
          * 
@@ -153,15 +163,6 @@ public class GeneticAlgo implements TopologyGraphSelector{
          * then go to the next step
          */
         for(Node node : tempGraph.getEachNode()){
-            // Map<String,Double> nodeState = new HashMap<>();
-            // nodeState.put("total", 0.0);
-            // nodeState.put("cur", 0.0);
-            // nodeState.put("lamda", 0.0);
-            // nodeState.put("n", 0.0);
-            // node.addAttribute("nodeState", nodeState);
-            
-            // node.addAttribute("total", 0);
-            // node.addAttribute("cur", 0);
             node.addAttribute("lamda", 0.0);
             node.addAttribute("n", 0.0);
         }
@@ -207,9 +208,14 @@ public class GeneticAlgo implements TopologyGraphSelector{
                 node.addAttribute("n", new_n);
             }
         }
+        System.out.println("=============================");
+        System.out.println("formal method : for each flow");
+        
 
         // for each flowPath
         for(int flowID : flowPaths.keySet()){
+            System.out.println("flowID = " + Integer.toString(flowID));
+
             PathDescriptor path = flowPaths.get(flowID);
             List<Integer> pathNodeIDs = path.getPathNodeIds();
             // On the way of flow, the smallest throughput

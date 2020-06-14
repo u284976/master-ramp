@@ -5,8 +5,14 @@ import it.unibo.deis.lia.ramp.core.internode.sdn.applicationRequirements.Traffic
 import test.iotos.testbatch.SetupTestBatch;
 
 public class SetupMinaTestBatch implements SetupTestBatch{
+    public String getTestBatchName() {
+        return "mina-topo";
+    }
     public int getNumberOfClient(){
         return 29;
+    }
+    public int getTestSecond(){
+        return 30;
     }
     public boolean getReceive(String nodeID){
         boolean receive = false;
@@ -149,10 +155,5 @@ public class SetupMinaTestBatch implements SetupTestBatch{
 
 
         return applicationRequirements;
-    }
-
-    @Override
-    public String getTestBatchName() {
-        return "mina-topo";
     }
 }

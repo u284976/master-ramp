@@ -11,7 +11,9 @@ public class SetupMeshTestBatch implements SetupTestBatch{
     public int getNumberOfClient(){
         return 8;
     }
-
+    public int getTestSecond(){
+        return 15;
+    }
     public String getAppTarget(String nodeID){
         String targetID = "0";
         switch (nodeID) {
@@ -57,7 +59,7 @@ public class SetupMeshTestBatch implements SetupTestBatch{
             case "3":
                 trafficType = TrafficType.FILE_TRANSFER;
                 payloadSize = 16;
-                GenPacketPerSeconds = 500;
+                GenPacketPerSeconds = 5;
                 requireDelay = 2000.0;
                 requireThroughput = 8000.0;
                 duration = 100;
@@ -65,7 +67,7 @@ public class SetupMeshTestBatch implements SetupTestBatch{
             case "4":
                 trafficType = TrafficType.FILE_TRANSFER;
                 payloadSize = 16;
-                GenPacketPerSeconds = 300;
+                GenPacketPerSeconds = 3;
                 requireDelay = 2000.0;
                 requireThroughput = 8000.0;
                 duration = 100;
@@ -73,7 +75,7 @@ public class SetupMeshTestBatch implements SetupTestBatch{
             case "6":
                 trafficType = TrafficType.VIDEO_STREAM;
                 payloadSize = 20;
-                GenPacketPerSeconds = 200;
+                GenPacketPerSeconds = 2;
                 requireDelay = 2000.0;
                 requireThroughput = 4000.0;
                 duration = 100;

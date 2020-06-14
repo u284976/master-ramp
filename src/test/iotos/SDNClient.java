@@ -19,7 +19,9 @@ import it.unibo.deis.lia.ramp.service.management.ServiceDiscovery;
 import it.unibo.deis.lia.ramp.service.management.ServiceManager;
 import it.unibo.deis.lia.ramp.service.management.ServiceResponse;
 import test.iotos.messagetype.timeDataType;
+import test.iotos.testbatch.SetupMeshTestBatch;
 import test.iotos.testbatch.SetupMinaTestBatch;
+import test.iotos.testbatch.SetupSimpleTest;
 import test.iotos.testbatch.SetupTestBatch;
 
 public class SDNClient{
@@ -43,7 +45,7 @@ public class SDNClient{
         
         TestTime = "2020-06-14";
         // change here to change testBatch
-        testBatch = new SetupMinaTestBatch();
+        testBatch = new SetupMeshTestBatch();
         
         System.out.println("================================");
         System.out.println("SDN Client starting...");
@@ -135,8 +137,12 @@ public class SDNClient{
         }
 
         // start listen
-        listener = new receiveThread(TestTime,applicationSocket,nodeID);
-        listener.start();
+        boolean IamReceive = testBatch.getReceive(nodeID);
+        if(IamReceive){
+            listener = new receiveThread(TestTime,applicationSocket,nodeID);
+            listener.start();
+        }
+        
 
         ServiceResponse appService = null;
         String targetID = testBatch.getAppTarget(nodeID);
@@ -223,8 +229,9 @@ public class SDNClient{
                 long preWhile = System.currentTimeMillis();
                 int seqNum = 0;
 
-                // start transfer execute 30s
-                while(System.currentTimeMillis() - preWhile <= 30*1000){
+                // start transfer execute "testSecond"
+                int testSecond = testBatch.getTestSecond();
+                while(System.currentTimeMillis() - preWhile <= testSecond*1000){
 
                     long currentTime = System.currentTimeMillis();
                     seqNum++;
@@ -295,11 +302,14 @@ class receiveThread extends Thread{
 
     @Override
     public void run(){
-        String outputFile = TestTime + "receive.csv";
+        String outputFile = "../0-outputFile/" + TestTime + "receive_on_" + nodeID + ".csv";
         try {
+            // init file , false to not append file
             CSVWriter writer = new CSVWriter(new FileWriter(outputFile, false), ','); 
-            String[] entry = {TestTime,nodeID};
-            writer.writeNext(entry);
+            String[] entry1 = {TestTime,"nodeID="+nodeID};
+            writer.writeNext(entry1);
+            String[] entry2 = {"seq","sendTime","receiveTime","payloadSize"};
+            writer.writeNext(entry2);
             writer.close();
             while (appActive) {
                     UnicastPacket up = (UnicastPacket)E2EComm.receive(applicationSocket);
@@ -323,6 +333,7 @@ class packetHandler extends Thread{
 
     public void run(){
         try {
+            // when receive packet, true to append message to file
             CSVWriter writer = new CSVWriter(new FileWriter(outputFile, true), ','); 
             timeDataType payload = (timeDataType)E2EComm.deserialize(up.getBytePayload());
 
