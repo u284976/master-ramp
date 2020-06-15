@@ -10,6 +10,9 @@ public class SetupSimpleTest implements SetupTestBatch {
     public int getNumberOfClient(){
         return 3;
     }
+    public int getNumberOfEdge(){
+        return 2;
+    }
     public int getTestSecond(){
         return 10;
     }

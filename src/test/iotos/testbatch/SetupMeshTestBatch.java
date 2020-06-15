@@ -11,6 +11,9 @@ public class SetupMeshTestBatch implements SetupTestBatch{
     public int getNumberOfClient(){
         return 8;
     }
+    public int getNumberOfEdge(){
+        return 13;
+    }
     public int getTestSecond(){
         return 15;
     }
@@ -56,7 +59,7 @@ public class SetupMeshTestBatch implements SetupTestBatch{
         int duration = 0;
 
         switch (nodeID) {
-            case "3":
+            case "3":       // send to 8
                 trafficType = TrafficType.FILE_TRANSFER;
                 payloadSize = 16;
                 GenPacketPerSeconds = 5;
@@ -64,7 +67,7 @@ public class SetupMeshTestBatch implements SetupTestBatch{
                 requireThroughput = 8000.0;
                 duration = 100;
                 break;
-            case "4":
+            case "4":       // send to 5
                 trafficType = TrafficType.FILE_TRANSFER;
                 payloadSize = 16;
                 GenPacketPerSeconds = 3;
@@ -72,7 +75,7 @@ public class SetupMeshTestBatch implements SetupTestBatch{
                 requireThroughput = 8000.0;
                 duration = 100;
                 break;
-            case "6":
+            case "6":       // send to 2
                 trafficType = TrafficType.VIDEO_STREAM;
                 payloadSize = 20;
                 GenPacketPerSeconds = 2;

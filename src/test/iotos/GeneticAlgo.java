@@ -1,5 +1,6 @@
 package test.iotos;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -38,17 +39,21 @@ public class GeneticAlgo implements TopologyGraphSelector{
         PathDescriptor tempPath = new BreadthFirstFlowPathSelector(topologyGraph).selectPath(sourceNodeId, destNodeId, null, null);
         Graph checkGraph = Graphs.clone(topologyGraph);
 
+        /**
+         * 2020-06-15
+         * Object is "call by reference" like ArrayList, HashMap, Integer
+         * variable is "call by value" like String[], int,...
+         * 
+         * so when i clone pathDescriptor need "new Object" for ArrayList
+         */
         Map<Integer,PathDescriptor> flowPaths = new HashMap<Integer,PathDescriptor>();
         for(int key : activePaths.keySet()){
-            /**
-             * 2020-06-15
-             * handle Synchronization problem about multiple path_request at same time
-             * may cause problem with missig value at formal method
-             */
-            if(activePaths.get(key)==null){
-                continue;
+            
+            List<Integer> pathNodeIDs = new ArrayList<>();
+            for(int i=0 ; i<activePaths.get(key).getPathNodeIds().size() ; i++){
+                pathNodeIDs.add(activePaths.get(key).getPathNodeIds().get(i));
             }
-            PathDescriptor path = new PathDescriptor(activePaths.get(key).getPath(), activePaths.get(key).getPathNodeIds());
+            PathDescriptor path = new PathDescriptor(activePaths.get(key).getPath(), pathNodeIDs);
             flowPaths.put(key,path);
         }
 
@@ -145,19 +150,7 @@ public class GeneticAlgo implements TopologyGraphSelector{
     private void formalMethod(Graph tempGraph, Map<Integer,PathDescriptor> flowPaths,
                                 Map<Integer,ApplicationRequirements> flowAR,
                                 Map<Integer,Integer> flowSources,
-                                int sourceNodeId){
-        // TODO: handle concurrent get path request, 
-        // the last path request at here may not get correct path about more earlier flow
-        System.out.println("=============================");
-        System.out.println("flowPaths = ");
-        for(int flowID : flowPaths.keySet()){ 
-            System.out.println(Integer.toString(flowID)+ ":");
-            for(String s : flowPaths.get(flowID).getPath()){
-                System.out.println(s);
-            }
-        }
-        System.out.println("=============================");
-        
+                                int sourceNodeId){       
         /**
          * add attribute in topo's node
          * 
@@ -218,13 +211,10 @@ public class GeneticAlgo implements TopologyGraphSelector{
                 node.addAttribute("n", new_n);
             }
         }
-        System.out.println("=============================");
-        System.out.println("formal method : for each flow");
-        
+
 
         // for each flowPath
         for(int flowID : flowPaths.keySet()){
-            System.out.println("flowID = " + Integer.toString(flowID));
 
             PathDescriptor path = flowPaths.get(flowID);
             List<Integer> pathNodeIDs = path.getPathNodeIds();

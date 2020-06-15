@@ -1026,7 +1026,19 @@ public class ControllerService extends Thread {
     public void setCountClient(int countClient) {
         this.countClient = countClient;
     }
-    public boolean checkTopoComplete(){
+    public boolean checkTopoComplete(int countEdge){
+
+        /**
+         * countEdge = 0, means this testBatch not care about topo edge complete
+         * as long as there is connectivity and link have value
+         */
+        if(countEdge!=0 && topologyGraph.getEdgeCount() < countEdge){
+            System.out.println("***************************");
+            System.out.println("Topology not complete!");
+            System.out.println("***************************");
+            return false;
+        }
+
         boolean allSet = true;
         for(Node node : topologyGraph.getEachNode()){
             int edgeCount = 0;
@@ -1050,9 +1062,6 @@ public class ControllerService extends Thread {
         }
         
         if(allSet){
-            System.out.println("================================");
-			System.out.println("controller notice to all client");
-			System.out.println("================================");
             ControllerMessageReady updateMessage = new ControllerMessageReady(MessageType.READY_TO_TEST);
 
             for (Node clientNode : topologyGraph.getNodeSet()) {

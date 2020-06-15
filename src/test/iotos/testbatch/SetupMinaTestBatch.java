@@ -11,6 +11,9 @@ public class SetupMinaTestBatch implements SetupTestBatch{
     public int getNumberOfClient(){
         return 29;
     }
+    public int getNumberOfEdge(){
+        return 0;
+    }
     public int getTestSecond(){
         return 30;
     }

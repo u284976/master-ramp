@@ -2049,11 +2049,16 @@ public class ControllerClient extends Thread implements ControllerClientInterfac
                 // addr[0] = 10.0.0.1
                 addr[0] = address.toString().substring(1);
 
-                ServiceResponse service = ServiceDiscovery.findService(
-                    addr,
-                    "measure_"+nodeId.toString()
-                );
-
+                ServiceResponse service = null;
+                try {
+                    service = ServiceDiscovery.findService(
+                        addr,
+                        "measure_"+nodeId.toString()
+                    );
+                } catch (Exception e) {
+                    // e.printStackTrace();
+                }
+                
                 if(service == null){
                     continue;
                 }

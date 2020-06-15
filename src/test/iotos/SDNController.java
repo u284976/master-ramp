@@ -20,6 +20,8 @@ public class SDNController{
 	static RampEntryPoint ramp;
 	
 	static int countClient;
+	
+	static int countEdge;
 
 	static SetupTestBatch testBatch;
 
@@ -30,6 +32,7 @@ public class SDNController{
 		
 		testBatch = new SetupMeshTestBatch();
 		countClient = testBatch.getNumberOfClient();
+		countEdge = testBatch.getNumberOfEdge();
 		testBatchName = testBatch.getTestBatchName();
 
         System.out.println("================================");
@@ -96,10 +99,23 @@ public class SDNController{
 				e.printStackTrace();
 			}
 			if(controllerService.getActiveClients().size() >= countClient){
-				if(controllerService.checkTopoComplete()){
+				if(controllerService.checkTopoComplete(countEdge)){
 					break;
 				}
 			}
-		}		
+		}
+		System.out.println("================================");
+		System.out.println("controller notice to all client");
+		System.out.println("================================");
+
+		try {
+			Thread.sleep(testBatch.getTestSecond()*1000);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+
+		System.out.println("================================");
+		System.out.println("controller notice to all client");
+		System.out.println("================================");
 	}
 }
