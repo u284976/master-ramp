@@ -1569,13 +1569,6 @@ public class ControllerClient extends Thread implements ControllerClientInterfac
              */
             int flowId = responseMessage.getFlowId();
             PathDescriptor newPath = responseMessage.getNewPaths().get(0);
-
-            System.out.println("==============handleFixPathPushResponse===============");
-            for(String s : newPath.getPath()){
-                System.out.println(s);
-            }
-            System.out.println("==============handleFixPathPushResponse===============");
-
             log("PushFixPath: " + Arrays.toString(newPath.getPath()));
             newPath.setCreationTime(System.currentTimeMillis());
 

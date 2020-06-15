@@ -115,11 +115,6 @@ public class SDNController{
 		System.out.println("controller notice to all client");
 		System.out.println("================================");
 
-		try {
-			Thread.sleep(testBatch.getTestSecond()*1000 + 20000);
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}
 
 		while (!controllerService.checkComplete()) {
 			try {

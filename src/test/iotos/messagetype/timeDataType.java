@@ -4,6 +4,9 @@ import java.io.Serializable;
 
 import it.unibo.deis.lia.ramp.service.application.SDNControllerMessage;
 
+/**
+ * used for client---->client
+ */
 public class timeDataType extends SDNControllerMessage implements Serializable {
     
     private static final long serialVersionUID = 2L;
