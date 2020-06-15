@@ -40,6 +40,14 @@ public class GeneticAlgo implements TopologyGraphSelector{
 
         Map<Integer,PathDescriptor> flowPaths = new HashMap<Integer,PathDescriptor>();
         for(int key : activePaths.keySet()){
+            /**
+             * 2020-06-15
+             * handle Synchronization problem about multiple path_request at same time
+             * may cause problem with missig value at formal method
+             */
+            if(activePaths.get(key)==null){
+                continue;
+            }
             PathDescriptor path = new PathDescriptor(activePaths.get(key).getPath(), activePaths.get(key).getPathNodeIds());
             flowPaths.put(key,path);
         }
