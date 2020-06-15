@@ -191,6 +191,8 @@ public class GeneticAlgo implements TopologyGraphSelector{
          * path.getPath() is String[] "not" include Source, only M1,M2,D NetworkInterfaceCard address
          */
         for(int flowID : flowPaths.keySet()){
+
+            // combine flowSource and flowPath
             PathDescriptor path = flowPaths.get(flowID);
             List<Integer> pathNodeID = path.getPathNodeIds();
             pathNodeID.add(0, flowSources.get(flowID));
@@ -203,6 +205,8 @@ public class GeneticAlgo implements TopologyGraphSelector{
              * so needed to convert to kb
              */
             double flow_n = (double)flowAR.get(flowID).getPakcetLength()*8.0/1024.0;
+            
+            
             for(int nodeID : pathNodeID){
                 MultiNode node = tempGraph.getNode(Integer.toString(nodeID));
                 double oldLamda = (double)node.getAttribute("lamda");
@@ -230,6 +234,9 @@ public class GeneticAlgo implements TopologyGraphSelector{
              * take node's max throughput with neighbor as "application Layer--->Dispatch" throughput
              */
             MultiNode sourceNode = tempGraph.getNode(Integer.toString(pathNodeIDs.get(0)));
+            double flow_n = (double)flowAR.get(flowID).getPakcetLength();
+            double flow_lamda = (double)flowAR.get(flowID).getPacketRate();
+
             double maxThroughput = 0.0;
             for(Edge edge : sourceNode.getEdgeSet()){
                 if((double)edge.getAttribute("throughput") > maxThroughput){
@@ -244,7 +251,7 @@ public class GeneticAlgo implements TopologyGraphSelector{
             if(capacity > 0){
                 String attributeDelayOut = Integer.toString(flowID) + "delayOut";
                 
-                double delay = sourceN / capacity;
+                double delay = flow_n / capacity;
                 sourceNode.addAttribute(attributeDelayOut, delay);
 
                 String attributeMinThroughput = Integer.toString(flowID) + "minThroughput";
@@ -286,7 +293,7 @@ public class GeneticAlgo implements TopologyGraphSelector{
                         double cap = throughput - lamda*n;
                         if(cap > 0){
                             String attributeDelayOut = Integer.toString(flowID) + "delayOut";
-                            double delay = (n / cap) + delayIn;
+                            double delay = (flow_n / cap) + delayIn;
                             node.addAttribute(attributeDelayOut, delay);
 
                             String attributeMinThroughput = Integer.toString(flowID) + "minThroughput";

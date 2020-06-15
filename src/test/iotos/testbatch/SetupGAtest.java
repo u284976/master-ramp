@@ -50,9 +50,9 @@ public class SetupGAtest implements SetupTestBatch {
             case "2":
                 trafficType = TrafficType.FILE_TRANSFER;
                 payloadSize = 54200;            // 50KByte
-                GenPacketPerSeconds = 4;
+                GenPacketPerSeconds = 160;
                 requireDelay = 2000.0;
-                requireThroughput = 2000.0;
+                requireThroughput = 84000.0;
                 duration = 300;
                 break;
         }

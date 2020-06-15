@@ -82,6 +82,7 @@ def myNetwork():
 
 
     CLI.do_execute = execute
+    CLI.do_stopThread = stopThread
     CLI.do_stopTest = stopTest
     CLI(net)
     net.stop()
@@ -96,9 +97,9 @@ def execute(self, line):
         
         Threads.append(MyThread(node))
         Threads[i].start()
-        time.sleep(5)
-        # thread = MyThread(node)
-        # thread.start()
+        time.sleep(3)
+
+def stopThread(self, line):
     for t in Threads:
         stop_thread(t)
 
@@ -128,6 +129,8 @@ class MyThread(threading.Thread):
 
 # send ctrl+c to all node's cmd
 def stopTest(self, line):
+    for t in Threads:
+        stop_thread(t)
     for node in self.mn.values():
         node.sendInt()
 
