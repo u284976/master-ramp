@@ -36,10 +36,6 @@ public class GeneticAlgo implements TopologyGraphSelector{
     @Override
     public PathDescriptor selectPath(int sourceNodeId, int destNodeId, ApplicationRequirements applicationRequirements, Map<Integer, PathDescriptor> activePaths){
 
-        for(Edge e : topologyGraph.getEachEdge()){
-            System.out.println(e.getAttributeKeySet());
-        }
-
         PathDescriptor tempPath = new BreadthFirstFlowPathSelector(topologyGraph).selectPath(sourceNodeId, destNodeId, null, null);
         Graph checkGraph = Graphs.clone(topologyGraph);
 
