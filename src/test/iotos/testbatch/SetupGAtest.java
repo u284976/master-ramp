@@ -3,33 +3,37 @@ package test.iotos.testbatch;
 import it.unibo.deis.lia.ramp.core.internode.sdn.applicationRequirements.ApplicationRequirements;
 import it.unibo.deis.lia.ramp.core.internode.sdn.applicationRequirements.TrafficType;
 
-public class SetupSimpleTest implements SetupTestBatch {
+public class SetupGAtest implements SetupTestBatch {
     public String getTestBatchName(){
-        return "SimpleTest";
+        return "GA_SIMPLE_TEST";
     }
     public String getTestBatchTime(){
         return "2020-06-15";
     }
     public int getNumberOfClient(){
-        return 3;
+        return 5;
     }
     public int getNumberOfEdge(){
-        return 2;
+        return 5;
     }
     public int getTestSecond(){
-        return 10;
+        return 15;
     }
     public String getAppTarget(String nodeID){
         String targetID = "0";
-        if(nodeID.equals("2")){
-            targetID = "3";
+        switch(nodeID){
+            case "2":
+                targetID = "5";
+                break;
         }
         return targetID;
     }
     public boolean getReceive(String nodeID){
         boolean receive = false;
-        if(nodeID.equals("3")){
-            receive = true;
+        switch(nodeID){
+            case "5":
+                receive = true;
+                break;
         }
         return receive;
     }
@@ -41,14 +45,18 @@ public class SetupSimpleTest implements SetupTestBatch {
         double requireDelay = 0.0;
         double requireThroughput = 0.0;
         int duration = 0;
-        if(nodeID.equals("2")){
-            trafficType = TrafficType.FILE_TRANSFER;
-            payloadSize = 16;
-            GenPacketPerSeconds = 3;
-            requireDelay = 2000.0;
-            requireThroughput = 8000.0;
-            duration = 300;
+
+        switch(nodeID){
+            case "2":
+                trafficType = TrafficType.FILE_TRANSFER;
+                payloadSize = 400;
+                GenPacketPerSeconds = 10;
+                requireDelay = 2000.0;
+                requireThroughput = 4000.0;
+                duration = 300;
+                break;
         }
+
         applicationRequirements = new ApplicationRequirements(
             trafficType,
             payloadSize,
@@ -57,8 +65,9 @@ public class SetupSimpleTest implements SetupTestBatch {
             requireThroughput,
             duration
         );
+
+
         return applicationRequirements;
     }
-    
     
 }

@@ -1334,6 +1334,32 @@ public class ControllerClient extends Thread implements ControllerClientInterfac
     public long getReadyToTest(){
         return readyToTest;
     }
+    /**
+     * add u284976
+     * to notice controller this client are complete
+     */
+    public void sendCompleteToController(){
+        ServiceResponse service = controllerServiceDiscoverer.getControllerService();
+        if(service == null){
+
+        }
+
+        ControllerMessageReady updateMessage = new ControllerMessageReady(MessageType.READY_TO_TEST,0);
+
+        try {
+            E2EComm.sendUnicast(
+                service.getServerDest(),
+                service.getServerNodeId(),
+                service.getServerPort(),
+                service.getProtocol(),
+                CONTROL_FLOW_ID,
+                E2EComm.serialize(updateMessage)
+            );
+        } catch (Exception e) {
+            //TODO: handle exception
+        }
+        
+    }
 
     private class PacketHandler extends Thread {
 

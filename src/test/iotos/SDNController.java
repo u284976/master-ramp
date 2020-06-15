@@ -7,6 +7,7 @@ import it.unibo.deis.lia.ramp.core.internode.Dispatcher;
 import it.unibo.deis.lia.ramp.core.internode.sdn.controllerClient.ControllerClient;
 import it.unibo.deis.lia.ramp.core.internode.sdn.controllerService.ControllerService;
 import it.unibo.deis.lia.ramp.service.management.ServiceManager;
+import test.iotos.testbatch.SetupGAtest;
 import test.iotos.testbatch.SetupMeshTestBatch;
 import test.iotos.testbatch.SetupSimpleTest;
 import test.iotos.testbatch.SetupTestBatch;
@@ -27,17 +28,23 @@ public class SDNController{
 
 	static String testBatchName;
 
+	static String testTime;
+
 
     public static void main(String[] args){
 		
-		testBatch = new SetupMeshTestBatch();
+		// change here to change testBatch
+		testBatch = new SetupGAtest();
+		
+		testBatchName = testBatch.getTestBatchName();
+		testTime = testBatch.getTestBatchTime();
+
 		countClient = testBatch.getNumberOfClient();
 		countEdge = testBatch.getNumberOfEdge();
-		testBatchName = testBatch.getTestBatchName();
 
         System.out.println("================================");
         System.out.println("SDN Controller starting...");
-        System.out.println("version : 2020-06-14" + ", testbatch = " + testBatchName);
+        System.out.println("topo_version : " + testTime + ", testbatch = " + testBatchName);
         System.out.println("================================");
 
         ramp = RampEntryPoint.getInstance(true, null);
@@ -109,13 +116,20 @@ public class SDNController{
 		System.out.println("================================");
 
 		try {
-			Thread.sleep(testBatch.getTestSecond()*1000);
+			Thread.sleep(testBatch.getTestSecond()*1000 + 20000);
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
 
+		while (!controllerService.checkComplete()) {
+			try {
+				Thread.sleep(5000);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+		}
 		System.out.println("================================");
-		System.out.println("controller notice to all client");
+		System.out.println("Transfer complete");
 		System.out.println("================================");
 	}
 }

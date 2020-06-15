@@ -211,10 +211,12 @@ public class ControllerService extends Thread {
 
     /**
      * @add u284976
-     * store flow's source nodeID
+     * flowSources is store flow's source nodeID
+     * completeTest is store nodeID which is complete Test
      */
     private Map<Integer,Integer> flowSources;
     private int countClient;
+    private List<Integer> completeTest;
 
     private ControllerService() throws Exception {
         this.serviceSocket = E2EComm.bindPreReceive(PROTOCOL);
@@ -239,6 +241,7 @@ public class ControllerService extends Thread {
         this.flowApplicationRequirements = new ConcurrentHashMap<>();
         // @adder u284976 initial flowSources
         this.flowSources = new ConcurrentHashMap<>();
+        this.completeTest = new ArrayList<>();
 
         this.flowPriorities = new ConcurrentHashMap<>();
         this.flowPrioritySelector = new TrafficTypeFlowPrioritySelector();
@@ -1079,6 +1082,17 @@ public class ControllerService extends Thread {
 
         return allSet;
     }
+    /**
+     * add u284976
+     */
+    public boolean checkComplete(){
+        // delete myself(concurrent run the controller and client)
+        if(completeTest.size() >= countClient-1){
+            return true;
+        }else{
+            return false;
+        }
+    }
 
 
     @Override
@@ -1175,6 +1189,9 @@ public class ControllerService extends Thread {
                         // adder @u284976
                         case TOPOLOGY_LINK_UPDATE:
                             handleTopologyLinkUpdate((ControllerMessageUpdate) controllerMessage, clientNodeId);
+                            break;
+                        case READY_TO_TEST:
+                            handleCompleteTest((ControllerMessageReady) controllerMessage, clientNodeId);
                             break;
                         case PRIORITY_VALUE_REQUEST:
                             handlePriorityValueRequest((ControllerMessageRequest) controllerMessage, clientNodeId, clientDest);
@@ -1789,6 +1806,12 @@ public class ControllerService extends Thread {
                         }
                     }
                 }
+            }
+        }
+        // adder u284976
+        private void handleCompleteTest(ControllerMessageReady updateMessage, int clientNodeId){
+            if(!completeTest.contains(clientNodeId)){
+                completeTest.add(clientNodeId);
             }
         }
 

@@ -11,9 +11,9 @@ public class ControllerMessageReady extends ControllerMessage{
 
     private long startTime;
 
-    // 10 seconds later, start test
+    // 20 seconds later, start test
     public ControllerMessageReady(MessageType messageType){
-        this(messageType, System.currentTimeMillis() + 10000);
+        this(messageType, System.currentTimeMillis() + 20000);
     }
 
     public ControllerMessageReady(MessageType messageType, long startTime){

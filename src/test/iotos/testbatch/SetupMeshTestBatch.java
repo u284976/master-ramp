@@ -8,6 +8,9 @@ public class SetupMeshTestBatch implements SetupTestBatch{
     public String getTestBatchName(){
         return "normal-mesh";
     }
+    public String getTestBatchTime(){
+        return "2020-06-15";
+    }
     public int getNumberOfClient(){
         return 8;
     }

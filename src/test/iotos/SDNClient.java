@@ -19,6 +19,7 @@ import it.unibo.deis.lia.ramp.service.management.ServiceDiscovery;
 import it.unibo.deis.lia.ramp.service.management.ServiceManager;
 import it.unibo.deis.lia.ramp.service.management.ServiceResponse;
 import test.iotos.messagetype.timeDataType;
+import test.iotos.testbatch.SetupGAtest;
 import test.iotos.testbatch.SetupMeshTestBatch;
 import test.iotos.testbatch.SetupMinaTestBatch;
 import test.iotos.testbatch.SetupSimpleTest;
@@ -41,15 +42,14 @@ public class SDNClient{
     static SetupTestBatch testBatch;
 
     public static void main(String[] args){
-
         
-        TestTime = "2020-06-14";
         // change here to change testBatch
-        testBatch = new SetupMeshTestBatch();
+        testBatch = new SetupGAtest();
+        TestTime = testBatch.getTestBatchTime();
         
         System.out.println("================================");
         System.out.println("SDN Client starting...");
-        System.out.println("version : "+ TestTime + ", testbatch = " + testBatch.getTestBatchName());
+        System.out.println("topo_version : "+ TestTime + ", testbatch = " + testBatch.getTestBatchName());
         System.out.println("================================");
 
         ramp = RampEntryPoint.getInstance(true, null);
@@ -185,7 +185,7 @@ public class SDNClient{
 
             while (System.currentTimeMillis() < startTime) {
                 try {
-                    Thread.sleep(1000);
+                    Thread.sleep(startTime - System.currentTimeMillis());
                 } catch (Exception e) {
                 }
             }
@@ -275,6 +275,8 @@ public class SDNClient{
             System.out.println("Process Done");
             System.out.println("========================================");
         }
+
+        controllerClient.sendCompleteToController();
     }
 }
 

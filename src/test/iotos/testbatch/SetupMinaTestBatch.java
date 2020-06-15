@@ -8,6 +8,9 @@ public class SetupMinaTestBatch implements SetupTestBatch{
     public String getTestBatchName() {
         return "mina-topo";
     }
+    public String getTestBatchTime(){
+        return "2020-06-15";
+    }
     public int getNumberOfClient(){
         return 29;
     }
