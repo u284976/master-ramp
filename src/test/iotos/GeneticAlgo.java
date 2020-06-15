@@ -36,6 +36,10 @@ public class GeneticAlgo implements TopologyGraphSelector{
     @Override
     public PathDescriptor selectPath(int sourceNodeId, int destNodeId, ApplicationRequirements applicationRequirements, Map<Integer, PathDescriptor> activePaths){
 
+        for(Edge e : topologyGraph.getEachEdge()){
+            System.out.println(e.getAttributeKeySet());
+        }
+
         PathDescriptor tempPath = new BreadthFirstFlowPathSelector(topologyGraph).selectPath(sourceNodeId, destNodeId, null, null);
         Graph checkGraph = Graphs.clone(topologyGraph);
 
@@ -198,7 +202,11 @@ public class GeneticAlgo implements TopologyGraphSelector{
             flowPaths.put(flowID, path);
 
             double flow_lamda = (double)flowAR.get(flowID).getPacketRate();
-            double flow_n = (double)flowAR.get(flowID).getPakcetLength();
+            /**
+             * applicationRequirement PacketLength is byte
+             * so needed to convert to kb
+             */
+            double flow_n = (double)flowAR.get(flowID).getPakcetLength()*8.0/1024.0;
             for(int nodeID : pathNodeID){
                 MultiNode node = tempGraph.getNode(Integer.toString(nodeID));
                 double oldLamda = (double)node.getAttribute("lamda");
@@ -239,6 +247,7 @@ public class GeneticAlgo implements TopologyGraphSelector{
             double capacity = maxThroughput - sourceLamda*sourceN;
             if(capacity > 0){
                 String attributeDelayOut = Integer.toString(flowID) + "delayOut";
+                
                 double delay = sourceN / capacity;
                 sourceNode.addAttribute(attributeDelayOut, delay);
 

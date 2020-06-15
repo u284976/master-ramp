@@ -11,9 +11,9 @@ public class ControllerMessageReady extends ControllerMessage{
 
     private long startTime;
 
-    // 5 seconds later, start get flow path
+    // 10 seconds later, start get flow path
     public ControllerMessageReady(MessageType messageType){
-        this(messageType, System.currentTimeMillis() + 5000);
+        this(messageType, System.currentTimeMillis() + 10000);
     }
 
     public ControllerMessageReady(MessageType messageType, long startTime){

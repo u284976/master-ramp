@@ -1037,7 +1037,7 @@ public class ControllerService extends Thread {
          */
         if(countEdge!=0 && topologyGraph.getEdgeCount() < countEdge){
             System.out.println("***************************");
-            System.out.println("Topology not complete!");
+            System.out.println("Topology links not complete!");
             System.out.println("***************************");
             return false;
         }
@@ -1047,6 +1047,15 @@ public class ControllerService extends Thread {
             int edgeCount = 0;
             for(Edge edge : node.getEachEdge()){
                 if(edge.getAttribute("throughput") == null){
+                    allSet = false;
+                    break;
+                }
+                // add 2020-06-15 because these attribute are required in the BFS
+                if(edge.getAttribute("address_" + edge.getNode0().getId()) == null){
+                    allSet = false;
+                    break;
+                }
+                if(edge.getAttribute("address_" + edge.getNode1().getId()) == null){
                     allSet = false;
                     break;
                 }
