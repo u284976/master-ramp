@@ -180,7 +180,7 @@ public class SDNClient{
             int[] destNodePort = {appService.getServerPort()};
     
             System.out.println("========================================");
-            System.out.println("Waiting Start");
+            System.out.println("Waiting topo complete to get flow path");
             System.out.println("========================================");
 
             while (System.currentTimeMillis() < startTime) {
@@ -206,7 +206,18 @@ public class SDNClient{
                 System.out.println(s);
             }
             System.out.println("========================================");
-            
+
+
+            System.out.println("========================================");
+            System.out.println("Waiting new flow path to Start Traffic");
+            System.out.println("========================================");
+
+            while (System.currentTimeMillis() < startTime+20000) {
+                try {
+                    Thread.sleep(startTime+20000 - System.currentTimeMillis());
+                } catch (Exception e) {
+                }
+            }
 
 
 

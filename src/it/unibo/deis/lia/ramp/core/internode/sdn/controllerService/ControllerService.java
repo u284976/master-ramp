@@ -1525,7 +1525,23 @@ public class ControllerService extends Thread {
                      *      In particular when the clientNode is different from
                      *      the sourceNode the result is not correct.
                      */
-                    sourceNodeDest = Resolver.getInstance(false).resolveBlocking(sourceNodeId, 5 * 1000).get(0).getPath();
+                    /**
+                     * add u284976
+                     * sample topo like this , and controller on the 4
+                     * 
+                     * 1----2----3
+                     *      |  /
+                     *      4
+                     * 
+                     * flow 1-->2-->3 , but 2 will disconnect with 3
+                     * 
+                     * if resolver module store path to node 1 is 4-->3-->2-->1
+                     * origin method will fail
+                     * 
+                     * so use topology path selector will solve this problem, found a path 4-->2-->1
+                     */
+                    sourceNodeDest = new BreadthFirstFlowPathSelector(topologyGraphSnapshot).selectPath(Dispatcher.getLocalRampId(), sourceNodeId, null, null).getPath();
+                    // sourceNodeDest = Resolver.getInstance(false).resolveBlocking(sourceNodeId, 5 * 1000).get(0).getPath();
                     // TODO Remove me
                     // sourceNodeDest = new String[]{"192.168.3.101","192.168.3.100"};
                 }
