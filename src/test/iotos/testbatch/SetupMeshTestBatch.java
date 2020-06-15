@@ -11,6 +11,9 @@ public class SetupMeshTestBatch implements SetupTestBatch{
     public String getTestBatchTime(){
         return "2020-06-15";
     }
+    public boolean getMobility(){
+        return false;
+    }
     public int getNumberOfClient(){
         return 8;
     }

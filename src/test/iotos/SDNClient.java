@@ -85,6 +85,7 @@ public class SDNClient{
         }));
 
         controllerClient = ControllerClient.getInstance();
+        controllerClient.enableMeasure();
 
         System.out.println("========================================");
         System.out.println("get controller client instance done!!!!!");
@@ -189,6 +190,10 @@ public class SDNClient{
                 } catch (Exception e) {
                 }
             }
+
+            if(testBatch.getMobility() == false){
+                controllerClient.disableMeasure();
+            }
     
             System.out.println("========================================");
             System.out.println("send request to SDNController!!!!!");
@@ -282,6 +287,14 @@ public class SDNClient{
             System.out.println("Transfer Done!!!!!");
             System.out.println("========================================");
         }else{
+            try {
+                Thread.sleep(10000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            if(testBatch.getMobility() == false){
+                controllerClient.disableMeasure();
+            }
             System.out.println("========================================");
             System.out.println("Process Done");
             System.out.println("========================================");

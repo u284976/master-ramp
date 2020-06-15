@@ -10,6 +10,9 @@ public class SetupGAtest implements SetupTestBatch {
     public String getTestBatchTime(){
         return "2020-06-15";
     }
+    public boolean getMobility(){
+        return false;
+    }
     public int getNumberOfClient(){
         return 5;
     }
@@ -50,7 +53,7 @@ public class SetupGAtest implements SetupTestBatch {
             case "2":
                 trafficType = TrafficType.FILE_TRANSFER;
                 payloadSize = 54200;            // 50KByte
-                GenPacketPerSeconds = 160;
+                GenPacketPerSeconds = 200;
                 requireDelay = 2000.0;
                 requireThroughput = 84000.0;
                 duration = 300;

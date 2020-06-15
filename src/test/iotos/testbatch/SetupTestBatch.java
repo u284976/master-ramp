@@ -5,6 +5,7 @@ import it.unibo.deis.lia.ramp.core.internode.sdn.applicationRequirements.Applica
 public interface SetupTestBatch {
     public String getTestBatchName();
     public String getTestBatchTime();
+    public boolean getMobility();
     public int getNumberOfClient();
     /**
      * NumberOfClient = 0, means this testBatch not care about topo edge complete

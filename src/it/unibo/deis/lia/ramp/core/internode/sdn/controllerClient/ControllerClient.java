@@ -250,6 +250,7 @@ public class ControllerClient extends Thread implements ControllerClientInterfac
      */
     private ClientMeasurer clientMeasurer;
     private long readyToTest;
+    private boolean measureActive;
 
     private ControllerClient() {
 
@@ -281,6 +282,7 @@ public class ControllerClient extends Thread implements ControllerClientInterfac
          */
         clientMeasurer = ClientMeasurer.getInstance();
         readyToTest = 0;
+        measureActive = false;
 
         /*
          * Make sure this manager is always instantiated before any other DataPlaneForwarder
@@ -1360,6 +1362,16 @@ public class ControllerClient extends Thread implements ControllerClientInterfac
         }
         
     }
+    /**
+     * add u284976
+     * to enable measure
+     */
+    public void enableMeasure(){
+        measureActive = true;
+    }
+    public void disableMeasure(){
+        measureActive = false;
+    }
 
     private class PacketHandler extends Thread {
 
@@ -2291,10 +2303,12 @@ public class ControllerClient extends Thread implements ControllerClientInterfac
                  * adder @u284976
                  * send measure request to one hop neighbor
                  */
-                try {
-                    Measure();
-                } catch (Exception e) {
-                    e.printStackTrace();
+                if(measureActive){
+                    try {
+                        Measure();
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
                 }
                 
                 try {

@@ -76,6 +76,7 @@ public class SDNController{
 		}
 		
 		controllerClient = ControllerClient.getInstance();
+		controllerClient.enableMeasure();
 		
 		/**
          * register service and waiting message by other client
@@ -115,6 +116,12 @@ public class SDNController{
 		System.out.println("controller notice to all client");
 		System.out.println("================================");
 
+		try {
+			Thread.sleep(10000);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+		controllerClient.disableMeasure();
 
 		while (!controllerService.checkComplete()) {
 			try {

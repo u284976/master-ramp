@@ -257,6 +257,10 @@ public class GeneticAlgo implements TopologyGraphSelector{
                 String attributeMinThroughput = Integer.toString(flowID) + "minThroughput";
                 sourceNode.addAttribute(attributeMinThroughput, minThroughput);
             }else{
+                System.out.println("===========GeneticAlgo============");
+                System.out.println("overload on node: " + sourceNode.getId());
+                System.out.println("===========GeneticAlgo============");
+                break;
                 // TODO: maitain this case, maybe node can't load so much
             }
 
@@ -299,6 +303,10 @@ public class GeneticAlgo implements TopologyGraphSelector{
                             String attributeMinThroughput = Integer.toString(flowID) + "minThroughput";
                             node.addAttribute(attributeMinThroughput, minThroughput);
                         }else{
+                            System.out.println("===========GeneticAlgo============");
+                            System.out.println("overload on node: " + node.getId());
+                            System.out.println("===========GeneticAlgo============");
+                            break;
                             // TODO: maitain this case, maybe node can't load so much
                         }
                         break;
