@@ -15,6 +15,7 @@ public class MeasureMessage implements Serializable{
     public static final int Test_Delay = 3;
     public static final int Test_Throughput = 4;
     public static final int Test_Done = 5;
+    public static final int Test_Tx = 6;
     
     private int messagetype;
 

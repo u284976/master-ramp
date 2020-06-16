@@ -54,6 +54,7 @@ import it.unibo.deis.lia.ramp.util.NodeStats;
 import test.iotos.ClientMeasurer;
 import test.iotos.ControllerMessageReady;
 import test.iotos.messagetype.MeasureMessage;
+import test.iotos.messagetype.timeDataType;
 
 import org.graphstream.graph.Graph;
 
@@ -2146,49 +2147,113 @@ public class ControllerClient extends Thread implements ControllerClientInterfac
                              * start measure delay.
                              */
                             case MeasureMessage.Response_OK:
-
-                                boolean failed = false;
-
-                                /**
+                                /** 
                                  * Setting will not enter while loop again
                                  */
                                 retry = false;
 
-                                BoundReceiveSocket delayClient = E2EComm.bindPreReceive(E2EComm.UDP);
-                                long[] delay = new long[5];
-                                long temp = 0;
+                                /**
+                                 * 2020-06-17 replace to new Throughput measure method
+                                 */
+                                // boolean failed = false;
 
-                                for(int i=0 ; i<5 ; i++){
-                                    msg = new MeasureMessage(MeasureMessage.Test_Delay,delayClient.getLocalPort());
-                                    E2EComm.sendUnicast(
-                                        service.getServerDest(),
-                                        service.getServerPort(),
-                                        service.getProtocol(),
-                                        E2EComm.serialize(msg)
-                                    );
-                                    long pre = System.currentTimeMillis();
+                                
 
-                                    try {
-                                        E2EComm.receive(delayClient);    
-                                    } catch (Exception e) {
-                                        failed = true;
-                                    }
+                                // BoundReceiveSocket delayClient = E2EComm.bindPreReceive(E2EComm.UDP);
+                                // long[] delay = new long[5];
+                                // long temp = 0;
 
-                                    delay[i] = System.currentTimeMillis() - pre;
+                                // for(int i=0 ; i<5 ; i++){
+                                //     msg = new MeasureMessage(MeasureMessage.Test_Delay,delayClient.getLocalPort());
+                                //     E2EComm.sendUnicast(
+                                //         service.getServerDest(),
+                                //         service.getServerPort(),
+                                //         service.getProtocol(),
+                                //         E2EComm.serialize(msg)
+                                //     );
+                                //     long pre = System.currentTimeMillis();
 
-                                    // System.out.println("==========");
-                                    // System.out.println("delay = " + delay[i]);
-                                    temp += delay[i];
+                                //     try {
+                                //         E2EComm.receive(delayClient);    
+                                //     } catch (Exception e) {
+                                //         failed = true;
+                                //     }
+
+                                //     delay[i] = System.currentTimeMillis() - pre;
+
+                                //     // System.out.println("==========");
+                                //     // System.out.println("delay = " + delay[i]);
+                                //     temp += delay[i];
+                                // }
+                                // delayClient.close();
+
+                                // double avgDelay = temp/delay.length;
+
+                                // // send file need use TCP
+                                // BoundReceiveSocket throughputClient = E2EComm.bindPreReceive(E2EComm.TCP);
+                                // msg = new MeasureMessage(MeasureMessage.Test_Throughput,throughputClient.getLocalPort(),"1M.test");
+
+                                // long pre = System.currentTimeMillis();
+                                // E2EComm.sendUnicast(
+                                //     service.getServerDest(),
+                                //     service.getServerPort(),
+                                //     service.getProtocol(),
+                                //     E2EComm.serialize(msg)
+                                // );
+
+                                // // System.out.println("==========");
+                                // // System.out.println("starting transfer...");
+
+                                // try {
+                                //     E2EComm.receive(throughputClient);    
+                                // } catch (Exception e) {
+                                //     failed = true;
+                                // }
+                                
+                                // long elapsed = System.currentTimeMillis() - pre;
+
+
+                                // double throughput = (1024.0 / elapsed)*1000*8;      // Kbit/s
+                                // // System.out.println("==========");
+                                // // System.out.println("pre = " + pre);
+                                // // System.out.println("elapsed = " + elapsed);
+                                // // System.out.println("avgDelay = " + avgDelay);
+                                // // System.out.println("throughput = " + throughput + "Kbit/s");
+
+                                // msg = new MeasureMessage(MeasureMessage.Test_Done);
+                                // E2EComm.sendUnicast(
+                                //     service.getServerDest(),
+                                //     service.getServerPort(),
+                                //     service.getProtocol(),
+                                //     E2EComm.serialize(msg)
+                                // );
+
+                                // throughputClient.close();
+                                // clientMeasurer.releaseOccupy();
+
+                                // if(failed){
+                                //     break;    // break while
+                                // }
+                                
+
+                                
+
+                                /**
+                                 * can refer to test.iotos.testSender and test.iotos.testReceiver
+                                 * this block is receiver
+                                 */
+
+                                int[] seq = new int[100];
+                                long[] sendTime = new long[100];
+                                long[] receiveTime = new long[100];
+                                for(int i=0 ; i<seq.length ; i++){
+                                    seq[i] = -1;
+                                    sendTime[i] = -1;
+                                    receiveTime[i] = -1;
                                 }
-                                delayClient.close();
 
-                                double avgDelay = temp/delay.length;
-
-                                // send file need use TCP
-                                BoundReceiveSocket throughputClient = E2EComm.bindPreReceive(E2EComm.TCP);
-                                msg = new MeasureMessage(MeasureMessage.Test_Throughput,throughputClient.getLocalPort(),"1M.test");
-
-                                long pre = System.currentTimeMillis();
+                                BoundReceiveSocket TxServer = E2EComm.bindPreReceive(E2EComm.UDP);
+                                msg = new MeasureMessage(MeasureMessage.Test_Tx,TxServer.getLocalPort());
                                 E2EComm.sendUnicast(
                                     service.getServerDest(),
                                     service.getServerPort(),
@@ -2196,24 +2261,26 @@ public class ControllerClient extends Thread implements ControllerClientInterfac
                                     E2EComm.serialize(msg)
                                 );
 
-                                // System.out.println("==========");
-                                // System.out.println("starting transfer...");
-
+                                UnicastPacket tx_up = null;
                                 try {
-                                    E2EComm.receive(throughputClient);    
+                                    tx_up = (UnicastPacket)E2EComm.receive(TxServer);
+                                    new tx_Listener(tx_up, seq, sendTime, receiveTime).start();
                                 } catch (Exception e) {
-                                    failed = true;
                                 }
-                                
-                                long elapsed = System.currentTimeMillis() - pre;
 
 
-                                double throughput = (1024.0 / elapsed)*1000*8;      // Kbit/s
-                                // System.out.println("==========");
-                                // System.out.println("pre = " + pre);
-                                // System.out.println("elapsed = " + elapsed);
-                                // System.out.println("avgDelay = " + avgDelay);
-                                // System.out.println("throughput = " + throughput + "Kbit/s");
+                                long preWhile = System.currentTimeMillis();
+                                while(System.currentTimeMillis() - preWhile < 2000 ){
+                                    try {
+                                        up = (UnicastPacket)E2EComm.receive(TxServer,1000);
+                                        if(up==null){
+                                            break;
+                                        }
+                                        new tx_Listener(up, seq, sendTime, receiveTime).start();
+                                    } catch (Exception e) {
+                                        System.out.println("Tx test done");
+                                    }
+                                }
 
                                 msg = new MeasureMessage(MeasureMessage.Test_Done);
                                 E2EComm.sendUnicast(
@@ -2223,12 +2290,54 @@ public class ControllerClient extends Thread implements ControllerClientInterfac
                                     E2EComm.serialize(msg)
                                 );
 
-                                throughputClient.close();
+                                TxServer.close();
                                 clientMeasurer.releaseOccupy();
 
-                                if(failed){
-                                    break;    // break while
+                                int c = 0;
+                                long[] delay = new long[100];
+                                long total_delay = 0;
+                                for(int i=0 ; i<seq.length ; i++){
+                                    if(sendTime[i] == -1){
+                        
+                                    }else{
+                                        c++;
+                                        delay[i] = receiveTime[i] - sendTime[i];
+                                        total_delay = total_delay + delay[i];
+                                    }
                                 }
+
+                                // only work at c = 101
+                                if(c > 100){
+                                    c = 100;
+                                }
+
+                                double avgDelay = (double)total_delay / (double)c;
+
+                                /**
+                                 * througput = lamda * n
+                                 * packet rate * payload size
+                                 * packet rate is fixed
+                                 * payload size is every 200ms will continus to increase,
+                                 * (for details, please refer to the Sender setting)
+                                 * so we can observe how many packets are received to 
+                                 * determine how many THROUGHPUT this link can carry
+                                 */
+                                double throughput;
+                                if(c >= 90){
+                                    throughput = 5000000;    // 100 * 50000
+                                }else if(c >= 80){
+                                    throughput = 1000000;    // 100 * 10000
+                                }else if(c >= 60){
+                                    throughput = 500000;     // 100 * 5000
+                                }else if(c >= 40){
+                                    throughput = 200000;     // 100 * 2000
+                                }else if(c >= 20){
+                                    throughput = 100000;     // 100 * 1000
+                                }else{
+                                    throughput = 1000*c;
+                                }
+
+
 
                                 lastMeasureTime = System.currentTimeMillis();
                                 lastMeasureTimes.put(address,lastMeasureTime);
@@ -2320,6 +2429,37 @@ public class ControllerClient extends Thread implements ControllerClientInterfac
                 updateOsRoutes();
             }
             System.out.println("ControllerClient UpdateManager FINISHED");
+        }
+    }
+}
+/**
+ * add u284976
+ * for listen Tx packet
+ */
+class tx_Listener extends Thread{
+    int[] seq = new int[100];
+    long[] sendTime = new long[100];
+    long[] receiveTime = new long[100];
+    UnicastPacket up;
+
+    tx_Listener(UnicastPacket up , int[] seq, long[] sendTime, long[] receiveTime){
+        this.seq = seq;
+        this.sendTime = sendTime;
+        this.receiveTime = receiveTime;
+        this.up = up;
+    }
+
+    public void run(){
+        timeDataType payload = null;
+        try {
+            payload = (timeDataType)E2EComm.deserialize(up.getBytePayload());
+        } catch (Exception e) {
+        }
+        int seq = payload.getSeqNumber();
+
+        if(seq < 100){
+            sendTime[seq] = payload.getSendTime();
+            receiveTime[seq] = System.currentTimeMillis();
         }
     }
 }

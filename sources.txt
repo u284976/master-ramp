@@ -30,6 +30,8 @@
 ./src/test/iotos/SDNController.java
 ./src/test/iotos/iperfTest.java
 ./src/test/iotos/CollectNetworkInfoService.java
+./src/test/iotos/testSender.java
+./src/test/iotos/testReceiver.java
 ./src/test/iotos/copyPathMap.java
 ./src/test/iotos/graphdisplaytest.java
 ./src/test/iotos/SDNClient.java

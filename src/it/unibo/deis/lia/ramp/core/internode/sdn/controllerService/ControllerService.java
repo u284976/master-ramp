@@ -1822,11 +1822,11 @@ public class ControllerService extends Thread {
                              * 10000 -> wireless ( 40 meters)
                              */
                             System.out.println(neighborEdge.getId() + ", delay = " + delay + ", throughput = " + throughput);
-                            if(throughput > 100000){
-                                throughput = 100000;
-                            }else if(throughput > 10000){
-                                throughput = 10000;
-                            }
+                            // if(throughput > 100000){
+                            //     throughput = 100000;
+                            // }else if(throughput > 10000){
+                            //     throughput = 10000;
+                            // }
                             neighborEdge.addAttribute("throughput", throughput);
                         }
                     }

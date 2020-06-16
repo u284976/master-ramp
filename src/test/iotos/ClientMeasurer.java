@@ -10,6 +10,7 @@ import it.unibo.deis.lia.ramp.core.e2e.UnicastPacket;
 import it.unibo.deis.lia.ramp.core.internode.Dispatcher;
 import it.unibo.deis.lia.ramp.service.management.ServiceManager;
 import test.iotos.messagetype.MeasureMessage;
+import test.iotos.messagetype.timeDataType;
 
 public class ClientMeasurer extends Thread{
 
@@ -171,11 +172,203 @@ public class ClientMeasurer extends Thread{
                             e.printStackTrace();
                         }
                         break;
+                    /**
+                     * can refer to test.iotos.testSender and test.iotos.testReceiver
+                     * this block is Sender
+                     */
+                    case MeasureMessage.Test_Tx:
+                        sendTx(
+                            E2EComm.ipReverse(up.getSource()),
+                            up.getSourceNodeId(),
+                            mm.getClientPort(),
+                            E2EComm.UDP
+                        );
+                        
+                        
+                        break;
                     case MeasureMessage.Test_Done:
                         releaseOccupy();
                         break;
                 }
             }
         }
+    }
+
+    private void sendTx(String[] dest, int destNodeID, int destPort, int protocol){
+        timeDataType packet = new timeDataType();
+        
+
+        long prewhile = System.currentTimeMillis();
+
+        int i = 0;
+        /**
+         * packet rate is fixed , between packet time interval is 10ms,
+         * which means  100 packets per second, i.e. lamda = 100
+         * 
+         * payload size is every 200ms will continus to increase,
+         * 1000, 2000, 5000, 10000, 500000
+         * 
+         * packet rate (lamda) are 100,
+         * this value is depend on underlaying machine
+         * in desktop have more processing power so i can decided to use this number
+         * but my laptop may need reduce this value to 80 or less
+         * 
+         * if we have the ability to test on a decentralized physical platform in the future
+         * this value can be set larger
+         */
+		long computedSleepTime = 10;
+        long currentTime;
+        
+		packet.setPayloadSize(1000);
+		while(System.currentTimeMillis() - prewhile <= 200){
+			currentTime = System.currentTimeMillis();
+			packet.setSeqNumber(i);
+			packet.setSendTime(currentTime);
+			try {
+				E2EComm.sendUnicast(
+					dest,
+					destNodeID,
+					destPort,
+					protocol,
+					false,
+					GenericPacket.UNUSED_FIELD,
+					E2EComm.DEFAULT_BUFFERSIZE,
+					GenericPacket.UNUSED_FIELD,
+					GenericPacket.UNUSED_FIELD,
+					GenericPacket.UNUSED_FIELD,
+					0,
+					GenericPacket.UNUSED_FIELD,
+					E2EComm.serialize(packet)
+				);
+				long sleepTime = (computedSleepTime * i) - (currentTime - prewhile);
+				if (sleepTime > 0) {
+						Thread.sleep(sleepTime);
+				}
+				i++;
+			} catch (Exception e) {
+			}
+        }
+
+		packet.setPayloadSize(2000);
+		while(System.currentTimeMillis() - prewhile <= 400){
+			currentTime = System.currentTimeMillis();
+			packet.setSeqNumber(i);
+			packet.setSendTime(currentTime);
+			try {
+				E2EComm.sendUnicast(
+					dest,
+					destNodeID,
+					destPort,
+					protocol,
+					false,
+					GenericPacket.UNUSED_FIELD,
+					E2EComm.DEFAULT_BUFFERSIZE,
+					GenericPacket.UNUSED_FIELD,
+					GenericPacket.UNUSED_FIELD,
+					GenericPacket.UNUSED_FIELD,
+					0,
+					GenericPacket.UNUSED_FIELD,
+					E2EComm.serialize(packet)
+				);
+				long sleepTime = (computedSleepTime * i) - (currentTime - prewhile);
+				if (sleepTime > 0) {
+						Thread.sleep(sleepTime);
+				}
+				i++;
+			} catch (Exception e) {
+			}
+		}
+
+
+		packet.setPayloadSize(5000);
+		while(System.currentTimeMillis() - prewhile <= 600){
+			currentTime = System.currentTimeMillis();
+			packet.setSeqNumber(i);
+			packet.setSendTime(currentTime);
+			try {
+				E2EComm.sendUnicast(
+					dest,
+					destNodeID,
+					destPort,
+					protocol,
+					false,
+					GenericPacket.UNUSED_FIELD,
+					E2EComm.DEFAULT_BUFFERSIZE,
+					GenericPacket.UNUSED_FIELD,
+					GenericPacket.UNUSED_FIELD,
+					GenericPacket.UNUSED_FIELD,
+					0,
+					GenericPacket.UNUSED_FIELD,
+					E2EComm.serialize(packet)
+				);
+				long sleepTime = (computedSleepTime * i) - (currentTime - prewhile);
+				if (sleepTime > 0) {
+						Thread.sleep(sleepTime);
+				}
+				i++;
+			} catch (Exception e) {
+			}
+		}
+
+		packet.setPayloadSize(10000);
+		while(System.currentTimeMillis() - prewhile <= 800){
+			currentTime = System.currentTimeMillis();
+			packet.setSeqNumber(i);
+			packet.setSendTime(currentTime);
+			try {
+				E2EComm.sendUnicast(
+					dest,
+					destNodeID,
+					destPort,
+					protocol,
+					false,
+					GenericPacket.UNUSED_FIELD,
+					E2EComm.DEFAULT_BUFFERSIZE,
+					GenericPacket.UNUSED_FIELD,
+					GenericPacket.UNUSED_FIELD,
+					GenericPacket.UNUSED_FIELD,
+					0,
+					GenericPacket.UNUSED_FIELD,
+					E2EComm.serialize(packet)
+				);
+				long sleepTime = (computedSleepTime * i) - (currentTime - prewhile);
+				if (sleepTime > 0) {
+						Thread.sleep(sleepTime);
+				}
+				i++;
+			} catch (Exception e) {
+			}
+		}
+
+
+		packet.setPayloadSize(50000);
+		while(System.currentTimeMillis() - prewhile <= 1000){
+			currentTime = System.currentTimeMillis();
+			packet.setSeqNumber(i);
+			packet.setSendTime(currentTime);
+			try {
+				E2EComm.sendUnicast(
+					dest,
+					destNodeID,
+					destPort,
+					protocol,
+					false,
+					GenericPacket.UNUSED_FIELD,
+					E2EComm.DEFAULT_BUFFERSIZE,
+					GenericPacket.UNUSED_FIELD,
+					GenericPacket.UNUSED_FIELD,
+					GenericPacket.UNUSED_FIELD,
+					0,
+					GenericPacket.UNUSED_FIELD,
+					E2EComm.serialize(packet)
+				);
+				long sleepTime = (computedSleepTime * i) - (currentTime - prewhile);
+				if (sleepTime > 0) {
+						Thread.sleep(sleepTime);
+				}
+				i++;
+			} catch (Exception e) {
+			}
+        }		
     }
 }
