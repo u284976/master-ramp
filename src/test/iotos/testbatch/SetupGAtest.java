@@ -52,10 +52,10 @@ public class SetupGAtest implements SetupTestBatch {
         switch(nodeID){
             case "2":
                 trafficType = TrafficType.FILE_TRANSFER;
-                payloadSize = 54200;            // 50KByte
+                payloadSize = 10000;            // 50KByte
                 GenPacketPerSeconds = 100;
-                requireDelay = 2000.0;
-                requireThroughput = 5420000.0;
+                requireDelay = 1000000.0;
+                requireThroughput = 1000000.0;
                 duration = 300;
                 break;
         }

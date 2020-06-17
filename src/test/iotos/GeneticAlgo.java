@@ -23,11 +23,14 @@ import it.unibo.deis.lia.ramp.core.internode.sdn.pathSelection.pathSelectors.Bre
  */
 
 public class GeneticAlgo implements TopologyGraphSelector{
-    
+
+    private static final double NODE_OVERLOAD = -1;
+    private static final double LINK_OVERLOND = -2;
+    private static final double fitnessThreshold = 100;
     
     private Graph topologyGraph;
 
-    private double fitnessThreshold = 100;
+    
 
     public GeneticAlgo(Graph topologyGraph){
         this.topologyGraph = topologyGraph;
@@ -36,6 +39,20 @@ public class GeneticAlgo implements TopologyGraphSelector{
     @Override
     public PathDescriptor selectPath(int sourceNodeId, int destNodeId, ApplicationRequirements applicationRequirements, Map<Integer, PathDescriptor> activePaths){
 
+        // /**
+        //  * check first, sourceNode can generate this number of throughput with neighbor
+        //  */
+        // double maxThroughput = 0;
+        // for(Edge e : topologyGraph.getNode(Integer.toString(sourceNodeId)).getEachEdge()){
+        //     if((double)e.getAttribute("throughput") > maxThroughput){
+        //         maxThroughput = e.getAttribute("throughput");
+        //     }
+        // }
+        // if(applicationRequirements.getPacketRate()*applicationRequirements.getPakcetLength() > maxThroughput){
+        //     PathDescriptor path = null;
+        //     return path;
+        // }
+        
         PathDescriptor tempPath = new BreadthFirstFlowPathSelector(topologyGraph).selectPath(sourceNodeId, destNodeId, null, null);
         Graph checkGraph = Graphs.clone(topologyGraph);
 
@@ -266,8 +283,15 @@ public class GeneticAlgo implements TopologyGraphSelector{
                 System.out.println("===========GeneticAlgo============");
                 System.out.println("overload on node: " + sourceNode.getId());
                 System.out.println("===========GeneticAlgo============");
-                break;
-                // TODO: maitain this case, maybe node can't load so much
+
+                // continues this for loop
+                // and let fitness value be a speicial value
+                int lastNodeID = pathNodeIDs.get(pathNodeIDs.size()-1);
+                MultiNode lastNode = tempGraph.getNode(Integer.toString(lastNodeID));
+                lastNode.addAttribute(Integer.toString(flowID) + "delayOut", NODE_OVERLOAD);
+                lastNode.addAttribute(Integer.toString(flowID) + "minThroughput", NODE_OVERLOAD);
+                
+                continue;
             }
 
             /**
@@ -275,8 +299,9 @@ public class GeneticAlgo implements TopologyGraphSelector{
              * until second last node
              */
             for(int i=0 ; i<pathNodeIDs.size()-1 ; i++){
-                MultiNode lastNode = tempGraph.getNode(Integer.toString(pathNodeIDs.get(i)));
+                MultiNode preNode = tempGraph.getNode(Integer.toString(pathNodeIDs.get(i)));
                 MultiNode node = tempGraph.getNode(Integer.toString(pathNodeIDs.get(i+1)));
+                boolean failonLink = false;
 
                 /**
                  * Attention!!!
@@ -285,13 +310,13 @@ public class GeneticAlgo implements TopologyGraphSelector{
                  * ex. {10.0.0.1, 10.0.0.2, 10.0.0.3}
                  */
                 String nextAddr = path.getPath()[i];
-                for(Edge edge : lastNode.getEdgeSetBetween(node)){
+                for(Edge edge : preNode.getEdgeSetBetween(node)){
                     /**
                      * maybe have multiple link to one neighbor node
                      * so only select that target Network Interface Card address
                      */
                     if(edge.getAttribute("address_" + Integer.toString(pathNodeIDs.get(i+1))) == nextAddr){
-                        double delayIn = lastNode.getAttribute(Integer.toString(flowID) + "delayOut");
+                        double delayIn = preNode.getAttribute(Integer.toString(flowID) + "delayOut");
 
                         double lamda = node.getAttribute("lamda");
                         double n = node.getAttribute("n");
@@ -310,13 +335,22 @@ public class GeneticAlgo implements TopologyGraphSelector{
                             node.addAttribute(attributeMinThroughput, minThroughput);
                         }else{
                             System.out.println("===========GeneticAlgo============");
-                            System.out.println("overload on link: " + edge.getId());
+                            System.out.println("overload on link between : " + preNode.getId() + " to " + node.getId());
                             System.out.println("===========GeneticAlgo============");
-                            break;
-                            // TODO: maitain this case, maybe node can't load so much
+
+                            // TODO: maitain this case, maybe link can't load so much
+                            int lastNodeID = pathNodeIDs.get(pathNodeIDs.size()-1);
+                            MultiNode lastNode = tempGraph.getNode(Integer.toString(lastNodeID));
+                            lastNode.addAttribute(Integer.toString(flowID) + "delayOut", NODE_OVERLOAD);
+                            lastNode.addAttribute(Integer.toString(flowID) + "minThroughput", NODE_OVERLOAD);
+                            failonLink = true;
                         }
                         break;
                     }
+                }
+
+                if(failonLink){
+                    continue;
                 }
             }
         }
@@ -325,7 +359,7 @@ public class GeneticAlgo implements TopologyGraphSelector{
                                     Map<Integer,Double> flowDelays,
                                     Map<Integer,Double> flowThroughputs){
         Map<Integer,Double> flowFits = new HashMap<>();
-        for(int flowID : flowAR.keySet()){
+        for(int flowID : flowDelays.keySet()){
             TrafficType trafficType = flowAR.get(flowID).getTrafficType();
             /**
              * weight of parameter
