@@ -151,7 +151,35 @@ public class GeneticAlgo implements TopologyGraphSelector{
             assert tempPath.getPath().length == tempPath.getPathNodeIds().size();
             return tempPath;
         }
-        // TODO: step :3
+
+        // TODO: step3
+        /**
+         * tempPath found by BFS can't let all flow fit self applicationRequirement
+         * find another path for each flow
+         * 
+         * this logical need modify to more general, like "avoid remove edge that connect to articulation point"
+         */
+        Map<Integer,Map<Integer,PathDescriptor>> allPaths = new HashMap<>();
+        Map<Integer,PathDescriptor> otherPaths = new HashMap<>();
+        for(int flowID : flowPaths.keySet()){
+            PathDescriptor path = flowPaths.get(flowID);
+            MultiNode firstNode = checkGraph.getNode(Integer.toString(path.getPathNodeIds().get(0)));
+            MultiNode secondNode = checkGraph.getNode(Integer.toString(path.getPathNodeIds().get(1)));
+            Edge edge = checkGraph.removeEdge(firstNode, secondNode);
+
+            PathDescriptor otherPath = new BreadthFirstFlowPathSelector(checkGraph).selectPath(path.getPathNodeIds().get(0), path.getPathNodeIds().get(path.getPathNodeIds().size()-1), null, null);
+            otherPaths.put(flowID, otherPath);
+            
+            // recovery edge
+            checkGraph.addEdge(edge.getId(), firstNode, secondNode);
+        }
+
+        int[] flowIDArray = new int[flowPaths.keySet().size()];
+        int i=0;
+        for(int flowID : flowPaths.keySet()){
+            flowIDArray[i] = flowID;
+            i++;
+        }
         
 
         PathDescriptor path = null;
