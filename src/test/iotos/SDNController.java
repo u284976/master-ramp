@@ -133,5 +133,8 @@ public class SDNController{
 		System.out.println("================================");
 		System.out.println("Transfer complete");
 		System.out.println("================================");
+
+
+		// TODO: analyze data in ~/ramp/0-outputFile/*
 	}
 }

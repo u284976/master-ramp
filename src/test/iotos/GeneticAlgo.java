@@ -200,12 +200,12 @@ public class GeneticAlgo implements TopologyGraphSelector{
             flowPaths.put(flowID, path);
 
             double flow_lamda = (double)flowAR.get(flowID).getPacketRate();
-            /**
-             * applicationRequirement PacketLength is byte
-             * so needed to convert to kb
-             */
-            double flow_n = (double)flowAR.get(flowID).getPakcetLength()*8.0/1024.0;
-            
+            // /**
+            //  * applicationRequirement PacketLength is byte
+            //  * so needed to convert to kb
+            //  */
+            // double flow_n = (double)flowAR.get(flowID).getPakcetLength()*8.0/1024.0;
+            double flow_n = (double)flowAR.get(flowID).getPakcetLength();
             
             for(int nodeID : pathNodeID){
                 MultiNode node = tempGraph.getNode(Integer.toString(nodeID));
@@ -248,6 +248,12 @@ public class GeneticAlgo implements TopologyGraphSelector{
             double sourceLamda = sourceNode.getAttribute("lamda");
             double sourceN = sourceNode.getAttribute("n");
             double capacity = maxThroughput - sourceLamda*sourceN;
+            System.out.println("===========GeneticAlgo============");
+            System.out.println("sourceLamda = " + sourceLamda);
+            System.out.println("sourceN = " + sourceN);
+            System.out.println("maxThroughput = " + maxThroughput);
+            System.out.println("capacity =  " + capacity);
+            System.out.println("===========GeneticAlgo============");
             if(capacity > 0){
                 String attributeDelayOut = Integer.toString(flowID) + "delayOut";
                 
@@ -304,7 +310,7 @@ public class GeneticAlgo implements TopologyGraphSelector{
                             node.addAttribute(attributeMinThroughput, minThroughput);
                         }else{
                             System.out.println("===========GeneticAlgo============");
-                            System.out.println("overload on node: " + node.getId());
+                            System.out.println("overload on link: " + edge.getId());
                             System.out.println("===========GeneticAlgo============");
                             break;
                             // TODO: maitain this case, maybe node can't load so much

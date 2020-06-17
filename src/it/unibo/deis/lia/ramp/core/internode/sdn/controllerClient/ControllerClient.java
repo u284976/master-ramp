@@ -2243,9 +2243,9 @@ public class ControllerClient extends Thread implements ControllerClientInterfac
                                  * this block is receiver
                                  */
 
-                                int[] seq = new int[100];
-                                long[] sendTime = new long[100];
-                                long[] receiveTime = new long[100];
+                                int[] seq = new int[300];
+                                long[] sendTime = new long[300];
+                                long[] receiveTime = new long[300];
                                 for(int i=0 ; i<seq.length ; i++){
                                     seq[i] = -1;
                                     sendTime[i] = -1;
@@ -2270,15 +2270,15 @@ public class ControllerClient extends Thread implements ControllerClientInterfac
 
 
                                 long preWhile = System.currentTimeMillis();
-                                while(System.currentTimeMillis() - preWhile < 2000 ){
+                                while(System.currentTimeMillis() - preWhile < 3000 ){
                                     try {
-                                        up = (UnicastPacket)E2EComm.receive(TxServer,1000);
+                                        up = (UnicastPacket)E2EComm.receive(TxServer,500);
                                         if(up==null){
                                             break;
                                         }
                                         new tx_Listener(up, seq, sendTime, receiveTime).start();
                                     } catch (Exception e) {
-                                        System.out.println("Tx test done");
+                                        // System.out.println("no packet arrival , Tx test done");
                                     }
                                 }
 
@@ -2294,7 +2294,7 @@ public class ControllerClient extends Thread implements ControllerClientInterfac
                                 clientMeasurer.releaseOccupy();
 
                                 int c = 0;
-                                long[] delay = new long[100];
+                                long[] delay = new long[300];
                                 long total_delay = 0;
                                 for(int i=0 ; i<seq.length ; i++){
                                     if(sendTime[i] == -1){
@@ -2306,10 +2306,9 @@ public class ControllerClient extends Thread implements ControllerClientInterfac
                                     }
                                 }
 
-                                // only work at c = 101
-                                if(c > 100){
-                                    c = 100;
-                                }
+                                // System.out.println("======Measure()======");
+                                // System.out.println("c = " + c);
+                                // System.out.println("======Measure()======");
 
                                 double avgDelay = (double)total_delay / (double)c;
 
@@ -2317,21 +2316,34 @@ public class ControllerClient extends Thread implements ControllerClientInterfac
                                  * througput = lamda * n
                                  * packet rate * payload size
                                  * packet rate is fixed
-                                 * payload size is every 200ms will continus to increase,
+                                 * payload size will continus increase at 200ms 400ms 1000ms 2000ms after first packet
+                                 * payload size = 1000, 2000, 5000, 10000, 50000, respectively
+                                 * total transfer 3000ms and 300 packets
                                  * (for details, please refer to the Sender setting)
                                  * so we can observe how many packets are received to 
                                  * determine how many THROUGHPUT this link can carry
+                                 * 
+                                 * 
+                                 * and because the bandwidth is limited by software ( wondershpaer or mininet.addLink(bw = 10))
+                                 * so it doesn't fail immediately when sending larger packets, 
+                                 * 
+                                 * for example, "sta1------sta2" bandwidth is 5 Mbit/s = 655360 bytes/s
+                                 * according to the previous conjecture this receive only can receive 
+                                 * payload size = 1000, 2000, 5000, 10000,  when packet rate = 100/s
+                                 * i.e. from the first packet after 2000ms , there will be no packet due to insuffficient bandwidth
+                                 * so we expect to get c = 200
+                                 * but in my test, it can still receive more than 10 packets
                                  */
                                 double throughput;
-                                if(c >= 90){
+                                if(c > 295){
                                     throughput = 5000000;    // 100 * 50000
-                                }else if(c >= 80){
+                                }else if(c > 220){
                                     throughput = 1000000;    // 100 * 10000
-                                }else if(c >= 60){
+                                }else if(c > 120){
                                     throughput = 500000;     // 100 * 5000
-                                }else if(c >= 40){
+                                }else if(c > 60){
                                     throughput = 200000;     // 100 * 2000
-                                }else if(c >= 20){
+                                }else if(c > 40){
                                     throughput = 100000;     // 100 * 1000
                                 }else{
                                     throughput = 1000*c;
@@ -2359,7 +2371,7 @@ public class ControllerClient extends Thread implements ControllerClientInterfac
                                 while (!clientMeasurer.tryOccupy()) {
                                     System.out.println("======================================");
                                     System.out.println("wait " + address.toString() + ", and release");
-                                    sleep(50);
+                                    sleep(3000);
                                 }
                                 msg = new MeasureMessage(MeasureMessage.Check_Occupy,client.getLocalPort());
 
@@ -2437,9 +2449,9 @@ public class ControllerClient extends Thread implements ControllerClientInterfac
  * for listen Tx packet
  */
 class tx_Listener extends Thread{
-    int[] seq = new int[100];
-    long[] sendTime = new long[100];
-    long[] receiveTime = new long[100];
+    int[] seq;
+    long[] sendTime;
+    long[] receiveTime;
     UnicastPacket up;
 
     tx_Listener(UnicastPacket up , int[] seq, long[] sendTime, long[] receiveTime){
@@ -2457,7 +2469,7 @@ class tx_Listener extends Thread{
         }
         int seq = payload.getSeqNumber();
 
-        if(seq < 100){
+        if(seq < 300){
             sendTime[seq] = payload.getSendTime();
             receiveTime[seq] = System.currentTimeMillis();
         }

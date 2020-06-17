@@ -281,7 +281,7 @@ public class ClientMeasurer extends Thread{
 
 
 		packet.setPayloadSize(5000);
-		while(System.currentTimeMillis() - prewhile <= 600){
+		while(System.currentTimeMillis() - prewhile <= 1000){
 			currentTime = System.currentTimeMillis();
 			packet.setSeqNumber(i);
 			packet.setSendTime(currentTime);
@@ -311,7 +311,7 @@ public class ClientMeasurer extends Thread{
 		}
 
 		packet.setPayloadSize(10000);
-		while(System.currentTimeMillis() - prewhile <= 800){
+		while(System.currentTimeMillis() - prewhile <= 2000){
 			currentTime = System.currentTimeMillis();
 			packet.setSeqNumber(i);
 			packet.setSendTime(currentTime);
@@ -342,7 +342,7 @@ public class ClientMeasurer extends Thread{
 
 
 		packet.setPayloadSize(50000);
-		while(System.currentTimeMillis() - prewhile <= 1000){
+		while(System.currentTimeMillis() - prewhile <= 3000){
 			currentTime = System.currentTimeMillis();
 			packet.setSeqNumber(i);
 			packet.setSendTime(currentTime);

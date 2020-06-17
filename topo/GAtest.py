@@ -44,7 +44,7 @@ def myNetwork():
     net.configureWifiNodes()
 
     info( '*** Add links\n')
-    net.addLink(sta1, sta2)
+    net.addLink(sta1, sta2, bw=5)
     net.addLink(sta1, sta5)
 
     net.addLink(sta2, sta3)
@@ -82,7 +82,7 @@ def myNetwork():
 
 
     CLI.do_execute = execute
-    CLI.do_stopThread = stopThread
+    # CLI.do_stopThread = stopThread
     CLI.do_stopTest = stopTest
     CLI(net)
     net.stop()
