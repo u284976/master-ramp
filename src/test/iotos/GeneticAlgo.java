@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 
 import org.graphstream.graph.Edge;
 import org.graphstream.graph.Graph;
@@ -159,29 +160,61 @@ public class GeneticAlgo implements TopologyGraphSelector{
          * 
          * this logical need modify to more general, like "avoid remove edge that connect to articulation point"
          */
+
+        //  store all path
         Map<Integer,Map<Integer,PathDescriptor>> allPaths = new HashMap<>();
-        Map<Integer,PathDescriptor> otherPaths = new HashMap<>();
         for(int flowID : flowPaths.keySet()){
+            Map<Integer,PathDescriptor> fps = new HashMap<>();
+
+            fps.put(1, flowPaths.get(flowID));
+
+            // find second path
             PathDescriptor path = flowPaths.get(flowID);
             MultiNode firstNode = checkGraph.getNode(Integer.toString(path.getPathNodeIds().get(0)));
             MultiNode secondNode = checkGraph.getNode(Integer.toString(path.getPathNodeIds().get(1)));
             Edge edge = checkGraph.removeEdge(firstNode, secondNode);
 
-            PathDescriptor otherPath = new BreadthFirstFlowPathSelector(checkGraph).selectPath(path.getPathNodeIds().get(0), path.getPathNodeIds().get(path.getPathNodeIds().size()-1), null, null);
-            otherPaths.put(flowID, otherPath);
-            
+            PathDescriptor secondPath = new BreadthFirstFlowPathSelector(checkGraph).selectPath(path.getPathNodeIds().get(0), path.getPathNodeIds().get(path.getPathNodeIds().size()-1), null, null);
+            fps.put(2, secondPath);
+
             // recovery edge
             checkGraph.addEdge(edge.getId(), firstNode, secondNode);
+            for(String key : edge.getAttributeKeySet()){
+                firstNode.getEdgeBetween(secondNode).addAttribute(key, edge.getAttribute(key));
+            }
+
+            allPaths.put(flowID, fps);
         }
 
-        int[] flowIDArray = new int[flowPaths.keySet().size()];
-        int i=0;
-        for(int flowID : flowPaths.keySet()){
-            flowIDArray[i] = flowID;
-            i++;
+        int[] flowIDArray = new int[allPaths.size()];
+        int count = 0;
+        for(int flowID : allPaths.keySet()){
+            flowIDArray[count] = flowID;
+            count++;
+        }
+
+
+
+        crossout(allPaths);
+
+        // mutation
+        for(int flowID : allPaths.keySet()){
+            PathDescriptor mPath = mutation(checkGraph, allPaths.get(flowID).get(1));
+            allPaths.get(flowID).put(5, mPath);
+            mPath = mutation(checkGraph, allPaths.get(flowID).get(2));
+            allPaths.get(flowID).put(6, mPath);
+            mPath = mutation(checkGraph, allPaths.get(flowID).get(3));
+            allPaths.get(flowID).put(7, mPath);
+            mPath = mutation(checkGraph, allPaths.get(flowID).get(4));
+            allPaths.get(flowID).put(8, mPath);
         }
         
 
+        double totalRound = Math.pow(8.0, allPaths.size());
+
+
+
+        // TODO : set Creaction time
         PathDescriptor path = null;
         return path;
     }
@@ -191,6 +224,200 @@ public class GeneticAlgo implements TopologyGraphSelector{
         Map<Integer, PathDescriptor> paths = new BreadthFirstFlowPathSelector(topologyGraph).getAllPathsFromSource(sourceNodeId);
         return paths;
     }
+
+    private void crossout(Map<Integer,Map<Integer,PathDescriptor>> allPaths){
+        for(int flowID : allPaths.keySet()){
+            Map<Integer,PathDescriptor> fps = allPaths.get(flowID);
+            PathDescriptor aPath = fps.get(1);
+            PathDescriptor bPath = fps.get(2);
+
+            // may occur when no second path exist
+            if(bPath == null){
+                continue;
+            }
+
+            List<Integer> commonGenes;
+            commonGenes = findCommonGenes(aPath, bPath);
+
+            // if no common genes skip this step
+            if(commonGenes.size() == 0){
+                fps.put(3, null);
+                fps.put(4, null);
+                continue;
+            }
+
+            Random rand = new Random(); 
+    
+            // Generate random integers in range 0 to commonGenes.size()-1 
+            int choosenode = commonGenes.get(rand.nextInt(commonGenes.size())); 
+
+            int seqIna = aPath.getPathNodeIds().indexOf(choosenode);
+            int seqInb = bPath.getPathNodeIds().indexOf(choosenode);
+
+            List<String> path = new ArrayList<>();
+            List<Integer> pathNodeID = new ArrayList<>();
+
+            /**
+             * remeber List<Integer> pathNodeID 's index is one more than String[] path
+             */
+            pathNodeID.add(aPath.getPathNodeIds().get(0));
+            for(int i=1 ; i<= seqIna ; i++){
+                pathNodeID.add(aPath.getPathNodeIds().get(i));
+                path.add(aPath.getPath()[i-1]);
+            }
+            for(int i=seqInb+1 ; i<=bPath.getPathNodeIds().size()-1 ; i++){
+                pathNodeID.add(bPath.getPathNodeIds().get(i));
+                path.add(bPath.getPath()[i-1]);
+            }
+            PathDescriptor cPath = new PathDescriptor(path.toArray(new String[0]), pathNodeID);
+            fps.put(3, cPath);
+
+            path = new ArrayList<>();
+            pathNodeID = new ArrayList<>();
+
+            pathNodeID.add(bPath.getPathNodeIds().get(0));
+            for(int i=1 ; i<= seqInb ; i++){
+                pathNodeID.add(bPath.getPathNodeIds().get(i));
+                path.add(bPath.getPath()[i-1]);
+            }
+            for(int i=seqIna+1 ; i<=aPath.getPathNodeIds().size()-1 ; i++){
+                pathNodeID.add(aPath.getPathNodeIds().get(i));
+                path.add(aPath.getPath()[i-1]);
+            }
+            PathDescriptor dPath = new PathDescriptor(path.toArray(new String[0]), pathNodeID);
+            fps.put(4, dPath);
+        }
+    }
+
+    /**
+     * this function will return Common node between 2 path without first and last node
+     */
+    private List<Integer> findCommonGenes(PathDescriptor a, PathDescriptor b){
+        List<Integer> commonGenes = new ArrayList<>();
+    
+        for(int nodeID1 : a.getPathNodeIds()){
+            for(int nodeID2 : b.getPathNodeIds()){
+                if(nodeID1 == a.getPathNodeIds().get(0) || nodeID1 == a.getPathNodeIds().get(a.getPathNodeIds().size()-1)){
+                    continue;
+                }
+                if(nodeID1 == nodeID2){
+                    commonGenes.add(nodeID1);
+                }
+            }
+        }
+
+        return commonGenes;
+    }
+
+    private PathDescriptor mutation(Graph tempGraph, PathDescriptor path){
+
+        if(path != null){
+            int bottleneck = findBottleneck(tempGraph, path);
+            int bottleIndex = path.getPathNodeIds().indexOf(bottleneck);
+    
+    
+            PathDescriptor mPath = null;
+            if(bottleneck == -1){
+                mPath = null;
+            }else{
+                MultiNode node = tempGraph.getNode(Integer.toString(path.getPathNodeIds().get(bottleIndex)));
+                MultiNode nextNode = tempGraph.getNode(Integer.toString(path.getPathNodeIds().get(bottleIndex+1)));
+                
+                Edge edge = tempGraph.removeEdge(node, nextNode);
+    
+                int nodeID = Integer.parseInt(node.getId());
+                int finalNodeID = path.getPathNodeIds().get(path.getPathNodeIds().size()-1);
+                mPath = new BreadthFirstFlowPathSelector(tempGraph).selectPath(nodeID, finalNodeID, null, null);
+                
+                // recovery edge
+                tempGraph.addEdge(edge.getId(), node, nextNode);
+                for(String key : edge.getAttributeKeySet()){
+                    node.getEdgeBetween(nextNode).addAttribute(key, edge.getAttribute(key));
+                }
+    
+                if(mPath != null){
+                    // add source
+                    mPath.getPathNodeIds().add(0, nodeID);
+    
+                    // if mutation let the path has loop, drop it.
+                    mPath = combineGene(path,mPath);
+                }
+            }
+    
+            return mPath;
+
+        }else{
+            return null;
+        }
+    }
+
+    private int findBottleneck(Graph tempGraph, PathDescriptor path){
+
+        // this path too short
+        if(path.getPathNodeIds().size() <= 2){
+            return -1;
+        }
+
+        int bottleneckSeq = 0;
+        double minThroughput = Double.MAX_VALUE;
+        for(int i=0 ; i<path.getPathNodeIds().size()-1 ; i++){
+            MultiNode node = tempGraph.getNode(Integer.toString(path.getPathNodeIds().get(i)));
+            MultiNode nextNode = tempGraph.getNode(Integer.toString(path.getPathNodeIds().get(i+1)));
+
+            String nextAddr = path.getPath()[i];
+            
+            for(Edge edge : node.getEdgeSetBetween(nextNode)){
+                if((edge.getAttribute("address_")+nextNode.getId()).equals(nextAddr)){
+
+                    double throughput = (double)edge.getAttribute("throughput");
+                    if(throughput < minThroughput){
+                        minThroughput = throughput;
+                        bottleneckSeq = i;
+                    }
+                }
+            }
+        }
+        return bottleneckSeq;
+    }
+
+    private PathDescriptor combineGene(PathDescriptor a, PathDescriptor b){
+
+        PathDescriptor mPath = null;
+
+        int mutationPoint = a.getPathNodeIds().indexOf(b.getPathNodeIds().get(0));
+
+        boolean findLoop = false;
+        for(int i=0 ; i<mutationPoint ; i++){
+            if(b.getPathNodeIds().indexOf(a.getPathNodeIds().get(i)) != -1){
+                findLoop = true;
+                break;
+            }
+        }
+
+        if(findLoop == true){
+            return mPath;
+        }else{
+            List<String> path = new ArrayList<>();
+            List<Integer> pathNodeID = new ArrayList<>();
+
+            pathNodeID.add(a.getPathNodeIds().get(0));
+            for(int i=0 ; i<mutationPoint ; i++){
+                path.add(a.getPath()[i]);
+                pathNodeID.add(a.getPathNodeIds().get(i+1));
+            }
+
+            b.getPathNodeIds().remove(0);
+            for(int i=0 ; i<b.getPathNodeIds().size() ; i++){
+                path.add(b.getPath()[i]);
+                pathNodeID.add(b.getPathNodeIds().get(i));
+            }
+
+            mPath = new PathDescriptor(path.toArray(new String[0]), pathNodeID);
+        }
+
+        return mPath;
+    }
+
     
     private void formalMethod(Graph tempGraph, Map<Integer,PathDescriptor> flowPaths,
                                 Map<Integer,ApplicationRequirements> flowAR,
