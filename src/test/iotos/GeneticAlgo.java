@@ -12,8 +12,12 @@ import org.graphstream.graph.Node;
 import org.graphstream.graph.implementations.Graphs;
 import org.graphstream.graph.implementations.MultiNode;
 
+import it.unibo.deis.lia.ramp.core.e2e.E2EComm;
+import it.unibo.deis.lia.ramp.core.internode.Resolver;
 import it.unibo.deis.lia.ramp.core.internode.sdn.applicationRequirements.ApplicationRequirements;
 import it.unibo.deis.lia.ramp.core.internode.sdn.applicationRequirements.TrafficType;
+import it.unibo.deis.lia.ramp.core.internode.sdn.controllerMessage.ControllerMessageResponse;
+import it.unibo.deis.lia.ramp.core.internode.sdn.controllerMessage.MessageType;
 import it.unibo.deis.lia.ramp.core.internode.sdn.controllerService.ControllerService;
 import it.unibo.deis.lia.ramp.core.internode.sdn.pathSelection.TopologyGraphSelector;
 import it.unibo.deis.lia.ramp.core.internode.sdn.pathSelection.pathDescriptors.PathDescriptor;
@@ -28,6 +32,8 @@ public class GeneticAlgo implements TopologyGraphSelector{
     private static final double NODE_OVERLOAD = -1;
     private static final double LINK_OVERLOND = -2;
     private static final double fitnessThreshold = 100;
+
+    private static final int GenerateMAX = 10;
     
     private Graph topologyGraph;
 
@@ -108,7 +114,26 @@ public class GeneticAlgo implements TopologyGraphSelector{
         flowAR.put(1, applicationRequirements);
         flowSources.put(1, sourceNodeId);
 
-        formalMethod(checkGraph, flowPaths, flowAR, flowSources, sourceNodeId);
+
+        /**
+         * 2020-06-19 : to be the same as the "iteration" part, move this step outside the formal method
+         * 
+         * combine flowSource and flowPath, becaue flowPath only store target node
+         * ex certain flow about "S" to "D", through M1,M2 like below:
+         *   S---->M1---->M2---->D
+         * 
+         * flowPath only store M1,M2,D these three nodeID and NetworkInterfaceCard
+         * so needed add the node that proposed the flow request
+         */
+        for(int flowID : flowPaths.keySet()){
+            PathDescriptor path = flowPaths.get(flowID);
+            List<Integer> pathNodeID = path.getPathNodeIds();
+            pathNodeID.add(0, flowSources.get(flowID));
+            path.setPathNodeIds(pathNodeID);
+            flowPaths.put(flowID, path);
+        }
+
+        formalMethod(checkGraph, flowPaths, flowAR);
 
         Map<Integer,Double> flowDelays = new HashMap<>();
         Map<Integer,Double> flowThroughputs = new HashMap<>();
@@ -124,10 +149,6 @@ public class GeneticAlgo implements TopologyGraphSelector{
 
         Map<Integer,Double> flowFits = calculateFitness(flowAR,flowDelays,flowThroughputs);
 
-        // System.out.println("10.0.0.1 - 10.0.0.2:");
-        // System.out.println("throughput = " + checkGraph.getNode("1").getEdgeBetween("2").getAttribute("throughput"));
-        // System.out.println("10.0.0.2 - 10.0.0.3:");
-        // System.out.println("throughput = " + checkGraph.getNode("2").getEdgeBetween("3").getAttribute("throughput"));
         
 
         boolean allFit = true;
@@ -163,19 +184,23 @@ public class GeneticAlgo implements TopologyGraphSelector{
 
         //  store all path
         Map<Integer,Map<Integer,PathDescriptor>> allPaths = new HashMap<>();
+        checkGraph.clear();
+        checkGraph = Graphs.clone(topologyGraph);
         for(int flowID : flowPaths.keySet()){
             Map<Integer,PathDescriptor> fps = new HashMap<>();
 
-            fps.put(1, flowPaths.get(flowID));
+            fps.put(0, flowPaths.get(flowID));
 
             // find second path
             PathDescriptor path = flowPaths.get(flowID);
+            
             MultiNode firstNode = checkGraph.getNode(Integer.toString(path.getPathNodeIds().get(0)));
             MultiNode secondNode = checkGraph.getNode(Integer.toString(path.getPathNodeIds().get(1)));
             Edge edge = checkGraph.removeEdge(firstNode, secondNode);
 
             PathDescriptor secondPath = new BreadthFirstFlowPathSelector(checkGraph).selectPath(path.getPathNodeIds().get(0), path.getPathNodeIds().get(path.getPathNodeIds().size()-1), null, null);
-            fps.put(2, secondPath);
+            secondPath.getPathNodeIds().add(flowSources.get(flowID));
+            fps.put(1, secondPath);
 
             // recovery edge
             checkGraph.addEdge(edge.getId(), firstNode, secondNode);
@@ -185,38 +210,170 @@ public class GeneticAlgo implements TopologyGraphSelector{
 
             allPaths.put(flowID, fps);
         }
+        checkGraph.clear();
+
 
         int[] flowIDArray = new int[allPaths.size()];
+        Map<Integer,Integer> flowIDArrayIndex = new HashMap<>();
         int count = 0;
         for(int flowID : allPaths.keySet()){
             flowIDArray[count] = flowID;
+            flowIDArrayIndex.put(flowID, count);
             count++;
         }
 
+        for(int Generation = 0 ; Generation < GenerateMAX ; Generation++){
+            checkGraph = Graphs.clone(topologyGraph);
 
+            crossout(allPaths);
+    
+            // mutation
+            for(int flowID : allPaths.keySet()){
+                PathDescriptor mPath = mutation(checkGraph, allPaths.get(flowID).get(1));
+                allPaths.get(flowID).put(4, mPath);
+                mPath = mutation(checkGraph, allPaths.get(flowID).get(2));
+                allPaths.get(flowID).put(5, mPath);
+                mPath = mutation(checkGraph, allPaths.get(flowID).get(3));
+                allPaths.get(flowID).put(6, mPath);
+                mPath = mutation(checkGraph, allPaths.get(flowID).get(4));
+                allPaths.get(flowID).put(7, mPath);
+            }
+    
+            checkGraph.clear();
+            
+    
+            // check all flow path combination Fitness value
+            double totalRound = Math.pow(8.0, allPaths.size());
+    
+            Map<Integer,List<Double>> bestFitValues = new HashMap<>();
+            Map<Integer,List<Integer>> bestFitTurns = new HashMap<>();
+            for(int flowID : allPaths.keySet()){
+                List<Double> bestFitValue = new ArrayList<>();
+                bestFitValue.add(Double.MAX_VALUE);
+                bestFitValue.add(Double.MAX_VALUE);
+                bestFitValues.put(flowID, bestFitValue);
+    
+                List<Integer> bestFitTurn = new ArrayList<>();
+                bestFitTurn.add(0);
+                bestFitTurn.add(0);
+                bestFitTurns.put(flowID, bestFitTurn);
+            }
+    
+            for(int i=0 ; i<totalRound ; i++){
+                List<Integer> select = octIntegers(allPaths.size(), i);
+    
+                flowPaths.clear();
+                for(int j=0 ; j<select.size() ; j++){
+                    flowPaths.put(flowIDArray[j], allPaths.get(flowIDArray[j]).get(select.get(j)));
+                }
+    
+                // if has null, skip this round
+                boolean hasNull = false;
+                for(int flowID : flowPaths.keySet()){
+                    if(flowPaths.get(flowID) == null){
+                        hasNull = true;
+                        break;
+                    }
+                }
+                if(hasNull){
+                    continue;
+                }
+    
+                flowDelays.clear();
+                flowThroughputs.clear();
+    
+                checkGraph = Graphs.clone(topologyGraph);
+                formalMethod(checkGraph, flowPaths, flowAR);
+    
+                for(int flowID : flowPaths.keySet()){
+                    /**
+                     * in the formal method, i store "calculated" delay and throughput at the last node of flow
+                     */
+                    String lastNodeID = Integer.toString(flowPaths.get(flowID).getDestinationNodeId());
+                    MultiNode lastNode = checkGraph.getNode(lastNodeID);
+                    flowDelays.put(flowID, lastNode.getAttribute(Integer.toString(flowID) + "delayOut"));
+                    flowThroughputs.put(flowID, lastNode.getAttribute(Integer.toString(flowID) + "minThroughput"));
+                }
+    
+                flowFits.clear();
+                flowFits = calculateFitness(flowAR,flowDelays,flowThroughputs);
+                
+    
+                allFit = true;
+                for(Integer flowID : flowFits.keySet()){
+                    if(flowFits.get(flowID) > fitnessThreshold){
+                        allFit = false;
+                    }
+                }
+                if(allFit){
+                    // in formal method, need flow Source so we add previoous
+                    // here neede remove it
+                    flowPaths.get(1).getPathNodeIds().remove(0);
+    
+                    handlePathChange(activePaths, flowPaths);
+    
+                    return flowPaths.get(1);
+                }else{
+                    // certain flow can't fit well   
+                    // if it fitness value better than previous iteration
+                    // store it value and iteration's index
+                    // and try next combination
+                    for(int flowID : flowPaths.keySet()){
+                        if(flowFits.get(flowID) < bestFitValues.get(flowID).get(0)){
+                            bestFitValues.get(flowID).add(0,flowFits.get(flowID));
+                            bestFitValues.get(flowID).remove(2);
+    
+                            bestFitTurns.get(flowID).add(0,i);
+                            bestFitTurns.get(flowID).remove(2);
+    
+                        }else if(flowFits.get(flowID) < bestFitValues.get(flowID).get(1)){
+                            bestFitValues.get(flowID).add(1,flowFits.get(flowID));
+                            bestFitValues.get(flowID).remove(2);
+    
+                            bestFitTurns.get(flowID).add(1,i);
+                            bestFitTurns.get(flowID).remove(2);
+                        }
+                    }
+                }
+            }
 
-        crossout(allPaths);
+            // replace Gene mothor
+            Map<Integer, Map<Integer, PathDescriptor>> newAllPath = new HashMap<>();
+            for(int flowID : allPaths.keySet()){
 
-        // mutation
-        for(int flowID : allPaths.keySet()){
-            PathDescriptor mPath = mutation(checkGraph, allPaths.get(flowID).get(1));
-            allPaths.get(flowID).put(5, mPath);
-            mPath = mutation(checkGraph, allPaths.get(flowID).get(2));
-            allPaths.get(flowID).put(6, mPath);
-            mPath = mutation(checkGraph, allPaths.get(flowID).get(3));
-            allPaths.get(flowID).put(7, mPath);
-            mPath = mutation(checkGraph, allPaths.get(flowID).get(4));
-            allPaths.get(flowID).put(8, mPath);
+                int indexInArray = flowIDArrayIndex.get(flowID);
+
+                List<Integer> bestTurnCombine = octIntegers(allPaths.size(), bestFitTurns.get(flowID).get(0));
+                int recordPathIndex = bestTurnCombine.get(indexInArray);
+                
+                Map<Integer,PathDescriptor> fps = new HashMap<>();
+                fps.put(0, allPaths.get(flowID).get(recordPathIndex));
+
+                bestTurnCombine = octIntegers(allPaths.size(), bestFitTurns.get(flowID).get(1));
+                recordPathIndex = bestTurnCombine.get(indexInArray);
+                fps.put(1, allPaths.get(flowID).get(recordPathIndex));
+
+                newAllPath.put(flowID, fps);
+            }
+            allPaths.clear();
+            allPaths = newAllPath;
         }
+
         
 
-        double totalRound = Math.pow(8.0, allPaths.size());
 
+        // iteration fail
+        // choose "last" path best turn
+        flowPaths.clear();
+        List<Integer> select = octIntegers(allPaths.size(), bestFitTurns.get(1).get(0));
+        for(int j=0 ; j<select.size() ; j++){
+            flowPaths.put(flowIDArray[j], allPaths.get(flowIDArray[j]).get(select.get(j)));
+        }
 
+        handlePathChange(activePaths, flowPaths);
 
-        // TODO : set Creaction time
-        PathDescriptor path = null;
-        return path;
+        flowPaths.get(1).getPathNodeIds().remove(0);
+        return flowPaths.get(1);
     }
 
     @Override
@@ -225,11 +382,52 @@ public class GeneticAlgo implements TopologyGraphSelector{
         return paths;
     }
 
+    private List<Integer> octIntegers(int totalLength, int number){
+        String o = Integer.toOctalString(number);
+
+        List<Integer> select = new ArrayList<>();
+
+        for(int i=0 ; i<totalLength-o.length() ; i++){
+            select.add(0);
+        }
+        for(int i=0 ; i<o.length() ; i++){
+            select.add(Integer.parseInt(Character.toString(o.charAt(i))));
+        }
+
+        return select;
+    }
+
+    private void handlePathChange(Map<Integer,PathDescriptor> activePaths, Map<Integer,PathDescriptor> flowPaths){
+        for(int flowID : activePaths.keySet()){
+
+            // why not compare two map directly?
+            // because have some variable different, ex : creation time, flowPaths's is empty
+            if(activePaths.get(flowID).getPath().equals(flowPaths.get(flowID).getPath())){
+                continue;
+            }
+
+            int noticeSourceID = activePaths.get(flowID).getPathNodeIds().get(0);
+            String[] noticeSourceDest = Resolver.getInstance(false).resolveBlocking(noticeSourceID, 5 * 1000).get(0).getPath();
+            MultiNode noticeNode = topologyGraph.getNode(Integer.toString(noticeSourceID));
+            int noticeNodePort = noticeNode.getAttribute("port");
+
+            List<PathDescriptor> newPaths = new ArrayList<>();
+            newPaths.add(flowPaths.get(flowID));
+            ControllerMessageResponse updateMessage = new ControllerMessageResponse(MessageType.FIX_PATH_PUSH_RESPONSE, flowID, newPaths);
+
+            try {
+                E2EComm.sendUnicast(noticeSourceDest, noticeSourceID, noticeNodePort, E2EComm.TCP, 0, E2EComm.serialize(updateMessage));
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
     private void crossout(Map<Integer,Map<Integer,PathDescriptor>> allPaths){
         for(int flowID : allPaths.keySet()){
             Map<Integer,PathDescriptor> fps = allPaths.get(flowID);
-            PathDescriptor aPath = fps.get(1);
-            PathDescriptor bPath = fps.get(2);
+            PathDescriptor aPath = fps.get(0);
+            PathDescriptor bPath = fps.get(1);
 
             // may occur when no second path exist
             if(bPath == null){
@@ -241,8 +439,8 @@ public class GeneticAlgo implements TopologyGraphSelector{
 
             // if no common genes skip this step
             if(commonGenes.size() == 0){
+                fps.put(2, null);
                 fps.put(3, null);
-                fps.put(4, null);
                 continue;
             }
 
@@ -270,7 +468,7 @@ public class GeneticAlgo implements TopologyGraphSelector{
                 path.add(bPath.getPath()[i-1]);
             }
             PathDescriptor cPath = new PathDescriptor(path.toArray(new String[0]), pathNodeID);
-            fps.put(3, cPath);
+            fps.put(2, cPath);
 
             path = new ArrayList<>();
             pathNodeID = new ArrayList<>();
@@ -285,7 +483,7 @@ public class GeneticAlgo implements TopologyGraphSelector{
                 path.add(aPath.getPath()[i-1]);
             }
             PathDescriptor dPath = new PathDescriptor(path.toArray(new String[0]), pathNodeID);
-            fps.put(4, dPath);
+            fps.put(3, dPath);
         }
     }
 
@@ -313,15 +511,14 @@ public class GeneticAlgo implements TopologyGraphSelector{
 
         if(path != null){
             int bottleneck = findBottleneck(tempGraph, path);
-            int bottleIndex = path.getPathNodeIds().indexOf(bottleneck);
     
     
             PathDescriptor mPath = null;
-            if(bottleneck == -1){
+            if(bottleneck == -1 || bottleneck == 0){
                 mPath = null;
             }else{
-                MultiNode node = tempGraph.getNode(Integer.toString(path.getPathNodeIds().get(bottleIndex)));
-                MultiNode nextNode = tempGraph.getNode(Integer.toString(path.getPathNodeIds().get(bottleIndex+1)));
+                MultiNode node = tempGraph.getNode(Integer.toString(path.getPathNodeIds().get(bottleneck-1)));
+                MultiNode nextNode = tempGraph.getNode(Integer.toString(path.getPathNodeIds().get(bottleneck)));
                 
                 Edge edge = tempGraph.removeEdge(node, nextNode);
     
@@ -420,9 +617,7 @@ public class GeneticAlgo implements TopologyGraphSelector{
 
     
     private void formalMethod(Graph tempGraph, Map<Integer,PathDescriptor> flowPaths,
-                                Map<Integer,ApplicationRequirements> flowAR,
-                                Map<Integer,Integer> flowSources,
-                                int sourceNodeId){       
+                                Map<Integer,ApplicationRequirements> flowAR){       
         /**
          * add attribute in topo's node
          * 
@@ -448,15 +643,6 @@ public class GeneticAlgo implements TopologyGraphSelector{
          * 
          * lamda = combine lamda    <---- see code or paper
          * n = combine n            <---- see code or paper
-         * 
-         * but flowPath only store target node
-         * ex A certain flow about "S" to "D", through M1,M2 like below:
-         *   S---->M1---->M2---->D
-         * 
-         * flowPath only store M1,M2,D these three nodeID and NetworkInterfaceCard
-         * so needed add the node that proposed the flow request
-         * 
-         * 2020-06-05 modify to combine flowSource and flowPath First
          * ===========================================
          * requires attention!!!
          * path.getPathNodeIds() is List<Integer> include Source, ex S,M1,M2,D
@@ -464,12 +650,16 @@ public class GeneticAlgo implements TopologyGraphSelector{
          */
         for(int flowID : flowPaths.keySet()){
 
-            // combine flowSource and flowPath
+            // 2020-06-19 move this step to outside
+            // // combine flowSource and flowPath
+            // PathDescriptor path = flowPaths.get(flowID);
+            // List<Integer> pathNodeID = path.getPathNodeIds();
+            // pathNodeID.add(0, flowSources.get(flowID));
+            // path.setPathNodeIds(pathNodeID);
+            // flowPaths.put(flowID, path);
+
             PathDescriptor path = flowPaths.get(flowID);
             List<Integer> pathNodeID = path.getPathNodeIds();
-            pathNodeID.add(0, flowSources.get(flowID));
-            path.setPathNodeIds(pathNodeID);
-            flowPaths.put(flowID, path);
 
             double flow_lamda = (double)flowAR.get(flowID).getPacketRate();
             // /**
