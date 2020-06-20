@@ -17,6 +17,7 @@
 ./src/test/iotos/testbatch/SetupMinaTestBatch.java
 ./src/test/iotos/testbatch/SetupGAtest.java
 ./src/test/iotos/testbatch/SetupMeshTestBatch.java
+./src/test/iotos/testbatch/SetupGA_Change_Test.java
 ./src/test/iotos/testbatch/SetupTestBatch.java
 ./src/test/iotos/testbatch/SetupSimpleTest.java
 ./src/test/iotos/messagetype/MeasureMessage.java

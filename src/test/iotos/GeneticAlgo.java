@@ -44,7 +44,7 @@ public class GeneticAlgo implements TopologyGraphSelector{
     }
 
     @Override
-    public PathDescriptor selectPath(int sourceNodeId, int destNodeId, ApplicationRequirements applicationRequirements, Map<Integer, PathDescriptor> activePaths){
+    public synchronized PathDescriptor selectPath(int sourceNodeId, int destNodeId, ApplicationRequirements applicationRequirements, Map<Integer, PathDescriptor> activePaths){
 
         // /**
         //  * check first, sourceNode can generate this number of throughput with neighbor
@@ -167,7 +167,12 @@ public class GeneticAlgo implements TopologyGraphSelector{
             // in formal method, will modify the flowPath (add source into the pathNodeID),
             // so neede remove it
             System.out.println("===========Genetic Output============");
-            System.out.println("find path on first BFS path, don't need to change other path");
+            System.out.println("request by node:" + sourceNodeId);
+            System.out.println("find path at first BFS path, don't need to change other path");
+            for(int nodeID : tempPath.getPathNodeIds()){
+                System.out.print(nodeID+" ");
+            }
+            System.out.println();
             System.out.println("===========Genetic Output============");
             List<Integer> pathNodeID = tempPath.getPathNodeIds();
             pathNodeID.remove(0);
@@ -384,6 +389,7 @@ public class GeneticAlgo implements TopologyGraphSelector{
                     // in formal method, need flow Source so we add previoous
                     // here neede remove it
                     System.out.println("===========Genetic Output============");
+                    System.out.println("request by node:" + sourceNodeId);
                     System.out.println("find combination can let all path fit");
                     for(int flowID : flowPaths.keySet()){
                         System.out.print("flowID = " + flowID + " : ");
@@ -459,6 +465,7 @@ public class GeneticAlgo implements TopologyGraphSelector{
 
 
         System.out.println("===========Genetic Output============");
+        System.out.println("request by node:" + sourceNodeId);
         System.out.println("can't find combination let all path fit, choose last generation best combination");
         for(int flowID : flowPaths.keySet()){
             System.out.print("flowID = " + flowID + " : ");

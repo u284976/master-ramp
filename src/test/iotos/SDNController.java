@@ -7,6 +7,7 @@ import it.unibo.deis.lia.ramp.core.internode.Dispatcher;
 import it.unibo.deis.lia.ramp.core.internode.sdn.controllerClient.ControllerClient;
 import it.unibo.deis.lia.ramp.core.internode.sdn.controllerService.ControllerService;
 import it.unibo.deis.lia.ramp.service.management.ServiceManager;
+import test.iotos.testbatch.SetupGA_Change_Test;
 import test.iotos.testbatch.SetupGAtest;
 import test.iotos.testbatch.SetupMeshTestBatch;
 import test.iotos.testbatch.SetupSimpleTest;
@@ -34,7 +35,7 @@ public class SDNController{
     public static void main(String[] args){
 		
 		// change here to change testBatch
-		testBatch = new SetupGAtest();
+		testBatch = new SetupGA_Change_Test();
 		
 		testBatchName = testBatch.getTestBatchName();
 		testTime = testBatch.getTestBatchTime();

@@ -3,9 +3,9 @@ package test.iotos.testbatch;
 import it.unibo.deis.lia.ramp.core.internode.sdn.applicationRequirements.ApplicationRequirements;
 import it.unibo.deis.lia.ramp.core.internode.sdn.applicationRequirements.TrafficType;
 
-public class SetupMeshTestBatch implements SetupTestBatch{
+public class SetupGA_Change_Test implements SetupTestBatch{
     public String getTestBatchName(){
-        return "normal-mesh";
+        return "GA_Change_Test";
     }
     public String getTestBatchTime(){
         return "2020-06-21";
@@ -14,10 +14,10 @@ public class SetupMeshTestBatch implements SetupTestBatch{
         return false;
     }
     public int getNumberOfClient(){
-        return 8;
+        return 7;
     }
     public int getNumberOfEdge(){
-        return 13;
+        return 8;
     }
     public int getTestSecond(){
         return 15;
@@ -25,14 +25,14 @@ public class SetupMeshTestBatch implements SetupTestBatch{
     public String getAppTarget(String nodeID){
         String targetID = "0";
         switch (nodeID) {
-            case "4":
-                targetID = "5";
+            case "2":
+                targetID = "6";
                 break;
             case "6":
                 targetID = "2";
                 break;
-            case "3":
-                targetID = "8";
+            case "7":
+                targetID = "2";
                 break;
         }
         return targetID;
@@ -40,13 +40,10 @@ public class SetupMeshTestBatch implements SetupTestBatch{
     public boolean getReceive(String nodeID){
         boolean receive = false;
         switch (nodeID) {
-            case "5":
-                receive = true;
-                break;
             case "2":
                 receive = true;
                 break;
-            case "8":
+            case "6":
                 receive = true;
                 break;
         }
@@ -64,7 +61,7 @@ public class SetupMeshTestBatch implements SetupTestBatch{
         int duration = 0;
 
         switch (nodeID) {
-            case "3":       // send to 8
+            case "2":       // send to 6
                 trafficType = TrafficType.FILE_TRANSFER;
                 payloadSize = 1600;
                 GenPacketPerSeconds = 10;
@@ -72,20 +69,20 @@ public class SetupMeshTestBatch implements SetupTestBatch{
                 requireThroughput = 16000.0;
                 duration = 100;
                 break;
-            case "4":       // send to 5
+            case "6":       // send to 2
                 trafficType = TrafficType.FILE_TRANSFER;
                 payloadSize = 1600;
                 GenPacketPerSeconds = 15;
                 requireDelay = 20.0;
-                requireThroughput = (double)(1600*15);
+                requireThroughput = 24000.0;
                 duration = 100;
                 break;
-            case "6":       // send to 2
-                trafficType = TrafficType.VIDEO_STREAM;
+            case "7":       // send to 2
+                trafficType = TrafficType.FILE_TRANSFER;
                 payloadSize = 800;
                 GenPacketPerSeconds = 30;
                 requireDelay = 10.0;
-                requireThroughput = (double)(800*30);
+                requireThroughput = 24000.0;
                 duration = 100;
                 break;
         }

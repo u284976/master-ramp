@@ -13,7 +13,25 @@ import inspect
 import ctypes
 import time
 
+"""
+testbatch with /testbatch/SetupGAtest.java
 
+this topo are try GA select second path
+
+topo is a cycle
+
+sta1---sta2---sta3---sta4---sta5
+|                            |
+------------------------------
+
+flow  2 ---> 5 is default through  2--->1--->5
+
+so i add bandwidth limit link between sta1 and sta2
+let application requirement can't fit well
+
+controller will choose another path 2--->3--->4--->5
+
+"""
 def myNetwork():
 
     net = Mininet_wifi(topo=None,
