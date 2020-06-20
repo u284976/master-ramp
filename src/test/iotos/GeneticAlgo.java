@@ -154,8 +154,8 @@ public class GeneticAlgo implements TopologyGraphSelector{
         boolean allFit = true;
         for(Integer flowID : flowFits.keySet()){
             System.out.println("===========GeneticAlgo============");
-            System.out.println("Request by: "+ sourceNodeId);
-            System.out.println("fitness value of " + flowID + " is :" + flowFits.get(flowID));
+            System.out.println("Request by node: "+ sourceNodeId);
+            System.out.println("fitness value of flow " + flowID + " is :" + flowFits.get(flowID));
             System.out.println("require: delay = " + flowAR.get(flowID).getRequireDelay() + ", throughput = " + flowAR.get(flowID).getRequireThroughput());
             System.out.println("predict: delay = " + flowDelays.get(flowID) + ", throughput = " + flowThroughputs.get(flowID));
             System.out.println("===========GeneticAlgo============");
@@ -166,6 +166,9 @@ public class GeneticAlgo implements TopologyGraphSelector{
         if(allFit){
             // in formal method, will modify the flowPath (add source into the pathNodeID),
             // so neede remove it
+            System.out.println("===========Genetic Output============");
+            System.out.println("find path on first BFS path, don't need to change other path");
+            System.out.println("===========Genetic Output============");
             List<Integer> pathNodeID = tempPath.getPathNodeIds();
             pathNodeID.remove(0);
 
@@ -173,6 +176,12 @@ public class GeneticAlgo implements TopologyGraphSelector{
             assert tempPath.getPath().length == tempPath.getPathNodeIds().size();
             return tempPath;
         }
+
+        System.out.println();
+        System.out.println("===========GeneticAlgo============");
+        System.out.println("first path can't let all path fit, start Genetic");
+        System.out.println("===========GeneticAlgo============");
+        System.out.println();
 
         // TODO: step3
         /**
@@ -185,33 +194,45 @@ public class GeneticAlgo implements TopologyGraphSelector{
         //  store all path
         Map<Integer,Map<Integer,PathDescriptor>> allPaths = new HashMap<>();
         checkGraph.clear();
-        checkGraph = Graphs.clone(topologyGraph);
+        
         for(int flowID : flowPaths.keySet()){
+            checkGraph = Graphs.clone(topologyGraph);
             Map<Integer,PathDescriptor> fps = new HashMap<>();
 
+            // put first path as mother Gene
             fps.put(0, flowPaths.get(flowID));
 
             // find second path
             PathDescriptor path = flowPaths.get(flowID);
             
+            /**
+             * find second path by remove first node to second node edge
+             * we assume all flow will not start at  articulation point
+             */
             MultiNode firstNode = checkGraph.getNode(Integer.toString(path.getPathNodeIds().get(0)));
             MultiNode secondNode = checkGraph.getNode(Integer.toString(path.getPathNodeIds().get(1)));
-            Edge edge = checkGraph.removeEdge(firstNode, secondNode);
+            checkGraph.removeEdge(firstNode, secondNode);
 
             PathDescriptor secondPath = new BreadthFirstFlowPathSelector(checkGraph).selectPath(path.getPathNodeIds().get(0), path.getPathNodeIds().get(path.getPathNodeIds().size()-1), null, null);
-            secondPath.getPathNodeIds().add(flowSources.get(flowID));
+            // add source to pathNodeID like previous do
+            secondPath.getPathNodeIds().add(0,flowSources.get(flowID));
+            // put second path as another mother Gene
             fps.put(1, secondPath);
 
-            // recovery edge
-            checkGraph.addEdge(edge.getId(), firstNode, secondNode);
-            for(String key : edge.getAttributeKeySet()){
-                firstNode.getEdgeBetween(secondNode).addAttribute(key, edge.getAttribute(key));
+            System.out.println();
+            System.out.println("===========GeneticAlgo============");
+            System.out.println("find second path to flowID " + flowID);
+            if(secondPath!=null){
+                for(int nodeID : secondPath.getPathNodeIds()){
+                    System.out.println(nodeID);
+                }
             }
-
+            System.out.println("===========GeneticAlgo============");
+            System.out.println();
+            
             allPaths.put(flowID, fps);
+            checkGraph.clear();
         }
-        checkGraph.clear();
-
 
         int[] flowIDArray = new int[allPaths.size()];
         Map<Integer,Integer> flowIDArrayIndex = new HashMap<>();
@@ -220,6 +241,28 @@ public class GeneticAlgo implements TopologyGraphSelector{
             flowIDArray[count] = flowID;
             flowIDArrayIndex.put(flowID, count);
             count++;
+        }
+
+        System.out.println();
+        System.out.println("===========flowIDArray============");
+        for(int x=0 ; x<flowIDArray.length ; x++){
+            System.out.println(flowIDArray[x]);
+        }
+        System.out.println("===========flowIDArray============");
+        System.out.println();
+
+        Map<Integer,List<Double>> bestFitValues = new HashMap<>();
+        Map<Integer,List<Integer>> bestFitTurns = new HashMap<>();
+        for(int flowID : allPaths.keySet()){
+            List<Double> bestFitValue = new ArrayList<>();
+            bestFitValue.add(Double.MAX_VALUE);
+            bestFitValue.add(Double.MAX_VALUE);
+            bestFitValues.put(flowID, bestFitValue);
+
+            List<Integer> bestFitTurn = new ArrayList<>();
+            bestFitTurn.add(0);
+            bestFitTurn.add(0);
+            bestFitTurns.put(flowID, bestFitTurn);
         }
 
         for(int Generation = 0 ; Generation < GenerateMAX ; Generation++){
@@ -238,6 +281,25 @@ public class GeneticAlgo implements TopologyGraphSelector{
                 mPath = mutation(checkGraph, allPaths.get(flowID).get(4));
                 allPaths.get(flowID).put(7, mPath);
             }
+
+                
+            System.out.println();
+            System.out.println("===========dispaly all path============");
+            for(int flowID : allPaths.keySet()){
+                System.out.println("flowID = " + flowID);
+                for(int x : allPaths.get(flowID).keySet()){
+                    if(allPaths.get(flowID).get(x) == null){
+                        continue;
+                    }
+                    System.out.print(x + " = ");
+                    for(int nodeID : allPaths.get(flowID).get(x).getPathNodeIds()){
+                        System.out.print(nodeID + " ");
+                    }
+                    System.out.println();
+                }
+            }
+            System.out.println("===========dispaly all path============");
+            System.out.println();
     
             checkGraph.clear();
             
@@ -245,28 +307,33 @@ public class GeneticAlgo implements TopologyGraphSelector{
             // check all flow path combination Fitness value
             double totalRound = Math.pow(8.0, allPaths.size());
     
-            Map<Integer,List<Double>> bestFitValues = new HashMap<>();
-            Map<Integer,List<Integer>> bestFitTurns = new HashMap<>();
-            for(int flowID : allPaths.keySet()){
-                List<Double> bestFitValue = new ArrayList<>();
-                bestFitValue.add(Double.MAX_VALUE);
-                bestFitValue.add(Double.MAX_VALUE);
-                bestFitValues.put(flowID, bestFitValue);
-    
-                List<Integer> bestFitTurn = new ArrayList<>();
-                bestFitTurn.add(0);
-                bestFitTurn.add(0);
-                bestFitTurns.put(flowID, bestFitTurn);
-            }
+            
+            
     
             for(int i=0 ; i<totalRound ; i++){
-                List<Integer> select = octIntegers(allPaths.size(), i);
-    
                 flowPaths.clear();
+
+                List<Integer> select = octIntegers(allPaths.size(), i);
                 for(int j=0 ; j<select.size() ; j++){
                     flowPaths.put(flowIDArray[j], allPaths.get(flowIDArray[j]).get(select.get(j)));
                 }
-    
+
+                System.out.println("===========brute-force method============");
+                System.out.println("ture to " + i);
+                System.out.println("choose :");
+                for(int x =0 ; x<select.size() ; x ++){
+                    System.out.print(select.get(x) + " ");
+                }
+                System.out.println();
+                for(int flowID : flowPaths.keySet()){
+                    System.out.print("flowID " + flowID + " path : ");
+                    for(int nodeID : flowPaths.get(flowID).getPathNodeIds()){
+                        System.out.print(nodeID + " ");
+                    }
+                    System.out.println();
+                }
+                System.out.println("===========brute-force method============");
+
                 // if has null, skip this round
                 boolean hasNull = false;
                 for(int flowID : flowPaths.keySet()){
@@ -285,14 +352,22 @@ public class GeneticAlgo implements TopologyGraphSelector{
                 checkGraph = Graphs.clone(topologyGraph);
                 formalMethod(checkGraph, flowPaths, flowAR);
     
+                boolean findOverLoad = false;
                 for(int flowID : flowPaths.keySet()){
                     /**
                      * in the formal method, i store "calculated" delay and throughput at the last node of flow
                      */
                     String lastNodeID = Integer.toString(flowPaths.get(flowID).getDestinationNodeId());
                     MultiNode lastNode = checkGraph.getNode(lastNodeID);
+                    if((double)lastNode.getAttribute(Integer.toString(flowID)+"delayOut") == NODE_OVERLOAD){
+                        findOverLoad = true;
+                        break;
+                    }
                     flowDelays.put(flowID, lastNode.getAttribute(Integer.toString(flowID) + "delayOut"));
                     flowThroughputs.put(flowID, lastNode.getAttribute(Integer.toString(flowID) + "minThroughput"));
+                }
+                if(findOverLoad){
+                    continue;
                 }
     
                 flowFits.clear();
@@ -308,6 +383,18 @@ public class GeneticAlgo implements TopologyGraphSelector{
                 if(allFit){
                     // in formal method, need flow Source so we add previoous
                     // here neede remove it
+                    System.out.println("===========Genetic Output============");
+                    System.out.println("find combination can let all path fit");
+                    for(int flowID : flowPaths.keySet()){
+                        System.out.print("flowID = " + flowID + " : ");
+
+                        for(int nodeID : flowPaths.get(flowID).getPathNodeIds()){
+                            System.out.print(nodeID + " ");
+                        }
+                        System.out.println();
+                    }
+                    System.out.println("===========Genetic Output============");
+                    
                     flowPaths.get(1).getPathNodeIds().remove(0);
     
                     handlePathChange(activePaths, flowPaths);
@@ -369,6 +456,19 @@ public class GeneticAlgo implements TopologyGraphSelector{
         for(int j=0 ; j<select.size() ; j++){
             flowPaths.put(flowIDArray[j], allPaths.get(flowIDArray[j]).get(select.get(j)));
         }
+
+
+        System.out.println("===========Genetic Output============");
+        System.out.println("can't find combination let all path fit, choose last generation best combination");
+        for(int flowID : flowPaths.keySet()){
+            System.out.print("flowID = " + flowID + " : ");
+
+            for(int nodeID : flowPaths.get(flowID).getPathNodeIds()){
+                System.out.print(nodeID + " ");
+            }
+            System.out.println();
+        }
+        System.out.println("===========Genetic Output============");
 
         handlePathChange(activePaths, flowPaths);
 
@@ -643,7 +743,7 @@ public class GeneticAlgo implements TopologyGraphSelector{
          * 
          * lamda = combine lamda    <---- see code or paper
          * n = combine n            <---- see code or paper
-         * ===========================================
+         * ============
          * requires attention!!!
          * path.getPathNodeIds() is List<Integer> include Source, ex S,M1,M2,D
          * path.getPath() is String[] "not" include Source, only M1,M2,D NetworkInterfaceCard address
@@ -710,12 +810,14 @@ public class GeneticAlgo implements TopologyGraphSelector{
             double sourceLamda = sourceNode.getAttribute("lamda");
             double sourceN = sourceNode.getAttribute("n");
             double capacity = maxThroughput - sourceLamda*sourceN;
-            System.out.println("===========GeneticAlgo============");
-            System.out.println("sourceLamda = " + sourceLamda);
-            System.out.println("sourceN = " + sourceN);
-            System.out.println("maxThroughput = " + maxThroughput);
-            System.out.println("capacity =  " + capacity);
-            System.out.println("===========GeneticAlgo============");
+            // System.out.println();
+            // System.out.println("===========formalMethod============");
+            // System.out.println("sourceLamda = " + sourceLamda);
+            // System.out.println("sourceN = " + sourceN);
+            // System.out.println("maxThroughput = " + maxThroughput);
+            // System.out.println("capacity =  " + capacity);
+            // System.out.println("===========formalMethod============");
+            // System.out.println();
             if(capacity > 0){
                 String attributeDelayOut = Integer.toString(flowID) + "delayOut";
                 
@@ -725,9 +827,11 @@ public class GeneticAlgo implements TopologyGraphSelector{
                 String attributeMinThroughput = Integer.toString(flowID) + "minThroughput";
                 sourceNode.addAttribute(attributeMinThroughput, minThroughput);
             }else{
-                System.out.println("===========GeneticAlgo============");
+                System.out.println();
+                System.out.println("===========formalMethod============");
                 System.out.println("overload on node: " + sourceNode.getId());
-                System.out.println("===========GeneticAlgo============");
+                System.out.println("===========formalMethod============");
+                System.out.println();
 
                 // continues this for loop
                 // and let fitness value be a speicial value
@@ -746,8 +850,16 @@ public class GeneticAlgo implements TopologyGraphSelector{
             for(int i=0 ; i<pathNodeIDs.size()-1 ; i++){
                 MultiNode preNode = tempGraph.getNode(Integer.toString(pathNodeIDs.get(i)));
                 MultiNode node = tempGraph.getNode(Integer.toString(pathNodeIDs.get(i+1)));
-                boolean failonLink = false;
 
+                // System.out.println();
+                // System.out.println("===========formalMethod============");
+                // System.out.println("Recursive calculate 'node----> neighbor_node  delay");
+                // System.out.println("turn to " + preNode.getId() + " to " + node.getId());
+                // System.out.println("===========formalMethod============");
+                // System.out.println();
+
+
+                boolean failonLink = false;
                 /**
                  * Attention!!!
                  * path.getPathNodeIds() is List<Integer> include Source, ex. {S,M1,M2,D}
@@ -771,6 +883,14 @@ public class GeneticAlgo implements TopologyGraphSelector{
                         }
 
                         double cap = throughput - lamda*n;
+
+                        // System.out.println();
+                        // System.out.println("===========formalMethod============");
+                        // System.out.println("lamda = " + lamda + ", n = " + n);
+                        // System.out.println("link throughput = " + throughput);
+                        // System.out.println("capacity =  " + capacity);
+                        // System.out.println("===========formalMethod============");
+                        // System.out.println();
                         if(cap > 0){
                             String attributeDelayOut = Integer.toString(flowID) + "delayOut";
                             double delay = (flow_n / cap) + delayIn;
@@ -779,9 +899,11 @@ public class GeneticAlgo implements TopologyGraphSelector{
                             String attributeMinThroughput = Integer.toString(flowID) + "minThroughput";
                             node.addAttribute(attributeMinThroughput, minThroughput);
                         }else{
-                            System.out.println("===========GeneticAlgo============");
+                            System.out.println();
+                            System.out.println("===========formalMethod============");
                             System.out.println("overload on link between : " + preNode.getId() + " to " + node.getId());
-                            System.out.println("===========GeneticAlgo============");
+                            System.out.println("===========formalMethod============");
+                            System.out.println();
 
                             // TODO: maitain this case, maybe link can't load so much
                             int lastNodeID = pathNodeIDs.get(pathNodeIDs.size()-1);
@@ -795,7 +917,7 @@ public class GeneticAlgo implements TopologyGraphSelector{
                 }
 
                 if(failonLink){
-                    continue;
+                    break;
                 }
             }
         }

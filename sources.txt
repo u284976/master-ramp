@@ -13,6 +13,7 @@
 ./src/test/sdncontroller/OsRoutingTest.java
 ./src/test/iotos/copyARMap.java
 ./src/test/iotos/GeneticAlgo.java
+./src/test/iotos/callbyRef.java
 ./src/test/iotos/testbatch/SetupMinaTestBatch.java
 ./src/test/iotos/testbatch/SetupGAtest.java
 ./src/test/iotos/testbatch/SetupMeshTestBatch.java
@@ -33,6 +34,7 @@
 ./src/test/iotos/testSender.java
 ./src/test/iotos/testReceiver.java
 ./src/test/iotos/copyPathMap.java
+./src/test/iotos/oct.java
 ./src/test/iotos/graphdisplaytest.java
 ./src/test/iotos/SDNClient.java
 ./src/test/distributedactuator/DistributedActuatorClientTest.java

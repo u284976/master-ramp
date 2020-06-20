@@ -2077,7 +2077,7 @@ public class ControllerClient extends Thread implements ControllerClientInterfac
             for(InetAddress address : addresses){
             
                 Long lastMeasureTime = lastMeasureTimes.get(address);
-                if(lastMeasureTime != null && System.currentTimeMillis() - lastMeasureTime < 3*TIME_INTERVAL){
+                if(lastMeasureTime != null && System.currentTimeMillis() - lastMeasureTime < 2*TIME_INTERVAL){
                     continue;
                 }
                 System.out.println("======================================");

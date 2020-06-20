@@ -44,7 +44,7 @@ def myNetwork():
     net.configureWifiNodes()
 
     info( '*** Add links\n')
-    net.addLink(sta1, sta2)
+    net.addLink(sta1, sta2,bw=5)
     net.addLink(sta1, sta5)
 
     net.addLink(sta2, sta3)
