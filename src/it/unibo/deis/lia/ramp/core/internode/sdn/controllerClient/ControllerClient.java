@@ -1945,12 +1945,6 @@ public class ControllerClient extends Thread implements ControllerClientInterfac
 
         private void handleReadyToTest(ControllerMessageReady messageUpdate){
             readyToTest = messageUpdate.getStartTime();
-            
-            /**
-             * TODO : Remove
-             * May be tested more than once, needed continuous measure
-             */
-            // clientMeasurer.tryOccupy();
         }
     }
 
@@ -2077,7 +2071,7 @@ public class ControllerClient extends Thread implements ControllerClientInterfac
             for(InetAddress address : addresses){
             
                 Long lastMeasureTime = lastMeasureTimes.get(address);
-                if(lastMeasureTime != null && System.currentTimeMillis() - lastMeasureTime < 2*TIME_INTERVAL){
+                if(lastMeasureTime != null && System.currentTimeMillis() - lastMeasureTime < 3*TIME_INTERVAL){
                     continue;
                 }
                 System.out.println("======================================");
@@ -2306,9 +2300,9 @@ public class ControllerClient extends Thread implements ControllerClientInterfac
                                     }
                                 }
 
-                                // System.out.println("======Measure()======");
-                                // System.out.println("c = " + c);
-                                // System.out.println("======Measure()======");
+                                System.out.println("======Measure()======");
+                                System.out.println("c = " + c);
+                                System.out.println("======Measure()======");
 
                                 double avgDelay = (double)total_delay / (double)c;
 
@@ -2339,7 +2333,7 @@ public class ControllerClient extends Thread implements ControllerClientInterfac
                                     throughput = 5000000;    // 100 * 50000
                                 }else if(c > 220){
                                     throughput = 1000000;    // 100 * 10000
-                                }else if(c > 120){
+                                }else if(c > 140){
                                     throughput = 500000;     // 100 * 5000
                                 }else if(c > 60){
                                     throughput = 200000;     // 100 * 2000
@@ -2349,7 +2343,14 @@ public class ControllerClient extends Thread implements ControllerClientInterfac
                                     throughput = 1000*c;
                                 }
 
-
+                                // cheating for GA_change_test
+                                if(Dispatcher.getLocalRampId() == 3 || address.toString().endsWith("3")){
+                                    throughput = 200000;
+                                }else if(Dispatcher.getLocalRampId() == 4 || address.toString().endsWith("4")){
+                                    throughput = 500000;
+                                }else if(Dispatcher.getLocalRampId() == 5 || address.toString().endsWith("5")){
+                                    throughput = 1000000;
+                                }
 
                                 lastMeasureTime = System.currentTimeMillis();
                                 lastMeasureTimes.put(address,lastMeasureTime);

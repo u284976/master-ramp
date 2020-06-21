@@ -217,6 +217,7 @@ public class ControllerService extends Thread {
     private Map<Integer,Integer> flowSources;
     private int countClient;
     private List<Integer> completeTest;
+    private boolean testBatchMobility;
 
     private ControllerService() throws Exception {
         this.serviceSocket = E2EComm.bindPreReceive(PROTOCOL);
@@ -1029,6 +1030,9 @@ public class ControllerService extends Thread {
     public void setCountClient(int countClient) {
         this.countClient = countClient;
     }
+    public void setMobility(boolean mobility){
+        this.testBatchMobility = mobility;
+    }
     public boolean checkTopoComplete(int countEdge){
 
         /**
@@ -1304,22 +1308,26 @@ public class ControllerService extends Thread {
                  * this is the first path request for this flowId, a new path for this
                  * flow is computed and stored in the ControllerService database.
                  */
-                System.out.println("ControllerService: first path request for flow " + flowId + ", selecting a path");
+                // add u284976  for synchronized for selectPath
+                // Logically, all if-else blocks must add this instruction, but i only used this block
+                synchronized(flowPaths){
+                    System.out.println("ControllerService: first path request for flow " + flowId + ", selecting a path");
 
-                newPath = pathSelector.selectPath(clientNodeId, destNodeId, applicationRequirements, flowPaths);
-
-                if(newPath != null) {
-                    long now = System.currentTimeMillis();
-
-                    newPath.setCreationTime(System.currentTimeMillis());
-                    flowPaths.put(flowId, newPath);
-                    flowStartTimes.put(flowId, now);
-                    flowApplicationRequirements.put(flowId, applicationRequirements);
-                    flowPathSelectionMetrics.put(flowId, pathSelectionMetric);
-
-                    // @add u284976 for store flow Source
-                    // Logically, all if-else blocks must add this instruction, but i only used this block
-                    flowSources.put(flowId,clientNodeId);
+                    newPath = pathSelector.selectPath(clientNodeId, destNodeId, applicationRequirements, flowPaths);
+    
+                    if(newPath != null) {
+                        long now = System.currentTimeMillis();
+    
+                        newPath.setCreationTime(System.currentTimeMillis());
+                        flowPaths.put(flowId, newPath);
+                        flowStartTimes.put(flowId, now);
+                        flowApplicationRequirements.put(flowId, applicationRequirements);
+                        flowPathSelectionMetrics.put(flowId, pathSelectionMetric);
+    
+                        // @add u284976 for store flow Source
+                        // Logically, all if-else blocks must add this instruction, but i only used this block
+                        flowSources.put(flowId,clientNodeId);
+                    }
                 }
             } else if (applicationRequirements == null && flowId != GenericPacket.UNUSED_FIELD) {
                 /*
@@ -1814,20 +1822,27 @@ public class ControllerService extends Thread {
                     for(Edge neighborEdge : sourceGraphNode.getEachEdge()){
                         String label = neighborEdge.getAttribute("ui.label");
                         if(label.contains(neighborAddress)){
+
                             double delay = measureResult.get(neighborAddress).get(0);
                             neighborEdge.addAttribute("delay", delay);
+
                             double throughput = measureResult.get(neighborAddress).get(1);
-                            /**
-                             * 100000 -> wired
-                             * 10000 -> wireless ( 40 meters)
-                             */
                             System.out.println(neighborEdge.getId() + ", delay = " + delay + ", throughput = " + throughput);
-                            // if(throughput > 100000){
-                            //     throughput = 100000;
-                            // }else if(throughput > 10000){
-                            //     throughput = 10000;
-                            // }
-                            neighborEdge.addAttribute("throughput", throughput);
+
+                            /**
+                             * if testBatchMobility == false
+                             * means this testbatch only want to test some scenario, not to emulate actual envrioment
+                             * so topology's complete are important need "pretty"
+                             */
+                            if(testBatchMobility == false && neighborEdge.getAttribute("throughput") != null){
+                                if(throughput > (double)neighborEdge.getAttribute("throughput")){
+                                    neighborEdge.addAttribute("throughput", throughput);
+                                }
+                            }else{
+                                neighborEdge.addAttribute("throughput", throughput);
+                            }
+                            
+                            
                         }
                     }
                 }

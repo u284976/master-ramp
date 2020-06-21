@@ -17,7 +17,7 @@ public class SetupGA_Change_Test implements SetupTestBatch{
         return 7;
     }
     public int getNumberOfEdge(){
-        return 8;
+        return 11;
     }
     public int getTestSecond(){
         return 15;
@@ -63,26 +63,26 @@ public class SetupGA_Change_Test implements SetupTestBatch{
         switch (nodeID) {
             case "2":       // send to 6
                 trafficType = TrafficType.FILE_TRANSFER;
-                payloadSize = 1600;
+                payloadSize = 15000;
                 GenPacketPerSeconds = 10;
                 requireDelay = 20.0;
-                requireThroughput = 16000.0;
+                requireThroughput = 150000.0;
                 duration = 100;
                 break;
             case "6":       // send to 2
                 trafficType = TrafficType.FILE_TRANSFER;
-                payloadSize = 1600;
-                GenPacketPerSeconds = 15;
+                payloadSize = 40000;
+                GenPacketPerSeconds = 10;
                 requireDelay = 20.0;
-                requireThroughput = 24000.0;
+                requireThroughput = 400000.0;
                 duration = 100;
                 break;
             case "7":       // send to 2
                 trafficType = TrafficType.FILE_TRANSFER;
-                payloadSize = 800;
-                GenPacketPerSeconds = 30;
+                payloadSize = 40000;
+                GenPacketPerSeconds = 20;
                 requireDelay = 10.0;
-                requireThroughput = 24000.0;
+                requireThroughput = 800000.0;
                 duration = 100;
                 break;
         }

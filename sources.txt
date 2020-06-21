@@ -31,6 +31,7 @@
 ./src/test/iotos/copySourceMap.java
 ./src/test/iotos/SDNController.java
 ./src/test/iotos/iperfTest.java
+./src/test/iotos/multiThreadTest.java
 ./src/test/iotos/CollectNetworkInfoService.java
 ./src/test/iotos/testSender.java
 ./src/test/iotos/testReceiver.java
@@ -44,6 +45,7 @@
 ./src/test/distributedactuator/RonTest.java
 ./src/test/distributedactuator/Sensor2.java
 ./src/test/distributedactuator/Sensor.java
+./src/test/bfs.java
 ./src/it/unibo/deis/lia/ramp/util/Stats.java
 ./src/it/unibo/deis/lia/ramp/util/NodeStats.java
 ./src/it/unibo/deis/lia/ramp/util/rampUtils/RampUtils.java

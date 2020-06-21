@@ -7,6 +7,7 @@ from mn_wifi.cli import CLI
 from mn_wifi.link import wmediumd
 from mn_wifi.wmediumdConnector import interference
 from subprocess import call
+from mininet.term import makeTerms
 
 import threading
 import inspect
@@ -46,9 +47,9 @@ def myNetwork():
     sta5 = net.addStation('sta5', ip='10.0.0.5/24',
                            position='300,100,0', range = 1)
     sta6 = net.addStation('sta6', ip='10.0.0.6/24',
-                           position='400,200,0', range = 1)
+                           position='400,250,0', range = 1)
     sta7 = net.addStation('sta7', ip='10.0.0.7/24',
-                           position='500,200,0', range = 1)
+                           position='400,150,0', range = 1)
 
     info("*** Configuring Propagation Model\n")
     net.setPropagationModel(model="logDistance", exp=3)
@@ -64,10 +65,22 @@ def myNetwork():
     net.addLink(sta2, sta5)
 
     net.addLink(sta3, sta6)
+    net.addLink(sta3, sta7)
 
     net.addLink(sta4, sta6)
+    net.addLink(sta4, sta7)
 
     net.addLink(sta5, sta6)
+    net.addLink(sta5, sta7)
+
+    # net.addLink(sta3, sta6,bw=2)
+    # net.addLink(sta3, sta7,bw=2)
+
+    # net.addLink(sta4, sta6,bw=5)
+    # net.addLink(sta4, sta7,bw=5)
+
+    # net.addLink(sta5, sta6,bw=10)
+    # net.addLink(sta5, sta7,bw=10)
 
     net.addLink(sta6, sta7)
 
@@ -92,23 +105,31 @@ def myNetwork():
 
     sta3.cmd("ifconfig sta3-eth1 10.0.23.3/24")
     sta3.cmd("ifconfig sta3-eth2 10.0.36.3/24")
+    sta3.cmd("ifconfig sta3-eth3 10.0.37.3/24")
     
     sta4.cmd("ifconfig sta4-eth1 10.0.24.4/24")
     sta4.cmd("ifconfig sta4-eth2 10.0.46.4/24")
+    sta4.cmd("ifconfig sta4-eth3 10.0.47.4/24")
 
     sta5.cmd("ifconfig sta5-eth1 10.0.25.5/24")
     sta5.cmd("ifconfig sta5-eth2 10.0.56.5/24")
+    sta5.cmd("ifconfig sta5-eth3 10.0.57.5/24")
 
     sta6.cmd("ifconfig sta6-eth1 10.0.36.6/24")
     sta6.cmd("ifconfig sta6-eth2 10.0.46.6/24")
     sta6.cmd("ifconfig sta6-eth3 10.0.56.6/24")
     sta6.cmd("ifconfig sta6-eth4 10.0.67.6/24")
 
-    sta7.cmd("ifconfig sta7-eth1 10.0.67.7/24")
+    sta7.cmd("ifconfig sta7-eth1 10.0.37.7/24")
+    sta7.cmd("ifconfig sta7-eth2 10.0.47.7/24")
+    sta7.cmd("ifconfig sta7-eth3 10.0.57.7/24")
+    sta7.cmd("ifconfig sta7-eth4 10.0.67.7/24")
+
     
 
 
     CLI.do_execute = execute
+    CLI.do_openXterm = openXterm
     # CLI.do_stopThread = stopThread
     CLI.do_stopTest = stopTest
     CLI(net)
@@ -160,6 +181,21 @@ def stopTest(self, line):
         stop_thread(t)
     for node in self.mn.values():
         node.sendInt()
+
+def openXterm(self, line):
+    term = 'xterm'
+    args = line.split()
+    if not args:
+        error( 'usage: openXterm m n ...\n' )
+    else:
+        for i in range(int(args[0]),int(args[1])+1):
+            arg = 'sta' + str(i)
+            if arg not in self.mn:
+                error( "node '%s' not in network\n" % arg )
+            else:
+                node = self.mn[ arg ]
+                self.mn.terms += makeTerms( [ node ], term = term )
+
 
 if __name__ == '__main__':
     setLogLevel( 'info' )
