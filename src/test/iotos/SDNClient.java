@@ -40,6 +40,8 @@ public class SDNClient{
 
     static Thread listener;
 
+    static int flowID;
+
     static SetupTestBatch testBatch;
 
     public static void main(String[] args){
@@ -199,7 +201,7 @@ public class SDNClient{
             System.out.println("========================================");
             System.out.println("send request to SDNController!!!!!");
             System.out.println("========================================");
-            int flowID = controllerClient.getFlowId(
+            flowID = controllerClient.getFlowId(
                 applicationRequirements,
                 destNodeID,
                 destNodePort,
@@ -286,6 +288,12 @@ public class SDNClient{
             
             System.out.println("========================================");
             System.out.println("Transfer Done!!!!!");
+            System.out.println("finally , use path:");
+            String[] pathArray = controllerClient.getFlowPath(appService.getServerNodeId(), flowID);
+            for(String s : pathArray){
+                System.out.print(s + "  ");
+            }
+            System.out.println();
             System.out.println("========================================");
         }else{
             try {

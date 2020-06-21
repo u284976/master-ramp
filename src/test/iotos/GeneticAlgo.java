@@ -1032,25 +1032,8 @@ public class GeneticAlgo implements TopologyGraphSelector{
                 if(failonLink){
                     break;
                 }
-
-            
-            
             }
-
-
-
-
-
-
-
-
-
-
-
-        }
-
-
-        
+        }        
     }
     
     private void formalMethod(Graph tempGraph, Map<Integer,PathDescriptor> flowPaths,
