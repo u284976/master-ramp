@@ -1,4 +1,4 @@
-package test;
+package test.iotos;
 
 import java.util.ArrayList;
 import java.util.HashMap;
