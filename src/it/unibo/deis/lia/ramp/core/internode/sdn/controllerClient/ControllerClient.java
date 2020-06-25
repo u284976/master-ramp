@@ -2344,13 +2344,13 @@ public class ControllerClient extends Thread implements ControllerClientInterfac
                                 }
 
                                 // cheating for GA_change_test
-                                if(Dispatcher.getLocalRampId() == 3 || address.toString().endsWith("3")){
-                                    throughput = 200000;
-                                }else if(Dispatcher.getLocalRampId() == 4 || address.toString().endsWith("4")){
-                                    throughput = 500000;
-                                }else if(Dispatcher.getLocalRampId() == 5 || address.toString().endsWith("5")){
-                                    throughput = 1000000;
-                                }
+                                // if(Dispatcher.getLocalRampId() == 3 || address.toString().endsWith("3")){
+                                //     throughput = 200000;
+                                // }else if(Dispatcher.getLocalRampId() == 4 || address.toString().endsWith("4")){
+                                //     throughput = 500000;
+                                // }else if(Dispatcher.getLocalRampId() == 5 || address.toString().endsWith("5")){
+                                //     throughput = 1000000;
+                                // }
 
                                 lastMeasureTime = System.currentTimeMillis();
                                 lastMeasureTimes.put(address,lastMeasureTime);

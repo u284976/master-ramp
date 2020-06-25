@@ -64,19 +64,7 @@ public class GeneticAlgo implements TopologyGraphSelector{
         // }
         PathDescriptor tempPath;
         Graph checkGraph;
-        // cheating for GA_change_test
-        if(sourceNodeId == 2){
-            checkGraph = Graphs.clone(topologyGraph);
-            checkGraph.removeNode("4");
-            checkGraph.removeNode("5");
-            // tempPath = new BreadthFirstFlowPathSelector(checkGraph).selectPath(sourceNodeId, destNodeId, null, null);
-            tempPath = new bfs(checkGraph).selectPath(sourceNodeId, destNodeId);
-            checkGraph.clear();
-        }else{
-            // tempPath = new BreadthFirstFlowPathSelector(topologyGraph).selectPath(sourceNodeId, destNodeId, null, null);
-            tempPath = new bfs(topologyGraph).selectPath(sourceNodeId, destNodeId);
-        }
-
+        tempPath = new bfs(topologyGraph).selectPath(sourceNodeId, destNodeId);
 
         checkGraph = Graphs.clone(topologyGraph);
 
