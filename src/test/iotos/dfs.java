@@ -177,13 +177,13 @@ public class dfs {
 
                 // back edge
                 if(finish[i] == -1){
-                    System.out.println("edge with " + i + " is backedge");
+                    // System.out.println("edge with " + i + " is backedge");
                     if(discovery[i] < min_d_backEdge){
                         min_d_backEdge = discovery[i];
                     }
                 }else{
                     // child
-                    System.out.println("edge with " + i + " is child");
+                    // System.out.println("edge with " + i + " is child");
                     if(low[i] < min_low_of_child){
                         min_low_of_child = low[i];
                     }
