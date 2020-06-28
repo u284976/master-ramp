@@ -19,6 +19,7 @@ import it.unibo.deis.lia.ramp.service.management.ServiceDiscovery;
 import it.unibo.deis.lia.ramp.service.management.ServiceManager;
 import it.unibo.deis.lia.ramp.service.management.ServiceResponse;
 import test.iotos.messagetype.timeDataType;
+import test.iotos.testbatch.SetupFinalTest;
 import test.iotos.testbatch.SetupGA_Change_Test;
 import test.iotos.testbatch.SetupGAtest;
 import test.iotos.testbatch.SetupMeshTestBatch;
@@ -47,7 +48,7 @@ public class SDNClient{
     public static void main(String[] args){
         
         // change here to change testBatch
-        testBatch = new SetupGA_Change_Test();
+        testBatch = new SetupFinalTest();
         TestTime = testBatch.getTestBatchTime();
         
         System.out.println("================================");

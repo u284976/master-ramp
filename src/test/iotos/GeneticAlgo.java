@@ -50,13 +50,13 @@ public class GeneticAlgo implements TopologyGraphSelector{
         System.out.println("===========GeneticAlgo============");
 
         List<Integer> articulationPoint = new dfs().findArticulationPoint(topologyGraph);
-        System.out.println("===========dfs============");
+        System.out.println("===========dfs output============");
         System.out.println("articulation Point =");
         for(int i=0 ; i<articulationPoint.size() ; i++){
             System.out.print(articulationPoint.get(i)+" ");
         }
         System.out.println();
-        System.out.println("===========dfs============");
+        System.out.println("===========dfs output============");
 
         // /**
         //  * check first, sourceNode can generate this number of throughput with neighbor

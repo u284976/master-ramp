@@ -98,6 +98,7 @@ public class dfs {
         // for(int i=0 ; i<color.length ; i++){
         //     System.out.print(low[i] + " ");
         // }
+        // System.out.println();
 
         List<Integer> result = new ArrayList<>();
 
@@ -106,24 +107,35 @@ public class dfs {
             result.add(0);
         }
         // if other vertex v has any child u, let low(u) >= discovery(v) , v is articulation point
-        for(int i=1 ; i<adj.length ; i++){
-            for(int j=0 ; j<adj[i].length ; j++){
-
-                if(adj[i][j] == 1){
-
-                    // if child
-                    if(discovery[i] < discovery[j]){
-
-                        // if low(u) >= d(v)
-                        if(low[j] >= discovery[i]){
-                            result.add(i);
-                            break;
-                        }
-                    }
-
+        for(int u=1 ; u<parent.length ; u++){
+            int v = parent[u];
+            if(v == 0){
+                continue;
+            }
+            if(low[u] >= discovery[v]){
+                if(!result.contains(v)){
+                    result.add(v);
                 }
             }
         }
+        // for(int i=1 ; i<adj.length ; i++){
+        //     for(int j=0 ; j<adj[i].length ; j++){
+
+        //         if(adj[i][j] == 1){
+
+        //             // if child
+        //             if(discovery[i] < discovery[j]){
+
+        //                 // if low(u) >= d(v)
+        //                 if(low[j] >= discovery[i]){
+        //                     result.add(i);
+        //                     break;
+        //                 }
+        //             }
+
+        //         }
+        //     }
+        // }
 
         // System.out.println();
         // for(int i=0 ; i<result.size() ; i++){
@@ -158,17 +170,20 @@ public class dfs {
         int min_low_of_child = Integer.MAX_VALUE;
         int min_d_backEdge = Integer.MAX_VALUE;
 
+        // System.out.println("===========dfs===========");
         for(int i=0 ; i < adj[vertex].length ; i++){
             // find child or back edge
             if(adj[vertex][i] == 1 && i != parent[vertex]){
 
                 // back edge
                 if(finish[i] == -1){
+                    System.out.println("edge with " + i + " is backedge");
                     if(discovery[i] < min_d_backEdge){
                         min_d_backEdge = discovery[i];
                     }
                 }else{
                     // child
+                    System.out.println("edge with " + i + " is child");
                     if(low[i] < min_low_of_child){
                         min_low_of_child = low[i];
                     }
@@ -177,6 +192,10 @@ public class dfs {
         }
 
         low[vertex] = Math.min(Math.min(d, min_d_backEdge), min_low_of_child);
+
+        
+        // System.out.println("choose vertex "+ vertex +" low value:" + low[vertex]);
+        // System.out.println("===========dfs===========");
         color[vertex] = 2;
         finish[vertex] = time;
         time++;
