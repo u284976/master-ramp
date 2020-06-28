@@ -181,8 +181,12 @@ public class bfs {
 
             topologyGraph.clear();
             return new PathDescriptor(path.toArray(new String[0]), pathNodeIDs);
-            } catch (Exception e) {
-                return null;
-            }
+
+        } catch (Exception e) {
+            System.out.println("============bfs============");
+            System.out.println("can't found path " + sourceNodeId + " to " + destNodeId);
+            System.out.println("============bfs============");
+            return null;
+        }
     }
 }

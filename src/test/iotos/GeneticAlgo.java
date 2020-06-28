@@ -49,6 +49,15 @@ public class GeneticAlgo implements TopologyGraphSelector{
         System.out.println("receive request by :" + sourceNodeId);
         System.out.println("===========GeneticAlgo============");
 
+        List<Integer> articulationPoint = new dfs().findArticulationPoint(topologyGraph);
+        System.out.println("===========dfs============");
+        System.out.println("articulation Point =");
+        for(int i=0 ; i<articulationPoint.size() ; i++){
+            System.out.print(articulationPoint.get(i)+" ");
+        }
+        System.out.println();
+        System.out.println("===========dfs============");
+
         // /**
         //  * check first, sourceNode can generate this number of throughput with neighbor
         //  */
