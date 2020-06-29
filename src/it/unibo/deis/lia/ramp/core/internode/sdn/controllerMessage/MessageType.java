@@ -17,6 +17,7 @@ public enum MessageType {
     TOPOLOGY_UPDATE,
     TOPOLOGY_LINK_UPDATE,   // add by u284976, update neighbor link's capacity
     READY_TO_TEST,          // add by u284976, controller noticy client "ready to test"
+    PRIORITY_ON_AP_UPDATE,  // add by u284976, controller noticy AP client "flowPriorityOnAP"
     PRIORITY_VALUE_REQUEST,
     MULTICAST_REQUEST,
     MULTICAST_CONTROL,

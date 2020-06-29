@@ -49,15 +49,7 @@ public class GeneticAlgo implements TopologyGraphSelector{
         System.out.println("receive request by :" + sourceNodeId);
         System.out.println("===========GeneticAlgo============");
 
-        List<Integer> articulationPoint = new dfs().findArticulationPoint(topologyGraph);
-        System.out.println("===========dfs output============");
-        System.out.println("articulation Point =");
-        for(int i=0 ; i<articulationPoint.size() ; i++){
-            System.out.print(articulationPoint.get(i)+" ");
-        }
-        System.out.println();
-        System.out.println("===========dfs output============");
-
+        
         // /**
         //  * check first, sourceNode can generate this number of throughput with neighbor
         //  */
@@ -212,6 +204,87 @@ public class GeneticAlgo implements TopologyGraphSelector{
          * 
          * this logical need modify to more general, like "avoid remove edge that connect to articulation point"
          */
+
+        // find articulation point
+        List<Integer> articulationPoints = new dfs().findArticulationPoint(topologyGraph);
+        ControllerService.getInstance().setArticulationPoints(articulationPoints);
+        System.out.println("===========dfs output============");
+        System.out.println("articulation Point =");
+        for(int i=0 ; i<articulationPoints.size() ; i++){
+            System.out.print(articulationPoints.get(i)+" ");
+        }
+        System.out.println();
+        System.out.println("===========dfs output============");
+
+        /**
+         * cut path, if path through articulation point(AP)
+         * 
+         * ex. A---B---C---D---E   C,D are AP
+         * 
+         * so follow up GeneticAlgo will only calculate A--->C 's path
+         * 
+         */
+        Map<Integer,PathDescriptor> flowRearPath = new HashMap<>();
+        Map<Integer,Integer> flowPriorityOnAp = new HashMap<>();
+        for(int flowID : flowPaths.keySet()){
+            String[] path = flowPaths.get(flowID).getPath();
+            List<Integer> pathNodeIDs = flowPaths.get(flowID).getPathNodeIds();
+            // ex find through     A---B---"C---D"---E
+            //  path : B,C,D,E (address)
+            //  pathNodeIDs : A,B,C,D,E
+            for(int i=0 ; i<pathNodeIDs.size()-1 ; i++){
+                if(articulationPoints.contains(pathNodeIDs.get(i)) && articulationPoints.contains(pathNodeIDs.get(i+1))){
+                    
+
+                    List<String> frontPath = new ArrayList<>();
+                    List<Integer> frontPathNodeIDs = new ArrayList<>();
+                    List<String> rearPath = new ArrayList<>();
+                    List<Integer> rearPathIDs = new ArrayList<>();
+                    /**
+                     * still remeber path.size+1 = pathNodeIDs
+                     * so we protection this relation on frontPath and frontPathIDs
+                     * 
+                     * ex. 
+                     * frontPath:           B,C  (address)
+                     * frontPathNodeIDs     A,B,C
+                     * rearPath             D,E  (address)
+                     * rearPathIDs          D,E
+                     */
+                    frontPathNodeIDs.add(pathNodeIDs.get(0));
+                    for(int j=0 ; j<i ; j++){
+                        frontPath.add(path[j]);
+                        frontPathNodeIDs.add(pathNodeIDs.get(j+1));
+                    }
+                    for(int j=i ; j<pathNodeIDs.size() ; j++){
+                        rearPath.add(path[j]);
+                        rearPathIDs.add(pathNodeIDs.get(j+1));
+                    }
+
+                    PathDescriptor front = new PathDescriptor(frontPath.toArray(new String[0]), frontPathNodeIDs);
+                    flowPaths.put(flowID, front);
+                    
+                    PathDescriptor rear = new PathDescriptor(rearPath.toArray(new String[0]), rearPathIDs);
+                    flowRearPath.put(flowID, rear);
+
+
+
+                    // give flowID priority with application Requirement
+                    if(flowAR.get(flowID).getTrafficType().equals(TrafficType.VIDEO_STREAM)){
+                        flowPriorityOnAp.put(flowID, 1);
+                    }else if(flowAR.get(flowID).getTrafficType().equals(TrafficType.FILE_TRANSFER)){
+                        flowPriorityOnAp.put(flowID, 2);
+                    }else{
+                        // if any in the future
+                        flowPriorityOnAp.put(flowID, 3);
+                    }
+                    ControllerService.getInstance().setflowPriorityOnAP(flowPriorityOnAp);
+
+                    break;
+                }
+            }
+        }
+
+
 
         //  store all path
         Map<Integer,Map<Integer,PathDescriptor>> allPaths = new HashMap<>();
@@ -426,38 +499,6 @@ public class GeneticAlgo implements TopologyGraphSelector{
     
                 checkGraph = Graphs.clone(topologyGraph);
 
-                /**
-                 * TODO : remove
-                 */
-                int c = 0;
-                for(int flowID : flowPaths.keySet()){
-                    List<Integer> temp1 = new ArrayList<>();
-                    temp1.add(2);
-                    temp1.add(3);
-                    temp1.add(6);
-                    List<Integer> temp2 = new ArrayList<>();
-                    temp2.add(6);
-                    temp2.add(4);
-                    temp2.add(2);
-                    List<Integer> temp3 = new ArrayList<>();
-                    temp3.add(7);
-                    temp3.add(5);
-                    temp3.add(2);
-                    if(flowPaths.get(flowID).getPathNodeIds().equals(temp1)){
-                        c++;
-                    }
-                    if(flowPaths.get(flowID).getPathNodeIds().equals(temp2)){
-                        c++;
-                    }
-                    if(flowPaths.get(flowID).getPathNodeIds().equals(temp3)){
-                        c++;
-                    }
-                }
-                if(c != 3){
-                    continue;
-                }
-
-
                 formalMethod2(checkGraph, flowPaths, flowAR);
     
                 boolean findOverLoad = false;
@@ -489,8 +530,32 @@ public class GeneticAlgo implements TopologyGraphSelector{
                     }
                 }
                 if(allFit){
-                    // in formal method, need flow Source so we add previoous
-                    // here neede remove it
+
+                    // recovery rearPath
+                    for(int flowID : flowPaths.keySet()){
+
+                        if(flowRearPath.get(flowID) != null){
+                            List<String> totalPath = new ArrayList<>();
+                            List<Integer> totalPathNodeIDs = new ArrayList<>();
+
+                            for(int nodeID=0 ; nodeID<flowPaths.get(flowID).getPath().length ; nodeID++){
+                                totalPath.add(flowPaths.get(flowID).getPath()[nodeID]);
+                                totalPathNodeIDs.add(flowPaths.get(flowID).getPathNodeIds().get(nodeID));
+                            }
+                            totalPathNodeIDs.add(flowPaths.get(flowID).getPathNodeIds().get(flowPaths.get(flowID).getPath().length));
+
+                            for(int nodeID=0 ; nodeID<flowRearPath.get(flowID).getPath().length ; nodeID++){
+                                totalPath.add(flowRearPath.get(flowID).getPath()[nodeID]);
+                                totalPathNodeIDs.add(flowRearPath.get(flowID).getPathNodeIds().get(nodeID));
+                            }
+
+                            PathDescriptor total = new PathDescriptor(totalPath.toArray(new String[0]), totalPathNodeIDs);
+                            flowPaths.put(flowID, total);
+                        }
+                    }
+
+
+                    
                     System.out.println("===========Genetic Output============");
                     System.out.println("find combination can let all path fit");
                     for(int flowID : flowPaths.keySet()){
@@ -502,7 +567,9 @@ public class GeneticAlgo implements TopologyGraphSelector{
                         System.out.println();
                     }
                     System.out.println("===========Genetic Output============");
-                    
+
+                    // in formal method, need flow Source so we add previoous
+                    // here neede remove it
                     flowPaths.get(1).getPathNodeIds().remove(0);
     
                     handlePathChange(activePaths, flowPaths);
@@ -574,6 +641,29 @@ public class GeneticAlgo implements TopologyGraphSelector{
             flowPaths.put(flowIDArray[j], allPaths.get(flowIDArray[j]).get(select.get(j)));
         }
 
+        // recovery rearPath
+        for(int flowID : flowPaths.keySet()){
+
+            if(flowRearPath.get(flowID) != null){
+                List<String> totalPath = new ArrayList<>();
+                List<Integer> totalPathNodeIDs = new ArrayList<>();
+
+                for(int nodeID=0 ; nodeID<flowPaths.get(flowID).getPath().length ; nodeID++){
+                    totalPath.add(flowPaths.get(flowID).getPath()[nodeID]);
+                    totalPathNodeIDs.add(flowPaths.get(flowID).getPathNodeIds().get(nodeID));
+                }
+                totalPathNodeIDs.add(flowPaths.get(flowID).getPathNodeIds().get(flowPaths.get(flowID).getPath().length));
+
+                for(int nodeID=0 ; nodeID<flowRearPath.get(flowID).getPath().length ; nodeID++){
+                    totalPath.add(flowRearPath.get(flowID).getPath()[nodeID]);
+                    totalPathNodeIDs.add(flowRearPath.get(flowID).getPathNodeIds().get(nodeID));
+                }
+
+                PathDescriptor total = new PathDescriptor(totalPath.toArray(new String[0]), totalPathNodeIDs);
+                flowPaths.put(flowID, total);
+            }
+        }
+
 
         System.out.println("===========Genetic Output============");
         System.out.println("request by node:" + sourceNodeId);
@@ -628,6 +718,10 @@ public class GeneticAlgo implements TopologyGraphSelector{
             String[] noticeSourceDest = Resolver.getInstance(false).resolveBlocking(noticeSourceID, 5 * 1000).get(0).getPath();
             MultiNode noticeNode = topologyGraph.getNode(Integer.toString(noticeSourceID));
             int noticeNodePort = noticeNode.getAttribute("port");
+
+            // in formal method, need flow Source so we add previoous
+            // here neede remove it
+            flowPaths.get(flowID).getPathNodeIds().remove(0);
 
             List<PathDescriptor> newPaths = new ArrayList<>();
             newPaths.add(flowPaths.get(flowID));

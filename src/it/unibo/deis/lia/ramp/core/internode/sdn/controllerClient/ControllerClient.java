@@ -1498,6 +1498,10 @@ public class ControllerClient extends Thread implements ControllerClientInterfac
                         case READY_TO_TEST:
                             handleReadyToTest((ControllerMessageReady) controllerMessage);
                             break;
+                        // add u284976
+                        case PRIORITY_ON_AP_UPDATE:
+                            handlePriorityOnAp((ControllerMessageUpdate) controllerMessage);
+                            break;
                         default:
                             break;
                     }
@@ -1945,6 +1949,17 @@ public class ControllerClient extends Thread implements ControllerClientInterfac
 
         private void handleReadyToTest(ControllerMessageReady messageUpdate){
             readyToTest = messageUpdate.getStartTime();
+        }
+
+        private void handlePriorityOnAp(ControllerMessageUpdate messageUpdate){
+            Map<Integer,Integer> flowPriorityOnAP = messageUpdate.getFlowPriorities();
+            
+            /**
+             * TODO : 
+             * 1. deactive data plane rule
+             * 2. enactive data plane rule
+             * 
+             */
         }
     }
 

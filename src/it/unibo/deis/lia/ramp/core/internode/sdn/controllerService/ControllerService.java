@@ -218,6 +218,8 @@ public class ControllerService extends Thread {
     private int countClient;
     private List<Integer> completeTest;
     private boolean testBatchMobility;
+    private Map<Integer,Integer> flowPriorityOnAP;
+    private List<Integer> articulationPoints;
 
     private ControllerService() throws Exception {
         this.serviceSocket = E2EComm.bindPreReceive(PROTOCOL);
@@ -243,6 +245,8 @@ public class ControllerService extends Thread {
         // @adder u284976 initial flowSources
         this.flowSources = new ConcurrentHashMap<>();
         this.completeTest = new ArrayList<>();
+        this.flowPriorityOnAP = new HashMap<>();
+        this.articulationPoints = new ArrayList<>();
 
         this.flowPriorities = new ConcurrentHashMap<>();
         this.flowPrioritySelector = new TrafficTypeFlowPrioritySelector();
@@ -1022,6 +1026,22 @@ public class ControllerService extends Thread {
      */
     public Map<Integer,Integer> getflowSources(){
         return flowSources;
+    }
+    /**
+     * add u284976
+     * for pathSelect to get flowPriorityOnAP
+     */
+    public Map<Integer,Integer> getflowPriorityOnAP(){
+        return flowPriorityOnAP;
+    }
+    public void setflowPriorityOnAP(Map<Integer,Integer> newSet){
+        this.flowPriorityOnAP = newSet;
+    }
+    public List<Integer> getArticulationPoint(){
+        return articulationPoints;
+    }
+    public void setArticulationPoints(List<Integer> aps){
+        this.articulationPoints = aps;
     }
     /**
      * @adder u284976
@@ -2889,6 +2909,24 @@ public class ControllerService extends Thread {
             }
         }
 
+        // add u284976
+        private void sendFlowPriorityOnAPUpdate() {
+            List<Integer> aps = getArticulationPoint();
+            for(int nodeID : aps){
+                Node clientNode = topologyGraph.getNode(Integer.toString(nodeID));
+                
+                ControllerMessageUpdate updateMessage = new ControllerMessageUpdate(MessageType.PRIORITY_ON_AP_UPDATE, ControllerMessage.UNUSED_FIELD, null, null, null, null, null, flowPriorityOnAP, null, null, null);
+                String[] clientDest = Resolver.getInstance(false).resolveBlocking(nodeID, 5 * 1000).get(0).getPath();
+                int clientPort = clientNode.getAttribute("port");
+                try {
+                    E2EComm.sendUnicast(clientDest, nodeID, clientPort, PROTOCOL, CONTROL_FLOW_ID, E2EComm.serialize(updateMessage));
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+            
+        }
+
         private void update() {
             updateTopology();
             updateFlows();
@@ -2899,6 +2937,7 @@ public class ControllerService extends Thread {
                 sendFlowPrioritiesUpdate();
 
             // adder @u284976
+            sendFlowPriorityOnAPUpdate();
             // System.out.println("==================");
             // System.out.println("==================");
             // int i=0;
