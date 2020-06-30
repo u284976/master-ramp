@@ -49,7 +49,7 @@ public class GeneticPacketForward implements DataPlaneForwarder{
     
     private static GeneticPacketForward gpf = null;
 
-    private static Map<Integer,Integer> flowPriority;
+    private static Map<Integer,Integer> flowPrioritys;
 
 
 
@@ -82,7 +82,7 @@ public class GeneticPacketForward implements DataPlaneForwarder{
             System.out.println("GeneticPacketForward starting...");
             System.out.println("==========GeneticPacketForward==========");
         }
-        flowPriority = flowPriorityOnAP;
+        flowPrioritys = flowPriorityOnAP;
 
         return gpf;
     }
@@ -97,18 +97,11 @@ public class GeneticPacketForward implements DataPlaneForwarder{
     }
 
 	public void receivedUdpUnicastPacket(UnicastPacket up){
-        if (controllerClient == null) {
-            controllerClient = ((ControllerClientInterface) ComponentLocator.getComponent(ComponentType.CONTROLLER_CLIENT));
-        }
 
-        /*
-         * Check if the current packet contains a valid flowId and has to be
-         * processed according to the SDN paradigm
-         */
         int flowId = up.getFlowId();
 
-        if (flowId != GenericPacket.UNUSED_FIELD && flowId != CONTROL_FLOW_ID && up.getDestNodeId() != Dispatcher.getLocalRampId()) {
-            int flowPriority = controllerClient.getFlowPriority(flowId);
+        if (flowPrioritys.containsKey(flowId) && up.getDestNodeId() != Dispatcher.getLocalRampId()) {
+            int flowPriority = flowPrioritys.get(flowId);
 
             NetworkInterface nextSendNetworkInterface = getNextSendNetworkInterface(up.getDest()[up.getCurrentHop()]);
             /*
@@ -133,7 +126,6 @@ public class GeneticPacketForward implements DataPlaneForwarder{
                     priorityFlowIdsSentPackets.put(flowId, 1);
                     this.prioritiesFlowIdsSentPackets.put(flowPriority, priorityFlowIdsSentPackets);
                 }
-                System.out.println("MultipleFlowsMultiplePrioritiesForwarder: packet " + up.getPacketId() + " with flowId " + flowId + " is the first to reach the channel, no changes made to it");
             }
             /*
              * If the packet has a priority value, get the elapsed time since the last send start

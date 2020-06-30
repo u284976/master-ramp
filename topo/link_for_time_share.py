@@ -15,6 +15,14 @@ import ctypes
 import time
 
 
+"""
+testbatch for SetupTimeShare.java
+
+(need let GA first path fail to) find articulation point
+and cut path
+
+"""
+
 def myNetwork():
 
     net = Mininet_wifi(topo=None,

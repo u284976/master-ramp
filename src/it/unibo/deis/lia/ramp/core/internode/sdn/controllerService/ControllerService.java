@@ -1322,15 +1322,14 @@ public class ControllerService extends Thread {
                 pathSelectionMetric = defaultPathSelectionMetric;
             }
 
-            if (applicationRequirements != null && flowId != GenericPacket.UNUSED_FIELD) {
-                /*
-                 * If applicationRequirements is not null and the flowId exists
-                 * this is the first path request for this flowId, a new path for this
-                 * flow is computed and stored in the ControllerService database.
-                 */
-                // add u284976  for synchronized for selectPath
-                // Logically, all if-else blocks must add this instruction, but i only used this block
-                synchronized(flowPaths){
+            // add u284976  for synchronized for selectPath
+            synchronized(flowPaths){
+                if (applicationRequirements != null && flowId != GenericPacket.UNUSED_FIELD) {
+                    /*
+                    * If applicationRequirements is not null and the flowId exists
+                    * this is the first path request for this flowId, a new path for this
+                    * flow is computed and stored in the ControllerService database.
+                    */
                     System.out.println("ControllerService: first path request for flow " + flowId + ", selecting a path");
 
                     newPath = pathSelector.selectPath(clientNodeId, destNodeId, applicationRequirements, flowPaths);
@@ -1352,64 +1351,63 @@ public class ControllerService extends Thread {
                             flowPriorityOnAP.remove(1);
                         }
                     }
-                }
-            } else if (applicationRequirements == null && flowId != GenericPacket.UNUSED_FIELD) {
-                /*
-                 * If applicationRequirements is null and the flowId exists, the time-to-live of the previous
-                 * path for the flow has expired, if the duration hasn't expired too a new path is selected.
-                 */
-                if (flowPaths.containsKey(flowId)) {
-                    System.out.println("ControllerService: new path request for flow " + flowId + ", the flow is still valid, selecting a new path");
-                    if (pathSelectionMetric == null) {
-                        /*
-                         * If not specified it is used the pathSelectionMetric used
-                         * fot the previous path computation.
-                         */
-                        PathSelectionMetric savedPathSelectionMetric = flowPathSelectionMetrics.get(flowId);
-                        pathSelector = getApplicationLevelRoutingTopologyGraphSelector(savedPathSelectionMetric);
-                    } else {
-                        flowPathSelectionMetrics.put(flowId, pathSelectionMetric);
-                    }
+                } else if (applicationRequirements == null && flowId != GenericPacket.UNUSED_FIELD) {
+                    /*
+                    * If applicationRequirements is null and the flowId exists, the time-to-live of the previous
+                    * path for the flow has expired, if the duration hasn't expired too a new path is selected.
+                    */
+                    if (flowPaths.containsKey(flowId)) {
+                        System.out.println("ControllerService: new path request for flow " + flowId + ", the flow is still valid, selecting a new path");
+                        if (pathSelectionMetric == null) {
+                            /*
+                            * If not specified it is used the pathSelectionMetric used
+                            * fot the previous path computation.
+                            */
+                            PathSelectionMetric savedPathSelectionMetric = flowPathSelectionMetrics.get(flowId);
+                            pathSelector = getApplicationLevelRoutingTopologyGraphSelector(savedPathSelectionMetric);
+                        } else {
+                            flowPathSelectionMetrics.put(flowId, pathSelectionMetric);
+                        }
 
+                        newPath = pathSelector.selectPath(clientNodeId, destNodeId, null, flowPaths);
+
+                        if(newPath != null) {
+                            flowPaths.put(flowId, newPath);
+                            flowStartTimes.put(flowId, System.currentTimeMillis());
+                        }
+                    } else
+                        System.out.println("ControllerService: new path request for flow " + flowId + ", but the flow isn't valid anymore, sending null path");
+                } else {
+                    /*
+                    * If applicationRequirements is null and the flowId doesn't exist, this PATH_REQUEST is sent
+                    * by someone that wants only to know the path from a source to a destination according to a
+                    * specified PathSelectionMetric. This path won't be stored in the database since it is not
+                    * associated to any flowId.
+                    */
+                    System.out.println("ControllerService: new path request, selecting a new path");
                     newPath = pathSelector.selectPath(clientNodeId, destNodeId, null, flowPaths);
-
-                    if(newPath != null) {
-                        flowPaths.put(flowId, newPath);
-                        flowStartTimes.put(flowId, System.currentTimeMillis());
-                    }
-                } else
-                    System.out.println("ControllerService: new path request for flow " + flowId + ", but the flow isn't valid anymore, sending null path");
-            } else {
-                /*
-                 * If applicationRequirements is null and the flowId doesn't exist, this PATH_REQUEST is sent
-                 * by someone that wants only to know the path from a source to a destination according to a
-                 * specified PathSelectionMetric. This path won't be stored in the database since it is not
-                 * associated to any flowId.
-                 */
-                System.out.println("ControllerService: new path request, selecting a new path");
-                newPath = pathSelector.selectPath(clientNodeId, destNodeId, null, flowPaths);
-            }
-
-            if (newPath != null) {
-                for (int i = 0; i < newPath.getPath().length; i++) {
-                    System.out.println("ControllerService: new flow path address " + i + ", " + newPath.getPath()[i]);
                 }
-            } else {
-                System.out.println("ControllerService: no valid path has been found, sending null path");
-            }
 
-            List<PathDescriptor> newPaths = new ArrayList<>();
-            newPaths.add(newPath);
-            ControllerMessageResponse responseMessage = new ControllerMessageResponse(MessageType.PATH_RESPONSE, ControllerMessage.UNUSED_FIELD, newPaths);
-            try {
-                /*
-                 * Send the response message using the inverted source path
-                 */
-                E2EComm.sendUnicast(clientDest, clientNodeId, requestMessage.getClientPort(), PROTOCOL, CONTROL_FLOW_ID, E2EComm.serialize(responseMessage));
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
+                if (newPath != null) {
+                    for (int i = 0; i < newPath.getPath().length; i++) {
+                        System.out.println("ControllerService: new flow path address " + i + ", " + newPath.getPath()[i]);
+                    }
+                } else {
+                    System.out.println("ControllerService: no valid path has been found, sending null path");
+                }
 
+                List<PathDescriptor> newPaths = new ArrayList<>();
+                newPaths.add(newPath);
+                ControllerMessageResponse responseMessage = new ControllerMessageResponse(MessageType.PATH_RESPONSE, ControllerMessage.UNUSED_FIELD, newPaths);
+                try {
+                    /*
+                    * Send the response message using the inverted source path
+                    */
+                    E2EComm.sendUnicast(clientDest, clientNodeId, requestMessage.getClientPort(), PROTOCOL, CONTROL_FLOW_ID, E2EComm.serialize(responseMessage));
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
             /*
              * TODO Remove me
              */

@@ -1,12 +1,14 @@
 #!/usr/bin/python
 
-from mininet.log import setLogLevel, info
+from mininet.log import setLogLevel, info, error
 from mn_wifi.net import Mininet_wifi
 from mn_wifi.node import Station, OVSKernelAP
 from mn_wifi.cli import CLI
 from mn_wifi.link import wmediumd
 from mn_wifi.wmediumdConnector import interference
 from subprocess import call
+
+from mininet.term import makeTerms
 
 import threading
 import inspect
@@ -135,7 +137,7 @@ def myNetwork():
 
     sta11.cmd("ifconfig sta11-eth1 10.0.119.11/24")
     
-    
+    CLI.do_openXterm = openXterm
     CLI.do_execute = execute
     CLI.do_stopTest = stopTest
     CLI(net)
@@ -187,6 +189,24 @@ def stopTest(self, line):
         stop_thread(t)
     for node in self.mn.values():
         node.sendInt()
+
+
+
+
+def openXterm(self, line):
+    term = 'xterm'
+    args = line.split()
+    if not args:
+        error( 'usage: openXterm m n ...\n' )
+    else:
+        for i in range(int(args[0]),int(args[1])+1):
+            arg = 'sta' + str(i)
+            if arg not in self.mn:
+                error( "node '%s' not in network\n" % arg )
+            else:
+                node = self.mn[ arg ]
+                self.mn.terms += makeTerms( [ node ], term = term )
+
 
 if __name__ == '__main__':
     setLogLevel( 'info' )

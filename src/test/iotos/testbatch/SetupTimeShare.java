@@ -3,6 +3,9 @@ package test.iotos.testbatch;
 import it.unibo.deis.lia.ramp.core.internode.sdn.applicationRequirements.ApplicationRequirements;
 import it.unibo.deis.lia.ramp.core.internode.sdn.applicationRequirements.TrafficType;
 
+/**
+ * use topo : link_for_time_share.py
+ */
 public class SetupTimeShare implements SetupTestBatch {
 
     public String getTestBatchName(){

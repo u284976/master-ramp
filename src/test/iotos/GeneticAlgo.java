@@ -169,25 +169,24 @@ public class GeneticAlgo implements TopologyGraphSelector{
             }
         }
 
-        // cheating for test link
-        // if(allFit){
-        //     // in formal method, will modify the flowPath (add source into the pathNodeID),
-        //     // so neede remove it
-        //     System.out.println("===========Genetic Output============");
-        //     System.out.println("request by node:" + sourceNodeId);
-        //     System.out.println("find path at first BFS path, don't need to change other path");
-        //     for(int nodeID : tempPath.getPathNodeIds()){
-        //         System.out.print(nodeID+" ");
-        //     }
-        //     System.out.println();
-        //     System.out.println("===========Genetic Output============");
-        //     List<Integer> pathNodeID = tempPath.getPathNodeIds();
-        //     pathNodeID.remove(0);
+        if(allFit){
+            // in formal method, will modify the flowPath (add source into the pathNodeID),
+            // so neede remove it
+            System.out.println("===========Genetic Output============");
+            System.out.println("request by node:" + sourceNodeId);
+            System.out.println("find path at first BFS path, don't need to change other path");
+            for(int nodeID : tempPath.getPathNodeIds()){
+                System.out.print(nodeID+" ");
+            }
+            System.out.println();
+            System.out.println("===========Genetic Output============");
+            List<Integer> pathNodeID = tempPath.getPathNodeIds();
+            pathNodeID.remove(0);
 
-        //     checkGraph.clear();
-        //     assert tempPath.getPath().length == tempPath.getPathNodeIds().size();
-        //     return tempPath;
-        // }
+            checkGraph.clear();
+            assert tempPath.getPath().length == tempPath.getPathNodeIds().size();
+            return tempPath;
+        }
 
         System.out.println();
         System.out.println("===========GeneticAlgo============");
