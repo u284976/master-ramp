@@ -53,6 +53,7 @@ import it.unibo.deis.lia.ramp.util.NetworkInterfaceStats;
 import it.unibo.deis.lia.ramp.util.NodeStats;
 import test.iotos.ClientMeasurer;
 import test.iotos.ControllerMessageReady;
+import test.iotos.GeneticPacketForward;
 import test.iotos.messagetype.MeasureMessage;
 import test.iotos.messagetype.timeDataType;
 
@@ -1953,13 +1954,8 @@ public class ControllerClient extends Thread implements ControllerClientInterfac
 
         private void handlePriorityOnAp(ControllerMessageUpdate messageUpdate){
             Map<Integer,Integer> flowPriorityOnAP = messageUpdate.getFlowPriorities();
-            
-            /**
-             * TODO : 
-             * 1. deactive data plane rule
-             * 2. enactive data plane rule
-             * 
-             */
+
+            GeneticPacketForward.getInstance(flowPriorityOnAP, routingDataPlaneForwarder);
         }
     }
 

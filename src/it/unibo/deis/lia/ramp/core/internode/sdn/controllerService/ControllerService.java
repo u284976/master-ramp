@@ -1347,6 +1347,10 @@ public class ControllerService extends Thread {
                         // @add u284976 for store flow Source
                         // Logically, all if-else blocks must add this instruction, but i only used this block
                         flowSources.put(flowId,clientNodeId);
+                        if(flowPriorityOnAP.get(1) != null){
+                            flowPriorityOnAP.put(flowId, flowPriorityOnAP.get(1));
+                            flowPriorityOnAP.remove(1);
+                        }
                     }
                 }
             } else if (applicationRequirements == null && flowId != GenericPacket.UNUSED_FIELD) {
@@ -2912,6 +2916,19 @@ public class ControllerService extends Thread {
         // add u284976
         private void sendFlowPriorityOnAPUpdate() {
             List<Integer> aps = getArticulationPoint();
+
+            // System.out.println("***********debug***********");
+            // System.out.println("ap = ");
+            // for(int i=0 ; i<aps.size() ; i++){
+            //     System.out.print(aps.get(i) + " ");
+            // }
+            // System.out.println();
+            // System.out.println("flow priority on AP");
+            // for(int flowID : flowPriorityOnAP.keySet()){
+            //     System.out.println(flowID +" "+ flowPriorityOnAP.get(flowID));
+            // }
+            // System.out.println("***********debug***********");
+
             for(int nodeID : aps){
                 Node clientNode = topologyGraph.getNode(Integer.toString(nodeID));
                 

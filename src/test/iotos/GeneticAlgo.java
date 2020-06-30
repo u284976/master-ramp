@@ -168,24 +168,26 @@ public class GeneticAlgo implements TopologyGraphSelector{
                 allFit = false;
             }
         }
-        if(allFit){
-            // in formal method, will modify the flowPath (add source into the pathNodeID),
-            // so neede remove it
-            System.out.println("===========Genetic Output============");
-            System.out.println("request by node:" + sourceNodeId);
-            System.out.println("find path at first BFS path, don't need to change other path");
-            for(int nodeID : tempPath.getPathNodeIds()){
-                System.out.print(nodeID+" ");
-            }
-            System.out.println();
-            System.out.println("===========Genetic Output============");
-            List<Integer> pathNodeID = tempPath.getPathNodeIds();
-            pathNodeID.remove(0);
 
-            checkGraph.clear();
-            assert tempPath.getPath().length == tempPath.getPathNodeIds().size();
-            return tempPath;
-        }
+        // cheating for test link
+        // if(allFit){
+        //     // in formal method, will modify the flowPath (add source into the pathNodeID),
+        //     // so neede remove it
+        //     System.out.println("===========Genetic Output============");
+        //     System.out.println("request by node:" + sourceNodeId);
+        //     System.out.println("find path at first BFS path, don't need to change other path");
+        //     for(int nodeID : tempPath.getPathNodeIds()){
+        //         System.out.print(nodeID+" ");
+        //     }
+        //     System.out.println();
+        //     System.out.println("===========Genetic Output============");
+        //     List<Integer> pathNodeID = tempPath.getPathNodeIds();
+        //     pathNodeID.remove(0);
+
+        //     checkGraph.clear();
+        //     assert tempPath.getPath().length == tempPath.getPathNodeIds().size();
+        //     return tempPath;
+        // }
 
         System.out.println();
         System.out.println("===========GeneticAlgo============");
@@ -233,9 +235,8 @@ public class GeneticAlgo implements TopologyGraphSelector{
             //  path : B,C,D,E (address)
             //  pathNodeIDs : A,B,C,D,E
             for(int i=0 ; i<pathNodeIDs.size()-1 ; i++){
+                
                 if(articulationPoints.contains(pathNodeIDs.get(i)) && articulationPoints.contains(pathNodeIDs.get(i+1))){
-                    
-
                     List<String> frontPath = new ArrayList<>();
                     List<Integer> frontPathNodeIDs = new ArrayList<>();
                     List<String> rearPath = new ArrayList<>();
@@ -255,7 +256,7 @@ public class GeneticAlgo implements TopologyGraphSelector{
                         frontPath.add(path[j]);
                         frontPathNodeIDs.add(pathNodeIDs.get(j+1));
                     }
-                    for(int j=i ; j<pathNodeIDs.size() ; j++){
+                    for(int j=i ; j<pathNodeIDs.size()-1 ; j++){
                         rearPath.add(path[j]);
                         rearPathIDs.add(pathNodeIDs.get(j+1));
                     }
@@ -265,8 +266,6 @@ public class GeneticAlgo implements TopologyGraphSelector{
                     
                     PathDescriptor rear = new PathDescriptor(rearPath.toArray(new String[0]), rearPathIDs);
                     flowRearPath.put(flowID, rear);
-
-
 
                     // give flowID priority with application Requirement
                     if(flowAR.get(flowID).getTrafficType().equals(TrafficType.VIDEO_STREAM)){
@@ -310,22 +309,25 @@ public class GeneticAlgo implements TopologyGraphSelector{
 
             // PathDescriptor secondPath = new BreadthFirstFlowPathSelector(checkGraph).selectPath(path.getPathNodeIds().get(0), path.getDestinationNodeId(), null, null);
             PathDescriptor secondPath = new bfs(checkGraph).selectPath(path.getPathNodeIds().get(0), path.getDestinationNodeId());
-            // add source to pathNodeID like previous do
-            secondPath.getPathNodeIds().add(0,flowSources.get(flowID));
-            // put second path as another mother Gene
-            fps.put(1, secondPath);
 
-            System.out.println();
-            System.out.println("===========GeneticAlgo============");
-            System.out.println("find second path to flowID " + flowID);
-            if(secondPath!=null){
-                for(int nodeID : secondPath.getPathNodeIds()){
-                    System.out.print(nodeID + " ");
+            if(secondPath.getPath().length != 0){
+                // add source to pathNodeID like previous do
+                secondPath.getPathNodeIds().add(0,flowSources.get(flowID));
+                // put second path as another mother Gene
+                fps.put(1, secondPath);
+
+                System.out.println();
+                System.out.println("===========GeneticAlgo============");
+                System.out.println("find second path to flowID " + flowID);
+                if(secondPath!=null){
+                    for(int nodeID : secondPath.getPathNodeIds()){
+                        System.out.print(nodeID + " ");
+                    }
                 }
+                System.out.println();
+                System.out.println("===========GeneticAlgo============");
+                System.out.println();
             }
-            System.out.println();
-            System.out.println("===========GeneticAlgo============");
-            System.out.println();
             
             allPaths.put(flowID, fps);
             checkGraph.clear();

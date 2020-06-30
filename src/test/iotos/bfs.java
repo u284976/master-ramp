@@ -23,9 +23,9 @@ public class bfs {
 
     public PathDescriptor selectPath(int sourceNodeId, int destNodeId){
 
-        // System.out.println("========BFS========");
-        // System.out.println("find " + sourceNodeId + " to " + destNodeId);
-        // System.out.println("========BFS========");
+        System.out.println("========BFS========");
+        System.out.println("find " + sourceNodeId + " to " + destNodeId);
+        System.out.println("========BFS========");
 
 
         /**

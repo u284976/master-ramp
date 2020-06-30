@@ -13,6 +13,7 @@ import test.iotos.testbatch.SetupGAtest;
 import test.iotos.testbatch.SetupMeshTestBatch;
 import test.iotos.testbatch.SetupSimpleTest;
 import test.iotos.testbatch.SetupTestBatch;
+import test.iotos.testbatch.SetupTimeShare;
 
 public class SDNController{
     
@@ -36,7 +37,7 @@ public class SDNController{
     public static void main(String[] args){
 		
 		// change here to change testBatch
-		testBatch = new SetupFinalTest();
+		testBatch = new SetupTimeShare();
 		
 		testBatchName = testBatch.getTestBatchName();
 		testTime = testBatch.getTestBatchTime();

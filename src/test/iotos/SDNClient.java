@@ -26,6 +26,7 @@ import test.iotos.testbatch.SetupMeshTestBatch;
 import test.iotos.testbatch.SetupMinaTestBatch;
 import test.iotos.testbatch.SetupSimpleTest;
 import test.iotos.testbatch.SetupTestBatch;
+import test.iotos.testbatch.SetupTimeShare;
 
 public class SDNClient{
 
@@ -48,7 +49,7 @@ public class SDNClient{
     public static void main(String[] args){
         
         // change here to change testBatch
-        testBatch = new SetupFinalTest();
+        testBatch = new SetupTimeShare();
         TestTime = testBatch.getTestBatchTime();
         
         System.out.println("================================");
@@ -229,7 +230,7 @@ public class SDNClient{
             }
 
 
-
+            path = controllerClient.getFlowPath(appService.getServerNodeId(), flowID);
             System.out.println("========================================");
             System.out.println("Start transfer!!!!!");
             System.out.println("========================================");
@@ -259,7 +260,7 @@ public class SDNClient{
                     packet.setSendTime(currentTime);
     
                     E2EComm.sendUnicast(
-                        appService.getServerDest(),
+                        path,
                         appService.getServerNodeId(),
                         appService.getServerPort(),
                         appService.getProtocol(),

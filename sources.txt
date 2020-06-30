@@ -11,11 +11,13 @@
 ./src/test/sdncontroller/ControllerClientTest.java
 ./src/test/sdncontroller/ControllerClientMLRTestReceiver.java
 ./src/test/sdncontroller/OsRoutingTest.java
+./src/test/iotos/GeneticPacketForward.java
 ./src/test/iotos/copyARMap.java
 ./src/test/iotos/GeneticAlgo.java
 ./src/test/iotos/callbyRef.java
 ./src/test/iotos/testbatch/SetupMinaTestBatch.java
 ./src/test/iotos/testbatch/SetupGAtest.java
+./src/test/iotos/testbatch/SetupTimeShare.java
 ./src/test/iotos/testbatch/SetupMeshTestBatch.java
 ./src/test/iotos/testbatch/SetupGA_Change_Test.java
 ./src/test/iotos/testbatch/SetupTestBatch.java
