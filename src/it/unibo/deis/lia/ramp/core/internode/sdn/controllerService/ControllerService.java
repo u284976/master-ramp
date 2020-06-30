@@ -1851,6 +1851,10 @@ public class ControllerService extends Thread {
                             double throughput = measureResult.get(neighborAddress).get(1);
                             System.out.println(neighborEdge.getId() + ", delay = " + delay + ", throughput = " + throughput);
 
+                            // cheating for time share 2
+                            if(clientNodeId == 9 || clientNodeId == 8){
+                                throughput = 500000;
+                            }
                             /**
                              * if testBatchMobility == false
                              * means this testbatch only want to test some scenario, not to emulate actual envrioment
@@ -2824,8 +2828,15 @@ public class ControllerService extends Thread {
          */
         private boolean active;
 
+        /**
+         * add u284976
+         * store link fixedness between articulation point
+         */
+        private Map<String,Integer> linkFix;
+
         UpdateManager() {
             this.active = true;
+            this.linkFix = new HashMap<>();
         }
 
         public void stopUpdateManager() {
@@ -2915,17 +2926,17 @@ public class ControllerService extends Thread {
         private void sendFlowPriorityOnAPUpdate() {
             List<Integer> aps = getArticulationPoint();
 
-            // System.out.println("***********debug***********");
-            // System.out.println("ap = ");
-            // for(int i=0 ; i<aps.size() ; i++){
-            //     System.out.print(aps.get(i) + " ");
-            // }
-            // System.out.println();
-            // System.out.println("flow priority on AP");
-            // for(int flowID : flowPriorityOnAP.keySet()){
-            //     System.out.println(flowID +" "+ flowPriorityOnAP.get(flowID));
-            // }
-            // System.out.println("***********debug***********");
+            System.out.println("***********debug***********");
+            System.out.println("ap = ");
+            for(int i=0 ; i<aps.size() ; i++){
+                System.out.print(aps.get(i) + " ");
+            }
+            System.out.println();
+            System.out.println("flow priority on AP");
+            for(int flowID : flowPriorityOnAP.keySet()){
+                System.out.println(flowID +" "+ flowPriorityOnAP.get(flowID));
+            }
+            System.out.println("***********debug***********");
 
             for(int nodeID : aps){
                 Node clientNode = topologyGraph.getNode(Integer.toString(nodeID));
@@ -2938,20 +2949,127 @@ public class ControllerService extends Thread {
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
-            }
+            }   
+        }
+
+        // add u284976
+        private void checkArticulationPointFixedness(){
+            List<Integer> aps = getArticulationPoint();
+
             
+            
+            // first store
+            if(linkFix.size() == 0){
+                for(int nodeID : aps){
+                    
+                    MultiNode node = topologyGraph.getNode(Integer.toString(nodeID));
+                    for(Edge edge : node.getEdgeSet()){
+                        MultiNode neighborNode = edge.getOpposite(node);
+
+                        // only consider link between Articulation points
+                        if(aps.contains(Integer.parseInt(neighborNode.getId()))){
+                            String firstNodeName;
+                            String SecondNodeName;
+                            if(Integer.parseInt(node.getId()) < Integer.parseInt(neighborNode.getId())){
+                                firstNodeName = node.getId();
+                                SecondNodeName = neighborNode.getId();
+                            }else{
+                                firstNodeName = neighborNode.getId();
+                                SecondNodeName = node.getId();
+                            }
+
+                            String linkName = firstNodeName + "_" + SecondNodeName;
+
+                            if(!linkFix.containsKey(linkName)){
+                                System.out.println("================check fix=================");
+                                System.out.println("first store nodeID = " + linkName);
+                                System.out.println("================check fix=================");
+                                linkFix.put(linkName, 100);
+                                edge.addAttribute("fixedness", 100);
+                            }
+                        }
+                    }
+                }
+            }else{
+                Map<String,Integer> temp = new HashMap<>();
+
+                for(int nodeID : aps){
+                    MultiNode node = topologyGraph.getNode(Integer.toString(nodeID));
+                    for(Edge edge : node.getEdgeSet()){
+
+                        MultiNode neighborNode = edge.getOpposite(node);
+                        // only consider link between Articulation points
+                        if(aps.contains(Integer.parseInt(neighborNode.getId()))){
+                            String firstNodeName;
+                            String SecondNodeName;
+                            if(Integer.parseInt(node.getId()) < Integer.parseInt(neighborNode.getId())){
+                                firstNodeName = node.getId();
+                                SecondNodeName = neighborNode.getId();
+                            }else{
+                                firstNodeName = neighborNode.getId();
+                                SecondNodeName = node.getId();
+                            }
+
+                            String linkName = firstNodeName + "_" + SecondNodeName;
+
+                            if(!linkFix.containsKey(linkName)){
+                                temp.put(linkName, 0);
+                                linkFix.put(linkName, 100);
+                                edge.addAttribute("fixedness", 100);
+                            }else{
+                                // System.out.println("================check fix=================");
+                                // System.out.println("check link = " + linkName);
+                                // System.out.println("================check fix=================");
+                                temp.put(linkName, 0);
+                            }
+                        }
+                    }
+                }
+
+
+                for(String linkID : linkFix.keySet()){
+                    
+                    // link still active
+                    if(temp.containsKey(linkID)){
+                        System.out.println("================check fix=================");
+                        System.out.println("linkID = " + linkID + " still active");
+                        System.out.println("================check fix=================");
+                    }else{
+                        System.out.println("================check fix=================");
+                        System.out.println("linkID = " + linkID + " was fail");
+                        System.out.println("================check fix=================");
+                        // link was failed
+                        int fixedness = linkFix.get(linkID);
+                        fixedness--;
+                        linkFix.put(linkID, fixedness);
+
+                        String[] nodeIDs = linkID.split("_");
+                        MultiNode firstNode = topologyGraph.getNode(nodeIDs[0]);
+                        MultiNode secondNode = topologyGraph.getNode(nodeIDs[1]);
+                        firstNode.getEdgeBetween(secondNode).addAttribute("fixedness", fixedness);;
+                    }
+                }
+            }
         }
 
         private void update() {
             updateTopology();
             updateFlows();
             updateOsRoutes();
-            if (routingPolicy == RoutingPolicy.REROUTING)
-                sendDefaultFlowPathsUpdate();
+
+            /**
+             * by u284976
+             * because occur exception in find all path default
+             * and this function are non-essential in my case so i comment out
+             */
+            // if (routingPolicy == RoutingPolicy.REROUTING)
+            //     sendDefaultFlowPathsUpdate();
+
             if (trafficEngineeringPolicy == TrafficEngineeringPolicy.SINGLE_FLOW || trafficEngineeringPolicy == TrafficEngineeringPolicy.QUEUES || trafficEngineeringPolicy == TrafficEngineeringPolicy.TRAFFIC_SHAPING)
                 sendFlowPrioritiesUpdate();
 
             // adder @u284976
+            checkArticulationPointFixedness();
             sendFlowPriorityOnAPUpdate();
             // System.out.println("==================");
             // System.out.println("==================");

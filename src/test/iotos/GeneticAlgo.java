@@ -30,7 +30,7 @@ import it.unibo.deis.lia.ramp.core.internode.sdn.pathSelection.pathSelectors.Bre
 public class GeneticAlgo implements TopologyGraphSelector{
 
     private static final double NODE_OVERLOAD = -1;
-    private static final double LINK_OVERLOND = -2;
+    private static final double LINK_OVERLOAD = -2;
     private static final double fitnessThreshold = 100;
 
     private static final int GenerateMAX = 5;
@@ -188,6 +188,54 @@ public class GeneticAlgo implements TopologyGraphSelector{
             return tempPath;
         }
 
+        /**
+         * check LINK_OVERLOAD occur when this path add to the topo, and occur between articulation point
+         */
+        // find articulation point
+        List<Integer> articulationPoints = new dfs().findArticulationPoint(topologyGraph);
+        ControllerService.getInstance().setArticulationPoints(articulationPoints);
+        System.out.println("===========dfs output============");
+        System.out.println("articulation Point =");
+        for(int i=0 ; i<articulationPoints.size() ; i++){
+            System.out.print(articulationPoints.get(i)+" ");
+        }
+        System.out.println();
+        System.out.println("===========dfs output============");
+        
+        // this path occur LINK_OVERLOAD
+        if((double)checkGraph.getNode(Integer.toString(tempPath.getDestinationNodeId())).getAttribute("1minThroughput") == LINK_OVERLOAD){
+            for(int i=0 ; i<tempPath.getPathNodeIds().size()-1 ; i++){
+                int nodeID = tempPath.getPathNodeIds().get(i);
+                int nextNodeID = tempPath.getPathNodeIds().get(i+1);
+    
+                // include ap----ap
+                if(articulationPoints.contains(nodeID) && articulationPoints.contains(nextNodeID)){
+    
+                    MultiNode node = checkGraph.getNode(Integer.toString(nodeID));
+                    MultiNode nextNode = checkGraph.getNode(Integer.toString(nextNodeID));
+                    Edge edge = node.getEdgeBetween(nextNode);
+                    
+                    double lamda = edge.getAttribute("lamda");
+                    double n = edge.getAttribute("n");
+                    double throughput = edge.getAttribute("throughput");
+
+                    // ap----ap occur overload
+                    if(lamda*n > throughput){
+                        // first time maitain fixedness
+                        if(edge.getAttribute("fixedness") == null){
+                            edge.addAttribute("fixedness", 100);
+                        }
+                        if((int)edge.getAttribute("fixedness") > 90){
+                            System.out.println("===========Genetic Output============");
+                            System.out.println("ERROR: Link overload occur between articulation point, let last path request delay");
+                            System.out.println("===========Genetic Output============");
+                            return null;
+                        }
+                    }
+                }
+            }
+        }
+
         System.out.println();
         System.out.println("===========GeneticAlgo============");
         System.out.println("first path can't let all path fit, start Genetic");
@@ -205,17 +253,6 @@ public class GeneticAlgo implements TopologyGraphSelector{
          * 
          * this logical need modify to more general, like "avoid remove edge that connect to articulation point"
          */
-
-        // find articulation point
-        List<Integer> articulationPoints = new dfs().findArticulationPoint(topologyGraph);
-        ControllerService.getInstance().setArticulationPoints(articulationPoints);
-        System.out.println("===========dfs output============");
-        System.out.println("articulation Point =");
-        for(int i=0 ; i<articulationPoints.size() ; i++){
-            System.out.print(articulationPoints.get(i)+" ");
-        }
-        System.out.println();
-        System.out.println("===========dfs output============");
 
         /**
          * cut path, if path through articulation point(AP)
@@ -509,7 +546,7 @@ public class GeneticAlgo implements TopologyGraphSelector{
                      */
                     String lastNodeID = Integer.toString(flowPaths.get(flowID).getDestinationNodeId());
                     MultiNode lastNode = checkGraph.getNode(lastNodeID);
-                    if((double)lastNode.getAttribute(Integer.toString(flowID)+"delayOut") == NODE_OVERLOAD){
+                    if((double)lastNode.getAttribute(Integer.toString(flowID)+"delayOut") == NODE_OVERLOAD || (double)lastNode.getAttribute(Integer.toString(flowID)+"delayOut") == LINK_OVERLOAD){
                         findOverLoad = true;
                         break;
                     }
@@ -1113,8 +1150,8 @@ public class GeneticAlgo implements TopologyGraphSelector{
 
                             int lastNodeID = pathNodeIDs.get(pathNodeIDs.size()-1);
                             MultiNode lastNode = tempGraph.getNode(Integer.toString(lastNodeID));
-                            lastNode.addAttribute(Integer.toString(flowID) + "delayOut", NODE_OVERLOAD);
-                            lastNode.addAttribute(Integer.toString(flowID) + "minThroughput", NODE_OVERLOAD);
+                            lastNode.addAttribute(Integer.toString(flowID) + "delayOut", LINK_OVERLOAD);
+                            lastNode.addAttribute(Integer.toString(flowID) + "minThroughput", LINK_OVERLOAD);
                             failonLink = true;
                         }
                         break;

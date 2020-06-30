@@ -210,13 +210,24 @@ public class SDNClient{
                 destNodePort,
                 PathSelectionMetric.GENETIC_ALGO
             );
+            String[] path = null;
             System.out.println("========================================");
             System.out.println("receive response!!!!!");
-            String[] path = controllerClient.getFlowPath(appService.getServerNodeId(), flowID);
-            for(String s : path){
-                System.out.println(s);
+            if(flowID == -1){
+                // TODO : wait few second and request new path
+                System.out.println("***************request path fail*******************");
+                System.out.println("***************request path fail*******************");
+                System.out.println("***************request path fail*******************");
+                System.out.println("***************request path fail*******************");
+            }else{
+                path = controllerClient.getFlowPath(appService.getServerNodeId(), flowID);
+                for(String s : path){
+                    System.out.println(s);
+                }
+                System.out.println("========================================");
             }
-            System.out.println("========================================");
+            
+            
 
 
             System.out.println("========================================");
