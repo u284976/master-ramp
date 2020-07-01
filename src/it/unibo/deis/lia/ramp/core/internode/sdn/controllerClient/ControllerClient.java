@@ -434,7 +434,7 @@ public class ControllerClient extends Thread implements ControllerClientInterfac
         controllerClient = null;
     }
 
-    private ServiceResponse getControllerService() {
+    public ServiceResponse getControllerService() {
         return this.controllerServiceDiscoverer.getControllerService();
     }
 

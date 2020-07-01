@@ -218,6 +218,7 @@ public class ControllerService extends Thread {
     private int countClient;
     private List<Integer> completeTest;
     private boolean testBatchMobility;
+    private boolean testBatchEnableFixedness;
     private Map<Integer,Integer> flowPriorityOnAP;
     private List<Integer> articulationPoints;
 
@@ -1126,6 +1127,12 @@ public class ControllerService extends Thread {
             return false;
         }
     }
+    public void setEnableFixedness(boolean enableFixedness){
+        testBatchEnableFixedness = enableFixedness;
+    }
+    public boolean getEnableFixedness(){
+        return testBatchEnableFixedness;
+    }
 
 
     @Override
@@ -1225,6 +1232,9 @@ public class ControllerService extends Thread {
                             break;
                         case READY_TO_TEST:
                             handleCompleteTest((ControllerMessageReady) controllerMessage, clientNodeId);
+                            break;
+                        case DELAY_PATH_REQUEST:
+                            handleDelayPathRequest(controllerMessage, clientNodeId, up);
                             break;
                         case PRIORITY_VALUE_REQUEST:
                             handlePriorityValueRequest((ControllerMessageRequest) controllerMessage, clientNodeId, clientDest);
@@ -1878,6 +1888,50 @@ public class ControllerService extends Thread {
         private void handleCompleteTest(ControllerMessageReady updateMessage, int clientNodeId){
             if(!completeTest.contains(clientNodeId)){
                 completeTest.add(clientNodeId);
+            }
+        }
+        private void handleDelayPathRequest(ControllerMessage requestMessage, int clientNodeId, UnicastPacket up){
+            int clientPort = requestMessage.getClientPort();
+
+            long waitToTime = 0;
+            for(int flowID : flowPaths.keySet()){
+
+                boolean findConflictInfo = false;
+                for(int i=0 ; i<flowPaths.get(flowID).getPathNodeIds().size()-1 ; i++){
+                    int nodeID = flowPaths.get(flowID).getPathNodeIds().get(i);
+                    int nextNodeID = flowPaths.get(flowID).getPathNodeIds().get(i+1);
+
+                    if(articulationPoints.contains(nodeID) && articulationPoints.contains(nextNodeID)){
+
+                        // 
+                        /**
+                         * application duration = 
+                         *  
+                         * actual duration
+                         *  + updateManager will remove it buffer time = 1/4 * actual duration
+                         *  + updateManager TIME_INTERVAL = 10
+                         */
+                        long flowDuration = (long)flowApplicationRequirements.get(flowID).getDuration()*1250+11*1000;
+                        waitToTime = flowStartTimes.get(flowID) + flowDuration;
+                    
+                        findConflictInfo = true;
+                        break;
+                    }
+                }
+
+                if(findConflictInfo){
+                    break;
+                }
+            }
+            
+            try {
+
+                ControllerMessageReady responseMessage = new ControllerMessageReady(MessageType.DELAY_PATH_REQUEST, waitToTime);
+
+                E2EComm.sendUnicast(E2EComm.ipReverse(up.getSource()), clientNodeId, clientPort, PROTOCOL, CONTROL_FLOW_ID, E2EComm.serialize(responseMessage));
+
+            } catch (Exception e) {
+                //TODO: handle exception
             }
         }
 
@@ -2874,6 +2928,7 @@ public class ControllerService extends Thread {
                     flowPaths.remove(flowId);
                     // @adder u284976
                     flowSources.remove(flowId);
+                    flowPriorityOnAP.remove(flowId);
                 }
             }
         }
@@ -2926,17 +2981,17 @@ public class ControllerService extends Thread {
         private void sendFlowPriorityOnAPUpdate() {
             List<Integer> aps = getArticulationPoint();
 
-            System.out.println("***********debug***********");
-            System.out.println("ap = ");
-            for(int i=0 ; i<aps.size() ; i++){
-                System.out.print(aps.get(i) + " ");
-            }
-            System.out.println();
-            System.out.println("flow priority on AP");
-            for(int flowID : flowPriorityOnAP.keySet()){
-                System.out.println(flowID +" "+ flowPriorityOnAP.get(flowID));
-            }
-            System.out.println("***********debug***********");
+            // System.out.println("***********debug***********");
+            // System.out.println("ap = ");
+            // for(int i=0 ; i<aps.size() ; i++){
+            //     System.out.print(aps.get(i) + " ");
+            // }
+            // System.out.println();
+            // System.out.println("flow priority on AP");
+            // for(int flowID : flowPriorityOnAP.keySet()){
+            //     System.out.println(flowID +" "+ flowPriorityOnAP.get(flowID));
+            // }
+            // System.out.println("***********debug***********");
 
             for(int nodeID : aps){
                 Node clientNode = topologyGraph.getNode(Integer.toString(nodeID));
@@ -2981,9 +3036,9 @@ public class ControllerService extends Thread {
                             String linkName = firstNodeName + "_" + SecondNodeName;
 
                             if(!linkFix.containsKey(linkName)){
-                                System.out.println("================check fix=================");
-                                System.out.println("first store nodeID = " + linkName);
-                                System.out.println("================check fix=================");
+                                // System.out.println("================check fix=================");
+                                // System.out.println("first store nodeID = " + linkName);
+                                // System.out.println("================check fix=================");
                                 linkFix.put(linkName, 100);
                                 edge.addAttribute("fixedness", 100);
                             }

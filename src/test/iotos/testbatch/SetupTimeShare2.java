@@ -16,6 +16,9 @@ public class SetupTimeShare2 implements SetupTestBatch {
     public boolean getMobility(){
         return false;
     }
+    public boolean getEnableFixedness(){
+        return true;
+    }
     public int getNumberOfClient(){
         return 11;
     }
@@ -75,7 +78,7 @@ public class SetupTimeShare2 implements SetupTestBatch {
                 GenPacketPerSeconds = 10;
                 requireDelay = 20.0;
                 requireThroughput = 150000.0;
-                duration = 100;
+                duration = 35;
                 break;
             case "3":       // send to 11
                 trafficType = TrafficType.VIDEO_STREAM;
@@ -83,7 +86,7 @@ public class SetupTimeShare2 implements SetupTestBatch {
                 GenPacketPerSeconds = 10;
                 requireDelay = 20.0;
                 requireThroughput = 150000.0;
-                duration = 100;
+                duration = 35;
                 break;
             case "5":       // send to 10
                 trafficType = TrafficType.FILE_TRANSFER;
@@ -91,7 +94,7 @@ public class SetupTimeShare2 implements SetupTestBatch {
                 GenPacketPerSeconds = 10;
                 requireDelay = 40.0;
                 requireThroughput = 150000.0;
-                duration = 100;
+                duration = 35;
                 break;
             case "6":       // send to 10
                 trafficType = TrafficType.FILE_TRANSFER;
@@ -99,7 +102,7 @@ public class SetupTimeShare2 implements SetupTestBatch {
                 GenPacketPerSeconds = 10;
                 requireDelay = 40.0;
                 requireThroughput = 150000.0;
-                duration = 100;
+                duration = 35;
                 break;
         }
         

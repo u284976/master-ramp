@@ -6,6 +6,7 @@ public interface SetupTestBatch {
     public String getTestBatchName();
     public String getTestBatchTime();
     public boolean getMobility();
+    public boolean getEnableFixedness();
     public int getNumberOfClient();
     /**
      * NumberOfClient = 0, means this testBatch not care about topo edge complete

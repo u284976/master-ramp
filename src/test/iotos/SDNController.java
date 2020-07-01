@@ -72,6 +72,7 @@ public class SDNController{
         controllerService = ControllerService.getInstance();
 		controllerService.setCountClient(countClient);
 		controllerService.setMobility(testBatch.getMobility());
+		controllerService.setEnableFixedness(testBatch.getEnableFixedness());
 		
 
         try {

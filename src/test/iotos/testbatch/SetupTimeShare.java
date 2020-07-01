@@ -17,6 +17,9 @@ public class SetupTimeShare implements SetupTestBatch {
     public boolean getMobility(){
         return false;
     }
+    public boolean getEnableFixedness(){
+        return false;
+    }
     public int getNumberOfClient(){
         return 4;
     }

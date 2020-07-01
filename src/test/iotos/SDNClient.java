@@ -14,6 +14,8 @@ import it.unibo.deis.lia.ramp.core.internode.Dispatcher;
 import it.unibo.deis.lia.ramp.core.internode.sdn.applicationRequirements.ApplicationRequirements;
 import it.unibo.deis.lia.ramp.core.internode.sdn.applicationRequirements.TrafficType;
 import it.unibo.deis.lia.ramp.core.internode.sdn.controllerClient.ControllerClient;
+import it.unibo.deis.lia.ramp.core.internode.sdn.controllerMessage.ControllerMessage;
+import it.unibo.deis.lia.ramp.core.internode.sdn.controllerMessage.MessageType;
 import it.unibo.deis.lia.ramp.core.internode.sdn.pathSelection.PathSelectionMetric;
 import it.unibo.deis.lia.ramp.service.management.ServiceDiscovery;
 import it.unibo.deis.lia.ramp.service.management.ServiceManager;
@@ -211,35 +213,77 @@ public class SDNClient{
                 PathSelectionMetric.GENETIC_ALGO
             );
             String[] path = null;
-            System.out.println("========================================");
-            System.out.println("receive response!!!!!");
+            
             if(flowID == -1){
+                System.out.println("========================================");
+                System.out.println("need request after a while");
+                System.out.println("========================================");
                 // TODO : wait few second and request new path
-                System.out.println("***************request path fail*******************");
-                System.out.println("***************request path fail*******************");
-                System.out.println("***************request path fail*******************");
-                System.out.println("***************request path fail*******************");
+
+                ServiceResponse controllerService = controllerClient.getControllerService();
+
+                try {
+                    BoundReceiveSocket tempSocket = E2EComm.bindPreReceive(controllerService.getProtocol());
+
+                    ControllerMessage requestMessage = new ControllerMessage(MessageType.DELAY_PATH_REQUEST,tempSocket.getLocalPort());
+
+                    E2EComm.sendUnicast(
+                        controllerService.getServerDest(),
+                        controllerService.getServerNodeId(),
+                        controllerService.getServerPort(),
+                        controllerService.getProtocol(),
+                        1,
+                        E2EComm.serialize(requestMessage)
+                    );
+
+                    UnicastPacket up = (UnicastPacket)E2EComm.receive(tempSocket);
+                    ControllerMessageReady payload = (ControllerMessageReady)E2EComm.deserialize(up.getBytePayload());
+                    long waitToTest = payload.getStartTime();
+
+                    System.out.println("========================================");
+                    System.out.println("wait " + (waitToTest - System.currentTimeMillis()) + " to try get path");
+                    System.out.println("========================================");
+
+                    try {
+                        Thread.sleep(waitToTest - System.currentTimeMillis());
+                    } catch (Exception e) {
+                    }
+
+                } catch (Exception e) {
+                    //TODO: handle exception
+                }
+
+                flowID = controllerClient.getFlowId(
+                    applicationRequirements,
+                    destNodeID,
+                    destNodePort,
+                    PathSelectionMetric.GENETIC_ALGO
+                );
+
             }else{
+                System.out.println("========================================");
+                System.out.println("receive response!!!!!");
                 path = controllerClient.getFlowPath(appService.getServerNodeId(), flowID);
                 for(String s : path){
                     System.out.println(s);
                 }
                 System.out.println("========================================");
-            }
-            
-            
 
+                
+                System.out.println("========================================");
+                System.out.println("Waiting new flow path to Start Traffic");
+                System.out.println("========================================");
 
-            System.out.println("========================================");
-            System.out.println("Waiting new flow path to Start Traffic");
-            System.out.println("========================================");
-
-            while (System.currentTimeMillis() < startTime+20000) {
-                try {
-                    Thread.sleep(startTime+20000 - System.currentTimeMillis());
-                } catch (Exception e) {
+                while (System.currentTimeMillis() < startTime+20000) {
+                    try {
+                        Thread.sleep(startTime+20000 - System.currentTimeMillis());
+                    } catch (Exception e) {
+                    }
                 }
+                
             }
+            
+                      
 
 
             path = controllerClient.getFlowPath(appService.getServerNodeId(), flowID);

@@ -47,6 +47,13 @@ public class GeneticAlgo implements TopologyGraphSelector{
     public PathDescriptor selectPath(int sourceNodeId, int destNodeId, ApplicationRequirements applicationRequirements, Map<Integer, PathDescriptor> activePaths){
         System.out.println("===========GeneticAlgo============");
         System.out.println("receive request by :" + sourceNodeId);
+        System.out.println("active path:");
+        for(int flowID : activePaths.keySet()){
+            for(int nodeID : activePaths.get(flowID).getPathNodeIds()){
+                System.out.print(nodeID + " ");
+            }
+            System.out.println();
+        }
         System.out.println("===========GeneticAlgo============");
 
         
@@ -202,39 +209,43 @@ public class GeneticAlgo implements TopologyGraphSelector{
         System.out.println();
         System.out.println("===========dfs output============");
         
-        // this path occur LINK_OVERLOAD
-        if((double)checkGraph.getNode(Integer.toString(tempPath.getDestinationNodeId())).getAttribute("1minThroughput") == LINK_OVERLOAD){
-            for(int i=0 ; i<tempPath.getPathNodeIds().size()-1 ; i++){
-                int nodeID = tempPath.getPathNodeIds().get(i);
-                int nextNodeID = tempPath.getPathNodeIds().get(i+1);
-    
-                // include ap----ap
-                if(articulationPoints.contains(nodeID) && articulationPoints.contains(nextNodeID)){
-    
-                    MultiNode node = checkGraph.getNode(Integer.toString(nodeID));
-                    MultiNode nextNode = checkGraph.getNode(Integer.toString(nextNodeID));
-                    Edge edge = node.getEdgeBetween(nextNode);
-                    
-                    double lamda = edge.getAttribute("lamda");
-                    double n = edge.getAttribute("n");
-                    double throughput = edge.getAttribute("throughput");
+        
+        if(ControllerService.getInstance().getEnableFixedness()){
+            // this path occur LINK_OVERLOAD
+            if((double)checkGraph.getNode(Integer.toString(tempPath.getDestinationNodeId())).getAttribute("1minThroughput") == LINK_OVERLOAD){
+                for(int i=0 ; i<tempPath.getPathNodeIds().size()-1 ; i++){
+                    int nodeID = tempPath.getPathNodeIds().get(i);
+                    int nextNodeID = tempPath.getPathNodeIds().get(i+1);
 
-                    // ap----ap occur overload
-                    if(lamda*n > throughput){
-                        // first time maitain fixedness
-                        if(edge.getAttribute("fixedness") == null){
-                            edge.addAttribute("fixedness", 100);
-                        }
-                        if((int)edge.getAttribute("fixedness") > 90){
-                            System.out.println("===========Genetic Output============");
-                            System.out.println("ERROR: Link overload occur between articulation point, let last path request delay");
-                            System.out.println("===========Genetic Output============");
-                            return null;
+                    // include ap----ap
+                    if(articulationPoints.contains(nodeID) && articulationPoints.contains(nextNodeID)){
+
+                        MultiNode node = checkGraph.getNode(Integer.toString(nodeID));
+                        MultiNode nextNode = checkGraph.getNode(Integer.toString(nextNodeID));
+                        Edge edge = node.getEdgeBetween(nextNode);
+                        
+                        double lamda = edge.getAttribute("lamda");
+                        double n = edge.getAttribute("n");
+                        double throughput = edge.getAttribute("throughput");
+
+                        // ap----ap occur overload
+                        if(lamda*n > throughput){
+                            // first time maitain fixedness
+                            if(edge.getAttribute("fixedness") == null){
+                                edge.addAttribute("fixedness", 100);
+                            }
+                            if((int)edge.getAttribute("fixedness") > 90){
+                                System.out.println("===========Genetic Output============");
+                                System.out.println("ERROR: Link overload occur between articulation point, let last path request delay");
+                                System.out.println("===========Genetic Output============");
+                                return null;
+                            }
                         }
                     }
                 }
             }
         }
+        
 
         System.out.println();
         System.out.println("===========GeneticAlgo============");

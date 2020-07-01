@@ -13,6 +13,9 @@ public class SetupGA_Change_Test implements SetupTestBatch{
     public boolean getMobility(){
         return false;
     }
+    public boolean getEnableFixedness(){
+        return false;
+    }
     public int getNumberOfClient(){
         return 7;
     }
