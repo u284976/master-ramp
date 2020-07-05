@@ -43,16 +43,16 @@ def myNetwork():
     sta7 = net.addStation('sta7', ip='10.0.0.7/24',
                            position='450.0,391.0,0', range = 1)
     sta8 = net.addStation('sta8', ip='10.0.0.8/24',
-                           position='562.0,218.0,0', range = 150)
+                           position='562.0,218.0,0')
     sta9 = net.addStation('sta9', ip='10.0.0.9/24',
-                           position='680.0,218.0,0', range = 150)
+                           position='750.0,218.0,0')
     sta10 = net.addStation('sta10', ip='10.0.0.10/24',
-                           position='800.0,318.0,0', range = 150)
+                           position='900.0,318.0,0')
     sta11 = net.addStation('sta11', ip='10.0.0.11/24',
-                           position='800.0,118.0,0', range = 150)
+                           position='900.0,118.0,0')
 
     info("*** Configuring Propagation Model\n")
-    net.setPropagationModel(model="logDistance", exp=1)
+    net.setPropagationModel(model="logDistance", exp=3)
 
     info("*** Configuring wifi nodes\n")
     net.configureWifiNodes()
