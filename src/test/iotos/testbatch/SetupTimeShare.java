@@ -2,6 +2,8 @@ package test.iotos.testbatch;
 
 import it.unibo.deis.lia.ramp.core.internode.sdn.applicationRequirements.ApplicationRequirements;
 import it.unibo.deis.lia.ramp.core.internode.sdn.applicationRequirements.TrafficType;
+import it.unibo.deis.lia.ramp.core.internode.sdn.pathSelection.PathSelectionMetric;
+import it.unibo.deis.lia.ramp.core.internode.sdn.trafficEngineeringPolicy.TrafficEngineeringPolicy;
 
 /**
  * use topo : link_for_time_share.py
@@ -19,6 +21,12 @@ public class SetupTimeShare implements SetupTestBatch {
     }
     public boolean getEnableFixedness(){
         return false;
+    }
+    public PathSelectionMetric getPathSelectionMetric(){
+        return PathSelectionMetric.GENETIC_ALGO;
+    }
+    public TrafficEngineeringPolicy getTrafficEngineeringPolicy(){
+        return TrafficEngineeringPolicy.NO_FLOW_POLICY;
     }
     public int getNumberOfClient(){
         return 4;

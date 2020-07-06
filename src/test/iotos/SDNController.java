@@ -8,13 +8,7 @@ import it.unibo.deis.lia.ramp.core.internode.sdn.controllerClient.ControllerClie
 import it.unibo.deis.lia.ramp.core.internode.sdn.controllerService.ControllerService;
 import it.unibo.deis.lia.ramp.service.management.ServiceManager;
 import test.iotos.testbatch.SetupFinalTest;
-import test.iotos.testbatch.SetupGA_Change_Test;
-import test.iotos.testbatch.SetupGAtest;
-import test.iotos.testbatch.SetupMeshTestBatch;
-import test.iotos.testbatch.SetupSimpleTest;
 import test.iotos.testbatch.SetupTestBatch;
-import test.iotos.testbatch.SetupTimeShare;
-import test.iotos.testbatch.SetupTimeShare2;
 
 public class SDNController{
     
@@ -38,7 +32,7 @@ public class SDNController{
     public static void main(String[] args){
 		
 		// change here to change testBatch
-		testBatch = new SetupTimeShare2();
+		testBatch = new SetupFinalTest();
 		
 		testBatchName = testBatch.getTestBatchName();
 		testTime = testBatch.getTestBatchTime();
@@ -73,7 +67,7 @@ public class SDNController{
 		controllerService.setCountClient(countClient);
 		controllerService.setMobility(testBatch.getMobility());
 		controllerService.setEnableFixedness(testBatch.getEnableFixedness());
-		
+		controllerService.updateTrafficEngineeringPolicy(testBatch.getTrafficEngineeringPolicy());
 
         try {
 			Thread.sleep(5*1000);

@@ -2,7 +2,8 @@ package test.iotos.testbatch;
 
 import it.unibo.deis.lia.ramp.core.internode.sdn.applicationRequirements.ApplicationRequirements;
 import it.unibo.deis.lia.ramp.core.internode.sdn.applicationRequirements.TrafficType;
-import test.iotos.testbatch.SetupTestBatch;
+import it.unibo.deis.lia.ramp.core.internode.sdn.pathSelection.PathSelectionMetric;
+import it.unibo.deis.lia.ramp.core.internode.sdn.trafficEngineeringPolicy.TrafficEngineeringPolicy;
 
 public class SetupMinaTestBatch implements SetupTestBatch{
     public String getTestBatchName() {
@@ -16,6 +17,12 @@ public class SetupMinaTestBatch implements SetupTestBatch{
     }
     public boolean getEnableFixedness(){
         return false;
+    }
+    public PathSelectionMetric getPathSelectionMetric(){
+        return PathSelectionMetric.GENETIC_ALGO;
+    }
+    public TrafficEngineeringPolicy getTrafficEngineeringPolicy(){
+        return TrafficEngineeringPolicy.NO_FLOW_POLICY;
     }
     public int getNumberOfClient(){
         return 29;

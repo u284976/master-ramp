@@ -1863,7 +1863,9 @@ public class ControllerService extends Thread {
 
                             // cheating for time share 2
                             if(clientNodeId == 9 || clientNodeId == 8){
-                                throughput = 500000;
+                                throughput = 1000000;
+                            }else{
+                                throughput = 5000000;
                             }
                             /**
                              * if testBatchMobility == false
@@ -2981,17 +2983,17 @@ public class ControllerService extends Thread {
         private void sendFlowPriorityOnAPUpdate() {
             List<Integer> aps = getArticulationPoint();
 
-            // System.out.println("***********debug***********");
-            // System.out.println("ap = ");
-            // for(int i=0 ; i<aps.size() ; i++){
-            //     System.out.print(aps.get(i) + " ");
-            // }
-            // System.out.println();
-            // System.out.println("flow priority on AP");
-            // for(int flowID : flowPriorityOnAP.keySet()){
-            //     System.out.println(flowID +" "+ flowPriorityOnAP.get(flowID));
-            // }
-            // System.out.println("***********debug***********");
+            System.out.println("***********debug***********");
+            System.out.println("ap = ");
+            for(int i=0 ; i<aps.size() ; i++){
+                System.out.print(aps.get(i) + " ");
+            }
+            System.out.println();
+            System.out.println("flow priority on AP");
+            for(int flowID : flowPriorityOnAP.keySet()){
+                System.out.println(flowID +" "+ flowPriorityOnAP.get(flowID));
+            }
+            System.out.println("***********debug***********");
 
             for(int nodeID : aps){
                 Node clientNode = topologyGraph.getNode(Integer.toString(nodeID));

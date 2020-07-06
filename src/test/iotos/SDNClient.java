@@ -21,15 +21,9 @@ import it.unibo.deis.lia.ramp.service.management.ServiceDiscovery;
 import it.unibo.deis.lia.ramp.service.management.ServiceManager;
 import it.unibo.deis.lia.ramp.service.management.ServiceResponse;
 import test.iotos.messagetype.timeDataType;
+
 import test.iotos.testbatch.SetupFinalTest;
-import test.iotos.testbatch.SetupGA_Change_Test;
-import test.iotos.testbatch.SetupGAtest;
-import test.iotos.testbatch.SetupMeshTestBatch;
-import test.iotos.testbatch.SetupMinaTestBatch;
-import test.iotos.testbatch.SetupSimpleTest;
 import test.iotos.testbatch.SetupTestBatch;
-import test.iotos.testbatch.SetupTimeShare;
-import test.iotos.testbatch.SetupTimeShare2;
 
 public class SDNClient{
 
@@ -52,8 +46,9 @@ public class SDNClient{
     public static void main(String[] args){
         
         // change here to change testBatch
-        testBatch = new SetupTimeShare2();
+        testBatch = new SetupFinalTest();
         TestTime = testBatch.getTestBatchTime();
+        PathSelectionMetric testMetric = testBatch.getPathSelectionMetric();
         
         System.out.println("================================");
         System.out.println("SDN Client starting...");
@@ -210,7 +205,7 @@ public class SDNClient{
                 applicationRequirements,
                 destNodeID,
                 destNodePort,
-                PathSelectionMetric.GENETIC_ALGO
+                testMetric
             );
             String[] path = null;
             
