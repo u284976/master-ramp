@@ -22,12 +22,12 @@ public class SetupFinalTest implements SetupTestBatch {
         return false;
     }
     public PathSelectionMetric getPathSelectionMetric(){
-        return PathSelectionMetric.GENETIC_ALGO;
-        // return PathSelectionMetric.BREADTH_FIRST;
+        // return PathSelectionMetric.GENETIC_ALGO;
+        return PathSelectionMetric.BREADTH_FIRST;
     }
     public TrafficEngineeringPolicy getTrafficEngineeringPolicy(){
-        return TrafficEngineeringPolicy.NO_FLOW_POLICY;
-        // return TrafficEngineeringPolicy.TRAFFIC_SHAPING;
+        // return TrafficEngineeringPolicy.NO_FLOW_POLICY;
+        return TrafficEngineeringPolicy.TRAFFIC_SHAPING;
     }
     public int getNumberOfClient(){
         return 11;

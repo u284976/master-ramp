@@ -18,7 +18,6 @@
 ./src/test/iotos/testbatch/SetupMinaTestBatch.java
 ./src/test/iotos/testbatch/SetupGAtest.java
 ./src/test/iotos/testbatch/SetupTimeShare.java
-./src/test/iotos/testbatch/SetupTimeShare2.java
 ./src/test/iotos/testbatch/SetupMeshTestBatch.java
 ./src/test/iotos/testbatch/SetupGA_Change_Test.java
 ./src/test/iotos/testbatch/SetupTestBatch.java

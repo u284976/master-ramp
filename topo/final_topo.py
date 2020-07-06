@@ -77,12 +77,12 @@ def myNetwork():
 
     net.addLink(sta7, sta8)
 
-    net.addLink(sta8, sta9)
+    net.addLink(sta8, sta9,bw=15)
 
     net.addLink(sta9, sta10)
     net.addLink(sta9, sta11)
 
-    net.plotGraph(max_x=1000, max_y=1000)
+    # net.plotGraph(max_x=1000, max_y=1000)
 
     info( '*** Starting network\n')
     net.build()
@@ -154,7 +154,7 @@ def execute(self, line):
         
         Threads.append(MyThread(node))
         Threads[i].start()
-        time.sleep(5)
+        time.sleep(2)
         # thread = MyThread(node)
         # thread.start()
     
