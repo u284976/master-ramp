@@ -47,9 +47,9 @@ def myNetwork():
     sta9 = net.addStation('sta9', ip='10.0.0.9/24',
                            position='750.0,218.0,0')
     sta10 = net.addStation('sta10', ip='10.0.0.10/24',
-                           position='900.0,318.0,0')
+                           position='900.0,318.0,0', range = 1)
     sta11 = net.addStation('sta11', ip='10.0.0.11/24',
-                           position='900.0,118.0,0')
+                           position='900.0,118.0,0', range = 1)
 
     info("*** Configuring Propagation Model\n")
     net.setPropagationModel(model="logDistance", exp=3)
@@ -81,12 +81,10 @@ def myNetwork():
                 ssid='adhocNet', mode='g', channel=5)
     net.addLink(sta9, cls=adhoc, intf='sta9-wlan0',
                 ssid='adhocNet', mode='g', channel=5)
-    net.addLink(sta10, cls=adhoc, intf='sta10-wlan0',
-                ssid='adhocNet', mode='g', channel=5)
-    net.addLink(sta11, cls=adhoc, intf='sta11-wlan0',
-                ssid='adhocNet', mode='g', channel=5)
+    net.addLink(sta9, sta10)
+    net.addLink(sta9, sta11)
 
-    net.plotGraph(max_x=1000, max_y=1000)
+    # net.plotGraph(max_x=1000, max_y=1000)
 
     info( '*** Starting network\n')
     net.build()
@@ -131,11 +129,9 @@ def myNetwork():
     sta8.cmd("ifconfig sta8-eth1 10.0.18.8/24")
     sta8.cmd("ifconfig sta8-eth2 10.0.48.8/24")
     sta8.cmd("ifconfig sta8-eth3 10.0.78.8/24")
-    sta8.cmd("ifconfig sta8-eth4 10.0.89.8/24")
 
-    sta9.cmd("ifconfig sta9-eth1 10.0.89.9/24")
-    sta9.cmd("ifconfig sta9-eth2 10.0.109.9/24")
-    sta9.cmd("ifconfig sta9-eth3 10.0.119.9/24")
+    sta9.cmd("ifconfig sta9-eth1 10.0.109.9/24")
+    sta9.cmd("ifconfig sta9-eth2 10.0.119.9/24")
 
     sta10.cmd("ifconfig sta10-eth1 10.0.109.10/24")
 

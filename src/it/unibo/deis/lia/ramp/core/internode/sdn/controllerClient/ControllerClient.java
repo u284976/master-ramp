@@ -1,6 +1,7 @@
 package it.unibo.deis.lia.ramp.core.internode.sdn.controllerClient;
 
 import java.io.*;
+import java.net.Inet4Address;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.net.SocketException;
@@ -14,6 +15,8 @@ import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ThreadLocalRandom;
+
+import com.opencsv.CSVWriter;
 
 import it.unibo.deis.lia.ramp.core.e2e.*;
 import it.unibo.deis.lia.ramp.core.internode.sdn.advancedDataPlane.dataPlaneMessage.DataPlaneMessage;
@@ -1374,6 +1377,9 @@ public class ControllerClient extends Thread implements ControllerClientInterfac
     public void disableMeasure(){
         measureActive = false;
     }
+    public boolean getMeasureActive(){
+        return measureActive;
+    }
 
     private class PacketHandler extends Thread {
 
@@ -1967,7 +1973,7 @@ public class ControllerClient extends Thread implements ControllerClientInterfac
 
         private Map<String, NodeStats> networkInterfaceStats;
         private boolean active;
-        private Map<InetAddress, Long> lastMeasureTimes = new HashMap<InetAddress, Long>();
+        private Map<String, Long> lastMeasureTimes = new HashMap<String, Long>();
 
         UpdateManager() {
             this.networkInterfaceStats = new HashMap<>();
@@ -2080,18 +2086,22 @@ public class ControllerClient extends Thread implements ControllerClientInterfac
 
             Vector<InetAddress> addresses = Heartbeater.getInstance(false).getNeighbors();
             for(InetAddress address : addresses){
+                if(!measureActive){
+                    break;
+                }
+                String[] addr = new String[1];
+                // address = /10.0.0.1
+                // addr[0] = 10.0.0.1
+                addr[0] = address.toString().substring(1);
             
-                Long lastMeasureTime = lastMeasureTimes.get(address);
-                if(lastMeasureTime != null && System.currentTimeMillis() - lastMeasureTime < 3*TIME_INTERVAL){
+                Long lastMeasureTime = lastMeasureTimes.get(addr[0]);
+                if(lastMeasureTime != null && System.currentTimeMillis() - lastMeasureTime < TIME_INTERVAL){
                     continue;
                 }
                 System.out.println("======================================");
                 System.out.println("address = " + address.toString());
                 Integer nodeId = Heartbeater.getInstance(false).getNodeId(address);
-                String[] addr = new String[1];
-                // address = /10.0.0.1
-                // addr[0] = 10.0.0.1
-                addr[0] = address.toString().substring(1);
+                
 
                 ServiceResponse service = null;
                 try {
@@ -2124,6 +2134,9 @@ public class ControllerClient extends Thread implements ControllerClientInterfac
                         clientMeasurer.releaseOccupy();;
                     }
                 };
+                if(!measureActive){
+                    break;
+                }
 
                 // if(attemp >= MAX_ATTEMP){
                 //     continue;
@@ -2137,6 +2150,11 @@ public class ControllerClient extends Thread implements ControllerClientInterfac
                 );
                 boolean retry = true;
                 while (retry) {
+                    
+                    if(!measureActive){
+                        break;
+                    }
+
                     GenericPacket gp = E2EComm.receive(client,5000);
                     UnicastPacket up = (UnicastPacket)gp;
                     Object payload = E2EComm.deserialize(up.getBytePayload());
@@ -2341,30 +2359,35 @@ public class ControllerClient extends Thread implements ControllerClientInterfac
                                  */
                                 double throughput;
                                 if(c > 295){
-                                    throughput = 5000000;    // 100 * 50000
-                                }else if(c > 220){
-                                    throughput = 1000000;    // 100 * 10000
-                                }else if(c > 140){
-                                    throughput = 500000;     // 100 * 5000
-                                }else if(c > 60){
-                                    throughput = 200000;     // 100 * 2000
-                                }else if(c > 40){
-                                    throughput = 100000;     // 100 * 1000
+                                    throughput = 5000000;
+                                }else if(c > 250){
+                                    throughput = 2000000;
+                                }else if(c > 190){
+                                    throughput = 1000000;
+                                }else if(c > 150){
+                                    throughput = 500000;
+                                }else if(c > 80){
+                                    throughput = 100000;
                                 }else{
                                     throughput = 1000*c;
                                 }
 
-                                // cheating for GA_change_test
-                                // if(Dispatcher.getLocalRampId() == 3 || address.toString().endsWith("3")){
-                                //     throughput = 200000;
-                                // }else if(Dispatcher.getLocalRampId() == 4 || address.toString().endsWith("4")){
-                                //     throughput = 500000;
-                                // }else if(Dispatcher.getLocalRampId() == 5 || address.toString().endsWith("5")){
+                                // cheating for final test
+                                // if(Dispatcher.getLocalRampId() == 8 && address.toString().endsWith("9")){
                                 //     throughput = 1000000;
+                                // }else if(Dispatcher.getLocalRampId() == 9 && address.toString().endsWith("8")){
+                                //     throughput = 1000000;
+                                // }else if(Dispatcher.getLocalRampId() == 8 && address.toString().endsWith("7")){
+                                //     throughput = 500000;
+                                // }else if(Dispatcher.getLocalRampId() == 7 && address.toString().endsWith("8")){
+                                //     throughput = 500000;
+                                // }else if(Dispatcher.getLocalRampId() == 7 && address.toString().endsWith("8")){
+
+                                // }else{
+                                //     throughput = 2000000;
                                 // }
 
-                                lastMeasureTime = System.currentTimeMillis();
-                                lastMeasureTimes.put(address,lastMeasureTime);
+                                
 
                                 // store
                                 String neighborAddress = service.getServerDest()[0];
@@ -2396,23 +2419,31 @@ public class ControllerClient extends Thread implements ControllerClientInterfac
                                 // make while loop do again and receive response
                                 retry = true;
                                 break;
+                                
                         }                       
                     }
                 }
             }
-            ControllerMessageUpdate updateMessage = new ControllerMessageUpdate(MessageType.TOPOLOGY_LINK_UPDATE, this.networkInterfaceStats, null, null, null, null, null, null, null, null, measureResult);
-            ServiceResponse serviceResponse = getControllerService();
-            if (serviceResponse == null) {
-                System.out.println("ControllerClient: controller service not found, cannot bind client socket");
-            } else {
-                try {
-                    E2EComm.sendUnicast(serviceResponse.getServerDest(), serviceResponse.getServerNodeId(), serviceResponse.getServerPort(), serviceResponse.getProtocol(), CONTROL_FLOW_ID, E2EComm.serialize(updateMessage));
-                    System.out.println("ControllerClient UpdateManager: topology update sent to the controller");
-                } catch (Exception e) {
-                    e.printStackTrace();
+            if(measureActive){
+                if(measureResult.size()>0){
+                    for(String address : measureResult.keySet()){
+                        lastMeasureTimes.put(address,System.currentTimeMillis());
+                    }
+                    ControllerMessageUpdate updateMessage = new ControllerMessageUpdate(MessageType.TOPOLOGY_LINK_UPDATE, this.networkInterfaceStats, null, null, null, null, null, null, null, null, measureResult);
+                    ServiceResponse serviceResponse = getControllerService();
+                    if (serviceResponse == null) {
+                        System.out.println("ControllerClient: controller service not found, cannot bind client socket");
+                    } else {
+                        try {
+                            E2EComm.sendUnicast(serviceResponse.getServerDest(), serviceResponse.getServerNodeId(), serviceResponse.getServerPort(), serviceResponse.getProtocol(), CONTROL_FLOW_ID, E2EComm.serialize(updateMessage));
+                            System.out.println("ControllerClient UpdateManager: topology update sent to the controller");
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                    }
+                    client.close();
                 }
             }
-            client.close();
         }
 
         @Override
@@ -2465,6 +2496,8 @@ class tx_Listener extends Thread{
     long[] sendTime;
     long[] receiveTime;
     UnicastPacket up;
+    String nodeID = Dispatcher.getLocalRampIdString();
+    String outputFile = "../0-outputFile/" + "Measure_on_" + nodeID + ".csv";
 
     tx_Listener(UnicastPacket up , int[] seq, long[] sendTime, long[] receiveTime){
         this.seq = seq;
@@ -2477,6 +2510,22 @@ class tx_Listener extends Thread{
         timeDataType payload = null;
         try {
             payload = (timeDataType)E2EComm.deserialize(up.getBytePayload());
+
+            /**
+             * output file of client measure info
+             */
+            // CSVWriter writer = new CSVWriter(new FileWriter(outputFile, true), ','); 
+            // String sendNode = Integer.toString(up.getSourceNodeId());
+            // String sendTime = Long.toString(payload.getSendTime());
+            // String currentTime = Long.toString(System.currentTimeMillis());
+            // String seqNum = Integer.toString(payload.getSeqNumber());
+            // String payloadSize = Integer.toString(payload.getPayloadSize());
+            // String diff = Long.toString(System.currentTimeMillis() - payload.getSendTime());
+            
+            // String[] entry = {sendNode, seqNum, payloadSize, sendTime, currentTime, diff};
+            // writer.writeNext(entry);
+            // writer.close();
+
         } catch (Exception e) {
         }
         int seq = payload.getSeqNumber();

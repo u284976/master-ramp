@@ -70,14 +70,15 @@ def myNetwork():
     net.addLink(sta3, sta5)
     net.addLink(sta3, sta6)
     net.addLink(sta3, sta7)
+    
 
     net.addLink(sta4, sta8)
 
     net.addLink(sta6, sta7)
 
-    net.addLink(sta7, sta8)
+    net.addLink(sta7, sta8,bw=10)
 
-    net.addLink(sta8, sta9,bw=15)
+    net.addLink(sta8, sta9,bw=20)
 
     net.addLink(sta9, sta10)
     net.addLink(sta9, sta11)
@@ -136,6 +137,12 @@ def myNetwork():
     sta10.cmd("ifconfig sta10-eth1 10.0.109.10/24")
 
     sta11.cmd("ifconfig sta11-eth1 10.0.119.11/24")
+
+
+    # net.addLink(sta3, sta8)
+    # sta3.cmd("ifconfig sta3-eth5 10.0.38.3/24")
+    # sta8.cmd("ifconfig sta8-eth5 10.0.38.8/24")
+
     
     CLI.do_openXterm = openXterm
     CLI.do_execute = execute
@@ -154,7 +161,7 @@ def execute(self, line):
         
         Threads.append(MyThread(node))
         Threads[i].start()
-        time.sleep(2)
+        time.sleep(1)
         # thread = MyThread(node)
         # thread.start()
     

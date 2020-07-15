@@ -23,6 +23,7 @@ import it.unibo.deis.lia.ramp.service.management.ServiceResponse;
 import test.iotos.messagetype.timeDataType;
 
 import test.iotos.testbatch.SetupFinalTest;
+import test.iotos.testbatch.SetupFinalTest2;
 import test.iotos.testbatch.SetupTestBatch;
 
 public class SDNClient{
@@ -46,7 +47,7 @@ public class SDNClient{
     public static void main(String[] args){
         
         // change here to change testBatch
-        testBatch = new SetupFinalTest();
+        testBatch = new SetupFinalTest2();
         TestTime = testBatch.getTestBatchTime();
         PathSelectionMetric testMetric = testBatch.getPathSelectionMetric();
         
@@ -56,6 +57,7 @@ public class SDNClient{
         System.out.println("================================");
 
         ramp = RampEntryPoint.getInstance(true, null);
+        nodeID = Integer.toString(Dispatcher.getLocalRampId());
 
         /**
          * wait a few second to allow the node to discover 
@@ -88,7 +90,13 @@ public class SDNClient{
         }));
 
         controllerClient = ControllerClient.getInstance();
-        controllerClient.enableMeasure();
+        // cheating for final topo let network resource more sufficient
+        if(nodeID.equals("9") || nodeID.equals("6")){
+            controllerClient.disableMeasure();
+        }else{
+            controllerClient.enableMeasure();
+        }
+        
 
         System.out.println("========================================");
         System.out.println("get controller client instance done!!!!!");
@@ -102,16 +110,20 @@ public class SDNClient{
         /**
          * register service and waiting message by other client
          */
+        
+        int protocol = E2EComm.UDP;
+        if(nodeID.equals("11")){
+            protocol = E2EComm.TCP;
+        }
         try{
-            applicationSocket = E2EComm.bindPreReceive(E2EComm.UDP);
+            applicationSocket = E2EComm.bindPreReceive(protocol);
         }catch(Exception e){
             e.printStackTrace();
         }
-        nodeID = Integer.toString(Dispatcher.getLocalRampId());
         ServiceManager.getInstance(false).registerService(
             "application" + nodeID,             // serviceName
             applicationSocket.getLocalPort(),   // servicePort
-            E2EComm.UDP                         // protocol
+            protocol                            // protocol
         );
 
         System.out.println("========================================");
@@ -197,7 +209,7 @@ public class SDNClient{
             if(testBatch.getMobility() == false){
                 controllerClient.disableMeasure();
             }
-    
+
             System.out.println("========================================");
             System.out.println("send request to SDNController!!!!!");
             System.out.println("========================================");
@@ -227,7 +239,7 @@ public class SDNClient{
                         controllerService.getServerNodeId(),
                         controllerService.getServerPort(),
                         controllerService.getProtocol(),
-                        1,
+                        0,
                         E2EComm.serialize(requestMessage)
                     );
 
@@ -269,9 +281,9 @@ public class SDNClient{
                 System.out.println("Waiting new flow path to Start Traffic");
                 System.out.println("========================================");
 
-                while (System.currentTimeMillis() < startTime+20000) {
+                while (System.currentTimeMillis() < startTime+10000) {
                     try {
-                        Thread.sleep(startTime+20000 - System.currentTimeMillis());
+                        Thread.sleep(startTime+10000 - System.currentTimeMillis());
                     } catch (Exception e) {
                     }
                 }
@@ -400,8 +412,8 @@ class receiveThread extends Thread{
             writer.writeNext(entry2);
             writer.close();
             while (appActive) {
-                    UnicastPacket up = (UnicastPacket)E2EComm.receive(applicationSocket);
-                    new packetHandler(up, outputFile).start();
+                UnicastPacket up = (UnicastPacket)E2EComm.receive(applicationSocket);
+                new packetHandler(up, outputFile).start();
             }
             
         } catch (Exception e) {
@@ -413,10 +425,12 @@ class packetHandler extends Thread{
 
     private UnicastPacket up;
     private String outputFile;
+    private long currentTime;
 
     public packetHandler(UnicastPacket up, String outputFile){
         this.up = up;
         this.outputFile = outputFile;
+        currentTime = System.currentTimeMillis();
     }
 
     public void run(){
@@ -425,12 +439,13 @@ class packetHandler extends Thread{
             CSVWriter writer = new CSVWriter(new FileWriter(outputFile, true), ','); 
             timeDataType payload = (timeDataType)E2EComm.deserialize(up.getBytePayload());
 
-            String sendTime = Long.toString(payload.getSendTime());
-            String currentTime = Long.toString(System.currentTimeMillis());
             String seqNum = Integer.toString(payload.getSeqNumber());
+            String sendTime = Long.toString(payload.getSendTime());
+            String currentTimeString = Long.toString(currentTime);
             String payloadSize = Integer.toString(payload.getPayloadSize());
+            String delay = Long.toString(currentTime-payload.getSendTime());
             
-            String[] entry = {seqNum, sendTime, currentTime, payloadSize};
+            String[] entry = {seqNum, sendTime, currentTimeString, payloadSize, delay};
             writer.writeNext(entry);
             writer.close();
         } catch (Exception e) {

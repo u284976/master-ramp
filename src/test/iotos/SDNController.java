@@ -8,6 +8,7 @@ import it.unibo.deis.lia.ramp.core.internode.sdn.controllerClient.ControllerClie
 import it.unibo.deis.lia.ramp.core.internode.sdn.controllerService.ControllerService;
 import it.unibo.deis.lia.ramp.service.management.ServiceManager;
 import test.iotos.testbatch.SetupFinalTest;
+import test.iotos.testbatch.SetupFinalTest2;
 import test.iotos.testbatch.SetupTestBatch;
 
 public class SDNController{
@@ -32,7 +33,7 @@ public class SDNController{
     public static void main(String[] args){
 		
 		// change here to change testBatch
-		testBatch = new SetupFinalTest();
+		testBatch = new SetupFinalTest2();
 		
 		testBatchName = testBatch.getTestBatchName();
 		testTime = testBatch.getTestBatchTime();
@@ -76,7 +77,7 @@ public class SDNController{
 		}
 		
 		controllerClient = ControllerClient.getInstance();
-		controllerClient.enableMeasure();
+		// controllerClient.enableMeasure();
 		
 		/**
          * register service and waiting message by other client
@@ -116,12 +117,15 @@ public class SDNController{
 		System.out.println("controller notice to all client");
 		System.out.println("================================");
 
+		if(testBatch.getMobility() == false){
+			controllerClient.disableMeasure();
+		}
 		try {
 			Thread.sleep(10000);
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
-		controllerClient.disableMeasure();
+		
 
 		while (!controllerService.checkComplete()) {
 			try {

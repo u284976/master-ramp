@@ -195,6 +195,7 @@ public class GeneticPacketForward implements DataPlaneForwarder{
         // System.out.println("==========GeneticPacketForward==========");
         // System.out.println("receivedTcpUnicastPacket");
         // System.out.println("==========GeneticPacketForward==========");
+        receivedUdpUnicastPacket(up);
     }
 	public void receivedTcpUnicastHeader(UnicastHeader uh){
         // System.out.println("==========GeneticPacketForward==========");

@@ -1862,11 +1862,16 @@ public class ControllerService extends Thread {
                             System.out.println(neighborEdge.getId() + ", delay = " + delay + ", throughput = " + throughput);
 
                             // cheating for time share 2
-                            if(clientNodeId == 9 || clientNodeId == 8){
-                                throughput = 1000000;
-                            }else{
-                                throughput = 5000000;
-                            }
+                            // if(clientNodeId == 9){
+                            //     throughput = 1000000;
+                            // }else if(clientNodeId == 7){
+                            //     throughput = 800000;
+                            // }else if(clientNodeId == 4 || clientNodeId == 8){
+                            //     throughput = 500000;
+                            // }else{
+                            //     throughput = 2000000;
+                            // }
+
                             /**
                              * if testBatchMobility == false
                              * means this testbatch only want to test some scenario, not to emulate actual envrioment
