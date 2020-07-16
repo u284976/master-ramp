@@ -210,6 +210,13 @@ public class SDNClient{
                 controllerClient.disableMeasure();
             }
 
+            if(nodeID.equals("7")){
+                try {
+                    Thread.sleep(2000);
+                } catch (Exception e) {
+                }
+            }
+
             System.out.println("========================================");
             System.out.println("send request to SDNController!!!!!");
             System.out.println("========================================");

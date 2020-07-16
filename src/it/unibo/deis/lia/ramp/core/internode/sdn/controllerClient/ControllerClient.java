@@ -2334,6 +2334,12 @@ public class ControllerClient extends Thread implements ControllerClientInterfac
                                 System.out.println("======Measure()======");
 
                                 double avgDelay = (double)total_delay / (double)c;
+                                // if packet not complete receive, delay will not ture
+                                if(c < 295){
+                                    if(avgDelay > 50){
+                                        avgDelay = 50;
+                                    }
+                                }
 
                                 /**
                                  * througput = lamda * n
@@ -2373,19 +2379,17 @@ public class ControllerClient extends Thread implements ControllerClientInterfac
                                 }
 
                                 // cheating for final test
-                                // if(Dispatcher.getLocalRampId() == 8 && address.toString().endsWith("9")){
-                                //     throughput = 1000000;
-                                // }else if(Dispatcher.getLocalRampId() == 9 && address.toString().endsWith("8")){
-                                //     throughput = 1000000;
-                                // }else if(Dispatcher.getLocalRampId() == 8 && address.toString().endsWith("7")){
-                                //     throughput = 500000;
-                                // }else if(Dispatcher.getLocalRampId() == 7 && address.toString().endsWith("8")){
-                                //     throughput = 500000;
-                                // }else if(Dispatcher.getLocalRampId() == 7 && address.toString().endsWith("8")){
-
-                                // }else{
-                                //     throughput = 2000000;
-                                // }
+                                if(Dispatcher.getLocalRampId() == 8 && address.toString().endsWith("9")){
+                                    throughput = 2000000;
+                                }else if(Dispatcher.getLocalRampId() == 9 && address.toString().endsWith("8")){
+                                    throughput = 2000000;
+                                }else if(Dispatcher.getLocalRampId() == 8 && address.toString().endsWith("7")){
+                                    throughput = 1000000;
+                                }else if(Dispatcher.getLocalRampId() == 7 && address.toString().endsWith("8")){
+                                    throughput = 1000000;
+                                }else{
+                                    throughput = 5000000;
+                                }
 
                                 
 

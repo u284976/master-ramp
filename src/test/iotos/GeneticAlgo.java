@@ -12,6 +12,7 @@ import org.graphstream.graph.Node;
 import org.graphstream.graph.implementations.Graphs;
 import org.graphstream.graph.implementations.MultiNode;
 
+import android.R.bool;
 import it.unibo.deis.lia.ramp.core.e2e.E2EComm;
 import it.unibo.deis.lia.ramp.core.internode.Resolver;
 import it.unibo.deis.lia.ramp.core.internode.sdn.applicationRequirements.ApplicationRequirements;
@@ -31,7 +32,7 @@ public class GeneticAlgo implements TopologyGraphSelector{
 
     private static final double NODE_OVERLOAD = -1;
     private static final double LINK_OVERLOAD = -2;
-    private static final double fitnessThreshold = 30;
+    private static final double fitnessThreshold = 5;
 
     private static final int GenerateMAX = 5;
     
@@ -146,8 +147,9 @@ public class GeneticAlgo implements TopologyGraphSelector{
             flowPaths.put(flowID, path);
         }
 
-        formalMethod2(checkGraph, flowPaths, flowAR);
+        formalMethod3(checkGraph, flowPaths, flowAR);
 
+        boolean findOverLoad = false;
         Map<Integer,Double> flowDelays = new HashMap<>();
         Map<Integer,Double> flowThroughputs = new HashMap<>();
         for(int flowID : flowPaths.keySet()){
@@ -156,44 +158,55 @@ public class GeneticAlgo implements TopologyGraphSelector{
              */
             String lastNodeID = Integer.toString(flowPaths.get(flowID).getDestinationNodeId());
             MultiNode lastNode = checkGraph.getNode(lastNodeID);
+            if((double)lastNode.getAttribute(Integer.toString(flowID)+"delayOut") == NODE_OVERLOAD || (double)lastNode.getAttribute(Integer.toString(flowID)+"delayOut") == LINK_OVERLOAD){
+                findOverLoad = true;
+                break;
+            }
+            System.out.println("===========formal method output===========");
+            System.out.println("source :" + flowSources.get(flowID) + ", delay = " + lastNode.getAttribute(Integer.toString(flowID) + "delayOut") + ", throughput = " + lastNode.getAttribute(Integer.toString(flowID) + "minThroughput"));
+            System.out.println("===========formal method output===========");
             flowDelays.put(flowID, lastNode.getAttribute(Integer.toString(flowID) + "delayOut"));
             flowThroughputs.put(flowID, lastNode.getAttribute(Integer.toString(flowID) + "minThroughput"));
         }
 
-        Map<Integer,Double> flowFits = calculateFitness(flowAR,flowDelays,flowThroughputs);
+        Map<Integer,Double> flowFits = null;
+        boolean allFit = true;
+        if(!findOverLoad){
+            flowFits = calculateFitness(flowAR,flowDelays,flowThroughputs);
 
+            for(Integer flowID : flowFits.keySet()){
+                System.out.println("===========GeneticAlgo============");
+                System.out.println("fitness value of flow " + flowID + " is :" + flowFits.get(flowID));
+                System.out.println("require: delay = " + flowAR.get(flowID).getRequireDelay() + ", throughput = " + flowAR.get(flowID).getRequireThroughput());
+                System.out.println("predict: delay = " + flowDelays.get(flowID) + ", throughput = " + flowThroughputs.get(flowID));
+                System.out.println("===========GeneticAlgo============");
+                if(flowFits.get(flowID) > fitnessThreshold){
+                    allFit = false;
+                }
+            }
+
+            if(allFit){
+                // in formal method, will modify the flowPath (add source into the pathNodeID),
+                // so neede remove it
+                System.out.println("===========Genetic Output============");
+                System.out.println("request by node:" + sourceNodeId);
+                System.out.println("find path at first BFS path, don't need to change other path");
+                for(int nodeID : tempPath.getPathNodeIds()){
+                    System.out.print(nodeID+" ");
+                }
+                System.out.println();
+                System.out.println("===========Genetic Output============");
+                List<Integer> pathNodeID = tempPath.getPathNodeIds();
+                pathNodeID.remove(0);
+
+                checkGraph.clear();
+                assert tempPath.getPath().length == tempPath.getPathNodeIds().size();
+                return tempPath;
+            }
+        }
         
 
-        boolean allFit = true;
-        for(Integer flowID : flowFits.keySet()){
-            System.out.println("===========GeneticAlgo============");
-            System.out.println("fitness value of flow " + flowID + " is :" + flowFits.get(flowID));
-            System.out.println("require: delay = " + flowAR.get(flowID).getRequireDelay() + ", throughput = " + flowAR.get(flowID).getRequireThroughput());
-            System.out.println("predict: delay = " + flowDelays.get(flowID) + ", throughput = " + flowThroughputs.get(flowID));
-            System.out.println("===========GeneticAlgo============");
-            if(flowFits.get(flowID) > fitnessThreshold){
-                allFit = false;
-            }
-        }
-
-        if(allFit){
-            // in formal method, will modify the flowPath (add source into the pathNodeID),
-            // so neede remove it
-            System.out.println("===========Genetic Output============");
-            System.out.println("request by node:" + sourceNodeId);
-            System.out.println("find path at first BFS path, don't need to change other path");
-            for(int nodeID : tempPath.getPathNodeIds()){
-                System.out.print(nodeID+" ");
-            }
-            System.out.println();
-            System.out.println("===========Genetic Output============");
-            List<Integer> pathNodeID = tempPath.getPathNodeIds();
-            pathNodeID.remove(0);
-
-            checkGraph.clear();
-            assert tempPath.getPath().length == tempPath.getPathNodeIds().size();
-            return tempPath;
-        }
+        
 
         /**
          * check LINK_OVERLOAD occur when this path add to the topo, and occur between articulation point
@@ -562,9 +575,9 @@ public class GeneticAlgo implements TopologyGraphSelector{
     
                 checkGraph = Graphs.clone(topologyGraph);
 
-                formalMethod2(checkGraph, flowPaths, flowAR);
+                formalMethod3(checkGraph, flowPaths, flowAR);
     
-                boolean findOverLoad = false;
+                findOverLoad = false;
                 for(int flowID : flowPaths.keySet()){
                     /**
                      * in the formal method, i store "calculated" delay and throughput at the last node of flow
@@ -582,7 +595,9 @@ public class GeneticAlgo implements TopologyGraphSelector{
                     continue;
                 }
     
-                flowFits.clear();
+                if(flowFits!=null){
+                    flowFits.clear();
+                }
                 flowFits = calculateFitness(flowAR,flowDelays,flowThroughputs);
                 
     
@@ -1000,6 +1015,192 @@ public class GeneticAlgo implements TopologyGraphSelector{
         return mPath;
     }
 
+    private void formalMethod3(Graph tempGraph, Map<Integer,PathDescriptor> flowPaths,
+    Map<Integer,ApplicationRequirements> flowAR){
+
+        // init edge parameter
+        for(Edge edge : tempGraph.getEachEdge()){
+            edge.addAttribute("lamda", 0.0);
+            edge.addAttribute("n", 0.0);
+        }
+        // init node parameter
+        for(Node node : tempGraph.getEachNode()){
+            node.addAttribute("lamda", 0.0);
+            node.addAttribute("n", 0.0);
+
+            // let neighbor link max throughput as node throughput
+            double maxThroughput = 0;
+            for(Edge edge : node.getEdgeSet()){
+                if((double)edge.getAttribute("throughput") > maxThroughput){
+                    maxThroughput = (double)edge.getAttribute("throughput");
+                }
+            }
+            node.addAttribute("maxThroughput", maxThroughput);
+        }
+
+        /**
+         * setup "lamda","n" attribute by "flowPath" on node and edge
+         * 
+         * lamda = combine lamda    <---- see code or paper
+         * n = combine n            <---- see code or paper
+         * ============
+         * requires attention!!!
+         * path.getPathNodeIds() is List<Integer> include Source, ex S,M1,M2,D
+         * path.getPath() is String[] "not" include Source, only M1,M2,D NetworkInterfaceCard address
+         */
+        for(int flowID : flowPaths.keySet()){
+            PathDescriptor path = flowPaths.get(flowID);
+            String[] pathAddress = path.getPath();
+            List<Integer> pathNodeIDs = path.getPathNodeIds();
+
+            double flow_lamda = (double)flowAR.get(flowID).getPacketRate();
+            double flow_n = (double)flowAR.get(flowID).getPakcetLength();
+
+            // set up node 
+            for(int nodeID : pathNodeIDs){
+                MultiNode node = tempGraph.getNode(Integer.toString(nodeID));
+                double oldLamda = (double)node.getAttribute("lamda");
+                double oldN = (double)node.getAttribute("n");
+
+                double new_lamda = oldLamda + flow_lamda;
+                double new_n = (flow_lamda*flow_n + oldLamda*oldN) / new_lamda;
+
+                node.addAttribute("lamda", new_lamda);
+                node.addAttribute("n", new_n);
+            }
+
+            // set up edge
+            for(int i=0 ; i<pathNodeIDs.size()-1 ; i++){
+                MultiNode node = tempGraph.getNode(Integer.toString(pathNodeIDs.get(i)));
+                MultiNode nextNode = tempGraph.getNode(Integer.toString(pathNodeIDs.get(i+1)));
+                String nextAddr = pathAddress[i];
+
+                for(Edge edge : node.getEdgeSetBetween(nextNode)){
+                    /**
+                     * maybe have multiple link to one neighbor node
+                     * so only select that target Network Interface Card address
+                     */
+                    if(edge.getAttribute("address_" + nextNode.getId()) == nextAddr){
+                        double oldLamda = (double)edge.getAttribute("lamda");
+                        double oldN = (double)edge.getAttribute("n");
+
+                        double new_lamda = oldLamda + flow_lamda;
+                        double new_n = (flow_lamda*flow_n + oldLamda*oldN) / new_lamda;
+
+                        edge.addAttribute("lamda", new_lamda);
+                        edge.addAttribute("n", new_n);
+                    }
+                }
+            }
+        }
+
+        // for each flow path
+        for(int flowID : flowPaths.keySet()){
+            PathDescriptor path = flowPaths.get(flowID);
+            String[] pathAddress = path.getPath();
+            List<Integer> pathNodeIDs = path.getPathNodeIds();
+
+            // On the way of flow, the smallest throughput
+            double minThroughput = Double.MAX_VALUE;
+            double delayOut = 0;
+
+
+            double flow_lamda = (double)flowAR.get(flowID).getPacketRate();
+            double flow_n = (double)flowAR.get(flowID).getPakcetLength();
+            for(int i=0 ; i<pathNodeIDs.size()-1 ; i++){
+
+                /**
+                 * calculate dispatch<--->network interface card
+                 */
+                String nodeID = Integer.toString(pathNodeIDs.get(i));
+                String nextNodeID = Integer.toString(pathNodeIDs.get(i+1));
+                MultiNode node = tempGraph.getNode(nodeID);
+                MultiNode nextNode = tempGraph.getNode(nextNodeID);
+
+                double node_throughput = (double)node.getAttribute("maxThroughput");
+                
+                double node_lamda = (double)node.getAttribute("lamda");
+                double node_n = (double)node.getAttribute("n");
+
+                double node_capacity = node_throughput - node_lamda*node_n;
+                if(node_capacity > 0){
+
+                    delayOut = delayOut + flow_n/node_capacity;
+
+                    if(node_throughput < minThroughput){
+                        minThroughput = node_throughput;
+                    }
+
+                }else{
+                    System.out.println();
+                    System.out.println("===========formalMethod============");
+                    System.out.println("overload on node: " + nodeID);
+                    System.out.println("===========formalMethod============");
+                    System.out.println();
+
+                    // continues for other flowPaths
+                    // and let fitness value be a speicial value
+                    delayOut = NODE_OVERLOAD;
+                    minThroughput = NODE_OVERLOAD;
+                    
+                    break;
+                }
+
+
+                /**
+                 * calculate link between node,nextNode
+                 * 
+                 * maybe have multiple link to nextNode
+                 * so only select that target Network Interface Card address
+                 */
+                boolean failonLink = false;
+                String nextAddr = pathAddress[i];
+                for(Edge edge : node.getEdgeSetBetween(nextNode)){
+                    if(edge.getAttribute("address_" + nextNode.getId()) == nextAddr){
+                        
+                        double link_throughput = (double)edge.getAttribute("throughput");
+
+                        double link_lamda = (double)edge.getAttribute("lamda");
+                        double link_n = (double)edge.getAttribute("n");
+
+                        double link_capacity = link_throughput - link_lamda*link_n;
+                        if(link_capacity > 0){
+
+                            double link_delay = (double)edge.getAttribute("delay");
+                            delayOut = delayOut + link_delay;
+
+                            if(link_throughput < minThroughput){
+                                minThroughput = link_throughput;
+                            }
+                        }else{
+                            System.out.println();
+                            System.out.println("===========formalMethod============");
+                            System.out.println("overload on link between : " + node.getId() + " to " + nextNode.getId());
+                            System.out.println("===========formalMethod============");
+                            System.out.println();
+                            // continues for other flowPaths
+                            // and let fitness value be a speicial value
+                            delayOut = LINK_OVERLOAD;
+                            minThroughput = LINK_OVERLOAD;
+                            
+                            failonLink = true;
+                        }
+
+                        break;
+                    }
+                }
+                if(failonLink){
+                    break;
+                }
+            }
+
+            int lastNodeID = path.getDestinationNodeId();
+            MultiNode lastNode = tempGraph.getNode(Integer.toString(lastNodeID));
+            lastNode.addAttribute(Integer.toString(flowID) + "delayOut", delayOut);
+            lastNode.addAttribute(Integer.toString(flowID) + "minThroughput", minThroughput);
+        }
+    }
+
     private void formalMethod2(Graph tempGraph, Map<Integer,PathDescriptor> flowPaths,
                                 Map<Integer,ApplicationRequirements> flowAR){
 
@@ -1069,6 +1270,8 @@ public class GeneticAlgo implements TopologyGraphSelector{
                 }
             }
         }
+
+
 
         // for each flow path
         for(int flowID : flowPaths.keySet()){

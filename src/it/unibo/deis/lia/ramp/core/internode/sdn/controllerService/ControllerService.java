@@ -1075,6 +1075,10 @@ public class ControllerService extends Thread {
                     allSet = false;
                     break;
                 }
+                if(edge.getAttribute("delay") == null){
+                    allSet = false;
+                    break;
+                }
                 // add 2020-06-15 because these attribute are required in the BFS
                 if(edge.getAttribute("address_" + edge.getNode0().getId()) == null){
                     allSet = false;
@@ -1094,7 +1098,7 @@ public class ControllerService extends Thread {
 
         for(Edge edge : topologyGraph.getEachEdge()){
             System.out.println("***************************");
-            System.out.println(edge.getId() + ", throughput = " + edge.getAttribute("throughput"));
+            System.out.println(edge.getId() + ", throughput = " + edge.getAttribute("throughput") + ", delay = " + edge.getAttribute("delay"));
             System.out.println("***************************");
         }
         
@@ -1856,8 +1860,6 @@ public class ControllerService extends Thread {
                         if(label.contains(neighborAddress)){
 
                             double delay = measureResult.get(neighborAddress).get(0);
-                            neighborEdge.addAttribute("delay", delay);
-
                             double throughput = measureResult.get(neighborAddress).get(1);
                             System.out.println(neighborEdge.getId() + ", delay = " + delay + ", throughput = " + throughput);
 
@@ -1877,12 +1879,16 @@ public class ControllerService extends Thread {
                              * means this testbatch only want to test some scenario, not to emulate actual envrioment
                              * so topology's complete are important need "pretty"
                              */
-                            if(testBatchMobility == false && neighborEdge.getAttribute("throughput") != null){
+                            if(testBatchMobility == false && neighborEdge.getAttribute("throughput") != null && neighborEdge.getAttribute("delay") != null){
                                 if(throughput > (double)neighborEdge.getAttribute("throughput")){
                                     neighborEdge.addAttribute("throughput", throughput);
                                 }
+                                if(delay < (double)neighborEdge.getAttribute("delay")){
+                                    neighborEdge.addAttribute("delay", delay);
+                                }
                             }else{
                                 neighborEdge.addAttribute("throughput", throughput);
+                                neighborEdge.addAttribute("delay", delay);
                             }
                             
                             

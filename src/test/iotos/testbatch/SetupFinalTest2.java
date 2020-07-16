@@ -19,12 +19,12 @@ public class SetupFinalTest2 implements SetupTestBatch {
         return false;
     }
     public boolean getEnableFixedness(){
-        return false;
-        // return true;
+        // return false;
+        return true;
     }
     public PathSelectionMetric getPathSelectionMetric(){
-        // return PathSelectionMetric.GENETIC_ALGO;
-        return PathSelectionMetric.BREADTH_FIRST;
+        return PathSelectionMetric.GENETIC_ALGO;
+        // return PathSelectionMetric.BREADTH_FIRST;
     }
     public TrafficEngineeringPolicy getTrafficEngineeringPolicy(){
         return TrafficEngineeringPolicy.NO_FLOW_POLICY;
@@ -84,33 +84,33 @@ public class SetupFinalTest2 implements SetupTestBatch {
         switch (nodeID) {
             case "2":       // send to 10
                 trafficType = TrafficType.VIDEO_STREAM;
-                payloadSize = 25002;
+                payloadSize = 50002;
                 GenPacketPerSeconds = 10;
-                requireDelay = 200.0;
+                requireDelay = 40.0;
                 requireThroughput = 0.0;
                 duration = 25;
                 break;
             case "5":       // send to 11
                 trafficType = TrafficType.FILE_TRANSFER;
-                payloadSize = 25005;
+                payloadSize = 50005;
                 GenPacketPerSeconds = 10;
                 requireDelay = 0.0;
-                requireThroughput = 250050.0;
+                requireThroughput = 500050.0;
                 duration = 25;
                 break;
             case "6":       // send to 11
                 trafficType = TrafficType.FILE_TRANSFER;
-                payloadSize = 25006;
+                payloadSize = 50006;
                 GenPacketPerSeconds = 10;
                 requireDelay = 0.0;
-                requireThroughput = 250060.0;
+                requireThroughput = 500060.0;
                 duration = 25;
                 break;
             case "7":       // send to 10
                 trafficType = TrafficType.VIDEO_STREAM;
-                payloadSize = 25007;
+                payloadSize = 50007;
                 GenPacketPerSeconds = 10;
-                requireDelay = 200.0;
+                requireDelay = 40.0;
                 requireThroughput = 0.0;
                 duration = 25;
                 break;
