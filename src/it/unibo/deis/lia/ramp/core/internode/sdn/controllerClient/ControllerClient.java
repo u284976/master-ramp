@@ -2383,10 +2383,6 @@ public class ControllerClient extends Thread implements ControllerClientInterfac
                                     throughput = 2000000;
                                 }else if(Dispatcher.getLocalRampId() == 9 && address.toString().endsWith("8")){
                                     throughput = 2000000;
-                                }else if(Dispatcher.getLocalRampId() == 8 && address.toString().endsWith("7")){
-                                    throughput = 1000000;
-                                }else if(Dispatcher.getLocalRampId() == 7 && address.toString().endsWith("8")){
-                                    throughput = 1000000;
                                 }else{
                                     throughput = 5000000;
                                 }

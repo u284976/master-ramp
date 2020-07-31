@@ -11,6 +11,7 @@
 ./src/test/sdncontroller/ControllerClientTest.java
 ./src/test/sdncontroller/ControllerClientMLRTestReceiver.java
 ./src/test/sdncontroller/OsRoutingTest.java
+./src/test/iotos/wifi_test_sender.java
 ./src/test/iotos/GeneticPacketForward.java
 ./src/test/iotos/copyARMap.java
 ./src/test/iotos/GeneticAlgo.java
@@ -28,6 +29,7 @@
 ./src/test/iotos/messagetype/CollectNetworkInfoRequest.java
 ./src/test/iotos/messagetype/timeDataType.java
 ./src/test/iotos/dfs.java
+./src/test/iotos/wifi_test_receive.java
 ./src/test/iotos/ControllerMessageReady.java
 ./src/test/iotos/csvWrite.java
 ./src/test/iotos/ClientMeasurer.java
