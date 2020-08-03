@@ -216,7 +216,7 @@ public class ClientMeasurer extends Thread{
          * if we have the ability to test on a decentralized physical platform in the future
          * this value can be set larger
          */
-		long computedSleepTime = 1;
+		long computedSleepTime = 10;
         long currentTime;
         
 		packet.setPayloadSize(1000);
@@ -340,7 +340,7 @@ public class ClientMeasurer extends Thread{
 			}
         }
         
-        packet.setPayloadSize(20000);
+        packet.setPayloadSize(14000);
 		while(System.currentTimeMillis() - prewhile <= 1600){
 			currentTime = System.currentTimeMillis();
 			packet.setSeqNumber(i);
@@ -370,7 +370,7 @@ public class ClientMeasurer extends Thread{
 			}
 		}
 
-        packet.setPayloadSize(30000);
+        packet.setPayloadSize(16000);
 		while(System.currentTimeMillis() - prewhile <= 2000){
 			currentTime = System.currentTimeMillis();
 			packet.setSeqNumber(i);
@@ -400,7 +400,7 @@ public class ClientMeasurer extends Thread{
 			}
         }
         
-        packet.setPayloadSize(30000);
+        packet.setPayloadSize(18000);
 		while(System.currentTimeMillis() - prewhile <= 2400){
 			currentTime = System.currentTimeMillis();
 			packet.setSeqNumber(i);
@@ -430,7 +430,7 @@ public class ClientMeasurer extends Thread{
 			}
 		}
 
-		packet.setPayloadSize(50000);
+		packet.setPayloadSize(20000);
 		while(System.currentTimeMillis() - prewhile <= 3000){
 			currentTime = System.currentTimeMillis();
 			packet.setSeqNumber(i);
