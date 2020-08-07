@@ -29,7 +29,7 @@ def myNetwork():
 
     info( '*** Add hosts/stations\n')
     sta1 = net.addStation('sta1', ip='10.0.0.1/24',
-                           position='210.0,225.0,0',range=1)
+                           position='300.0,300.0,0',range=1)
     sta2 = net.addStation('sta2', ip='10.0.0.2/24',
                            position='100.0,100.0,0')
     sta3 = net.addStation('sta3', ip='10.0.0.3/24',
