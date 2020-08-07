@@ -13,7 +13,7 @@ public class SetupFinalTest2 implements SetupTestBatch {
         return "Final_Test2";
     }
     public String getTestBatchTime(){
-        return "2020-07-12";
+        return "2020-08-05";
     }
     public boolean getMobility(){
         return false;
@@ -27,8 +27,8 @@ public class SetupFinalTest2 implements SetupTestBatch {
         return PathSelectionMetric.BREADTH_FIRST;
     }
     public TrafficEngineeringPolicy getTrafficEngineeringPolicy(){
-        // return TrafficEngineeringPolicy.NO_FLOW_POLICY;
-        return TrafficEngineeringPolicy.TRAFFIC_SHAPING;
+        return TrafficEngineeringPolicy.NO_FLOW_POLICY;
+        // return TrafficEngineeringPolicy.TRAFFIC_SHAPING;
     }
     public int getNumberOfClient(){
         return 11;
@@ -102,7 +102,7 @@ public class SetupFinalTest2 implements SetupTestBatch {
                 trafficType = TrafficType.FILE_TRANSFER;
                 payloadSize = 50006;
                 GenPacketPerSeconds = 10;
-                requireDelay = 0.0;
+                requireDelay  = 0.0;
                 requireThroughput = 500060.0;
                 duration = 25;
                 break;

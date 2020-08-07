@@ -32,7 +32,7 @@ public class GeneticAlgo implements TopologyGraphSelector{
 
     private static final double NODE_OVERLOAD = -1;
     private static final double LINK_OVERLOAD = -2;
-    private static final double fitnessThreshold = 5;
+    private static final double fitnessThreshold = 1;
 
     private static final int GenerateMAX = 5;
     

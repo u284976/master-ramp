@@ -2514,17 +2514,17 @@ class tx_Listener extends Thread{
             /**
              * output file of client measure info
              */
-            CSVWriter writer = new CSVWriter(new FileWriter(outputFile, true), ','); 
-            String sendNode = Integer.toString(up.getSourceNodeId());
-            String sendTime = Long.toString(payload.getSendTime());
-            String currentTime = Long.toString(System.currentTimeMillis());
-            String seqNum = Integer.toString(payload.getSeqNumber());
-            String payloadSize = Integer.toString(payload.getPayloadSize());
-            String diff = Long.toString(System.currentTimeMillis() - payload.getSendTime());
+            // CSVWriter writer = new CSVWriter(new FileWriter(outputFile, true), ','); 
+            // String sendNode = Integer.toString(up.getSourceNodeId());
+            // String sendTime = Long.toString(payload.getSendTime());
+            // String currentTime = Long.toString(System.currentTimeMillis());
+            // String seqNum = Integer.toString(payload.getSeqNumber());
+            // String payloadSize = Integer.toString(payload.getPayloadSize());
+            // String diff = Long.toString(System.currentTimeMillis() - payload.getSendTime());
             
-            String[] entry = {sendNode, seqNum, payloadSize, sendTime, currentTime, diff};
-            writer.writeNext(entry);
-            writer.close();
+            // String[] entry = {sendNode, seqNum, payloadSize, sendTime, currentTime, diff};
+            // writer.writeNext(entry);
+            // writer.close();
 
         } catch (Exception e) {
         }
