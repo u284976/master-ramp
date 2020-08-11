@@ -1,6 +1,7 @@
 package it.unibo.deis.lia.ramp.core.internode.sdn.controllerClient;
 
 import java.io.*;
+import java.lang.reflect.Array;
 import java.net.Inet4Address;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
@@ -2259,24 +2260,143 @@ public class ControllerClient extends Thread implements ControllerClientInterfac
                                 // }
                                 
 
+                                // measure link method 2020/06/17~2020/08/09
+
+                                // /**
+                                //  * can refer to test.iotos.testSender and test.iotos.testReceiver
+                                //  * this block is receiver
+                                //  */
+
+                                // int[] seq = new int[300];
+                                // long[] sendTime = new long[300];
+                                // long[] receiveTime = new long[300];
+                                // for(int i=0 ; i<seq.length ; i++){
+                                //     seq[i] = -1;
+                                //     sendTime[i] = -1;
+                                //     receiveTime[i] = -1;
+                                // }
+
+                                // BoundReceiveSocket TxServer = E2EComm.bindPreReceive(E2EComm.UDP);
+                                // msg = new MeasureMessage(MeasureMessage.Test_Tx,TxServer.getLocalPort());
+                                // E2EComm.sendUnicast(
+                                //     service.getServerDest(),
+                                //     service.getServerPort(),
+                                //     service.getProtocol(),
+                                //     E2EComm.serialize(msg)
+                                // );
+
+                                // UnicastPacket tx_up = null;
+                                // try {
+                                //     tx_up = (UnicastPacket)E2EComm.receive(TxServer);
+                                //     new tx_Listener(tx_up, seq, sendTime, receiveTime).start();
+                                // } catch (Exception e) {
+                                // }
+
+
+                                // long preWhile = System.currentTimeMillis();
+                                // while(System.currentTimeMillis() - preWhile < 3000 ){
+                                //     try {
+                                //         up = (UnicastPacket)E2EComm.receive(TxServer,500);
+                                //         if(up==null){
+                                //             break;
+                                //         }
+                                //         new tx_Listener(up, seq, sendTime, receiveTime).start();
+                                //     } catch (Exception e) {
+                                //         // System.out.println("no packet arrival , Tx test done");
+                                //     }
+                                // }
+
+                                // msg = new MeasureMessage(MeasureMessage.Test_Done);
+                                // E2EComm.sendUnicast(
+                                //     service.getServerDest(),
+                                //     service.getServerPort(),
+                                //     service.getProtocol(),
+                                //     E2EComm.serialize(msg)
+                                // );
+
+                                // TxServer.close();
+                                // clientMeasurer.releaseOccupy();
+
+                                // int c = 0;
+                                // long[] delay = new long[300];
+                                // long total_delay = 0;
+                                // for(int i=0 ; i<seq.length ; i++){
+                                //     if(sendTime[i] == -1){
+                        
+                                //     }else{
+                                //         c++;
+                                //         delay[i] = receiveTime[i] - sendTime[i];
+                                //         total_delay = total_delay + delay[i];
+                                //     }
+                                // }
+
+                                // System.out.println("======Measure()======");
+                                // System.out.println("c = " + c);
+                                // System.out.println("======Measure()======");
+
+                                // double avgDelay = (double)total_delay / (double)c;
+                                // // if packet not complete receive, delay will not ture
+                                // if(c < 295){
+                                //     if(avgDelay > 50){
+                                //         avgDelay = 50;
+                                //     }
+                                // }
+
+                                // /**
+                                //  * througput = lamda * n
+                                //  * packet rate * payload size
+                                //  * packet rate is fixed
+                                //  * payload size will continus increase at 200ms 400ms 1000ms 2000ms after first packet
+                                //  * payload size = 1000, 2000, 5000, 10000, 50000, respectively
+                                //  * total transfer 3000ms and 300 packets
+                                //  * (for details, please refer to the Sender setting)
+                                //  * so we can observe how many packets are received to 
+                                //  * determine how many THROUGHPUT this link can carry
+                                //  * 
+                                //  * 
+                                //  * and because the bandwidth is limited by software ( wondershpaer or mininet.addLink(bw = 10))
+                                //  * so it doesn't fail immediately when sending larger packets, 
+                                //  * 
+                                //  * for example, "sta1------sta2" bandwidth is 5 Mbit/s = 655360 bytes/s
+                                //  * according to the previous conjecture this receive only can receive 
+                                //  * payload size = 1000, 2000, 5000, 10000,  when packet rate = 100/s
+                                //  * i.e. from the first packet after 2000ms , there will be no packet due to insuffficient bandwidth
+                                //  * so we expect to get c = 200
+                                //  * but in my test, it can still receive more than 10 packets
+                                //  */
+                                // double throughput;
+                                // if(c > 295){
+                                //     throughput = 5000000;
+                                // }else if(c > 250){
+                                //     throughput = 2000000;
+                                // }else if(c > 190){
+                                //     throughput = 1000000;
+                                // }else if(c > 150){
+                                //     throughput = 500000;
+                                // }else if(c > 80){
+                                //     throughput = 100000;
+                                // }else{
+                                //     throughput = 1000*c;
+                                // }
+
+                                // // cheating for final test
+                                // if(Dispatcher.getLocalRampId() == 8 && address.toString().endsWith("9")){
+                                //     throughput = 2000000;
+                                // }else if(Dispatcher.getLocalRampId() == 9 && address.toString().endsWith("8")){
+                                //     throughput = 2000000;
+                                // }else{
+                                //     throughput = 5000000;
+                                // }
+
+                                // measure link method 2020/06/17~2020/08/09
+                                // Packet Pair (on google calendar 2020/08/08)
+
+                                long[] sendTime = new long[5];
+                                long[] receiveTime = new long[5];
+
                                 
-
-                                /**
-                                 * can refer to test.iotos.testSender and test.iotos.testReceiver
-                                 * this block is receiver
-                                 */
-
-                                int[] seq = new int[300];
-                                long[] sendTime = new long[300];
-                                long[] receiveTime = new long[300];
-                                for(int i=0 ; i<seq.length ; i++){
-                                    seq[i] = -1;
-                                    sendTime[i] = -1;
-                                    receiveTime[i] = -1;
-                                }
-
-                                BoundReceiveSocket TxServer = E2EComm.bindPreReceive(E2EComm.UDP);
-                                msg = new MeasureMessage(MeasureMessage.Test_Tx,TxServer.getLocalPort());
+                                BoundReceiveSocket PacketPairSocket = E2EComm.bindPreReceive(E2EComm.UDP);
+                                msg = new MeasureMessage(MeasureMessage.Test_PacketPair, PacketPairSocket.getLocalPort());
                                 E2EComm.sendUnicast(
                                     service.getServerDest(),
                                     service.getServerPort(),
@@ -2284,27 +2404,29 @@ public class ControllerClient extends Thread implements ControllerClientInterfac
                                     E2EComm.serialize(msg)
                                 );
 
-                                UnicastPacket tx_up = null;
+                                UnicastPacket pp_up = null;
+                                // first measure message
                                 try {
-                                    tx_up = (UnicastPacket)E2EComm.receive(TxServer);
-                                    new tx_Listener(tx_up, seq, sendTime, receiveTime).start();
+                                    pp_up = (UnicastPacket)E2EComm.receive(PacketPairSocket);
+                                    new PacketPairListener(pp_up, sendTime, receiveTime).start();
                                 } catch (Exception e) {
                                 }
 
-
-                                long preWhile = System.currentTimeMillis();
-                                while(System.currentTimeMillis() - preWhile < 3000 ){
+                                long pp_preWhile = System.currentTimeMillis();
+                                while(System.currentTimeMillis() - pp_preWhile < 1000 ){
                                     try {
-                                        up = (UnicastPacket)E2EComm.receive(TxServer,500);
+                                        pp_up = (UnicastPacket)E2EComm.receive(PacketPairSocket,500);
                                         if(up==null){
                                             break;
                                         }
-                                        new tx_Listener(up, seq, sendTime, receiveTime).start();
+                                        new PacketPairListener(pp_up, sendTime, receiveTime).start();
                                     } catch (Exception e) {
-                                        // System.out.println("no packet arrival , Tx test done");
+                                        // System.out.println("no packet arrival , Packet Pair Test done");
                                     }
                                 }
 
+
+                                // return test Done
                                 msg = new MeasureMessage(MeasureMessage.Test_Done);
                                 E2EComm.sendUnicast(
                                     service.getServerDest(),
@@ -2313,86 +2435,47 @@ public class ControllerClient extends Thread implements ControllerClientInterfac
                                     E2EComm.serialize(msg)
                                 );
 
-                                TxServer.close();
+                                PacketPairSocket.close();
                                 clientMeasurer.releaseOccupy();
 
-                                int c = 0;
-                                long[] delay = new long[300];
-                                long total_delay = 0;
-                                for(int i=0 ; i<seq.length ; i++){
-                                    if(sendTime[i] == -1){
-                        
-                                    }else{
-                                        c++;
-                                        delay[i] = receiveTime[i] - sendTime[i];
-                                        total_delay = total_delay + delay[i];
-                                    }
-                                }
-
-                                System.out.println("======Measure()======");
-                                System.out.println("c = " + c);
-                                System.out.println("======Measure()======");
-
-                                double avgDelay = (double)total_delay / (double)c;
-                                // if packet not complete receive, delay will not ture
-                                if(c < 295){
-                                    if(avgDelay > 50){
-                                        avgDelay = 50;
-                                    }
-                                }
-
-                                /**
-                                 * througput = lamda * n
-                                 * packet rate * payload size
-                                 * packet rate is fixed
-                                 * payload size will continus increase at 200ms 400ms 1000ms 2000ms after first packet
-                                 * payload size = 1000, 2000, 5000, 10000, 50000, respectively
-                                 * total transfer 3000ms and 300 packets
-                                 * (for details, please refer to the Sender setting)
-                                 * so we can observe how many packets are received to 
-                                 * determine how many THROUGHPUT this link can carry
-                                 * 
-                                 * 
-                                 * and because the bandwidth is limited by software ( wondershpaer or mininet.addLink(bw = 10))
-                                 * so it doesn't fail immediately when sending larger packets, 
-                                 * 
-                                 * for example, "sta1------sta2" bandwidth is 5 Mbit/s = 655360 bytes/s
-                                 * according to the previous conjecture this receive only can receive 
-                                 * payload size = 1000, 2000, 5000, 10000,  when packet rate = 100/s
-                                 * i.e. from the first packet after 2000ms , there will be no packet due to insuffficient bandwidth
-                                 * so we expect to get c = 200
-                                 * but in my test, it can still receive more than 10 packets
-                                 */
-                                double throughput;
-                                if(c > 295){
-                                    throughput = 5000000;
-                                }else if(c > 250){
-                                    throughput = 2000000;
-                                }else if(c > 190){
-                                    throughput = 1000000;
-                                }else if(c > 150){
-                                    throughput = 500000;
-                                }else if(c > 80){
-                                    throughput = 100000;
-                                }else{
-                                    throughput = 1000*c;
-                                }
-
-                                // cheating for final test
-                                if(Dispatcher.getLocalRampId() == 8 && address.toString().endsWith("9")){
-                                    throughput = 2000000;
-                                }else if(Dispatcher.getLocalRampId() == 9 && address.toString().endsWith("8")){
-                                    throughput = 2000000;
-                                }else{
-                                    throughput = 5000000;
-                                }
-
                                 
+
+                                long minReceive = Long.MAX_VALUE;
+                                long maxReceive = Long.MIN_VALUE;
+                                long minSend = Long.MAX_VALUE;
+                                for(int i=0 ; i<receiveTime.length ; i++){
+                                    minReceive = Math.min(minReceive, receiveTime[i]);
+                                    maxReceive = Math.max(maxReceive, receiveTime[i]);
+                                }
+                                for(int i=0 ; i<sendTime.length ; i++){
+                                    minSend = Math.min(minSend, sendTime[i]);
+                                }
+
+                                double delay = (double)(minReceive - minSend);
+
+                                long time_diff = maxReceive - minReceive;
+                                double packetSize = 1364*5;     // obtain by the wireshark : header (364) + payload (1000)
+                                double throughput = (packetSize/(double)time_diff) * 1000;      // change to bytes / per second
+
+                                for(int i=0 ; i<sendTime.length ; i++){
+                                    System.out.println("seq = " + i);
+                                    System.out.print(sendTime[i] + "        " + receiveTime[i]);
+                                    System.out.println();
+                                }
+                                System.out.println("predict :");
+                                System.out.println("delay = " + delay + " ms");
+                                System.out.println("throughput = " + throughput + " bytes / per second");
+                                System.out.println(" = " + throughput/1024/1024*8 + "Mbit/s");
+
+                                if(time_diff == 0){
+                                    throughput = Double.MAX_VALUE;
+                                }
 
                                 // store
                                 String neighborAddress = service.getServerDest()[0];
                                 List<Double> result = new ArrayList<Double>();
-                                result.add(avgDelay);
+                                // result.add(avgDelay);
+                                result.add(delay);
                                 result.add(throughput);
                                 measureResult.put(neighborAddress, result);
                                 
@@ -2490,6 +2573,7 @@ public class ControllerClient extends Thread implements ControllerClientInterfac
 /**
  * add u284976
  * for listen Tx packet
+ * measure link method 2020/06/17~2020/08/09
  */
 class tx_Listener extends Thread{
     int[] seq;
@@ -2533,6 +2617,59 @@ class tx_Listener extends Thread{
         if(seq < 300){
             sendTime[seq] = payload.getSendTime();
             receiveTime[seq] = System.currentTimeMillis();
+        }
+    }
+}
+
+/**
+ * add u284976
+ * for listen Packet Pair (on google calendar 2020/08/08)
+ * measure link method 2020/08/09 ~
+ */
+class PacketPairListener extends Thread{
+    long[] sendTime;
+    long[] receiveTime;
+    UnicastPacket up;
+    String nodeID = Dispatcher.getLocalRampIdString();
+    String outputFile = "../0-outputFile/" + "Measure_on_" + nodeID + ".csv";
+
+    PacketPairListener(UnicastPacket up , long[] sendTime, long[] receiveTime){
+        this.sendTime = sendTime;
+        this.receiveTime = receiveTime;
+        this.up = up;
+    }
+
+    public void run(){
+        timeDataType payload = null;
+
+        try{
+            payload = (timeDataType)E2EComm.deserialize(up.getBytePayload());
+
+
+            /**
+             * output file of client measure info
+             */
+            CSVWriter writer = new CSVWriter(new FileWriter(outputFile, true), ','); 
+            String sendNode = Integer.toString(up.getSourceNodeId());
+            String sendTime = Long.toString(payload.getSendTime());
+            String currentTime = Long.toString(System.currentTimeMillis());
+            String seqNum = Integer.toString(payload.getSeqNumber());
+            String payloadSize = Integer.toString(payload.getPayloadSize());
+            String diff = Long.toString(System.currentTimeMillis() - payload.getSendTime());
+            
+            String[] entry = {sendNode, seqNum, payloadSize, sendTime, currentTime, diff};
+            writer.writeNext(entry);
+            writer.close();
+
+        } catch (Exception e){
+
+        }
+
+        int sequence = payload.getSeqNumber();
+        
+        if(sequence < 5){
+            sendTime[sequence] = payload.getSendTime();
+            receiveTime[sequence] = System.currentTimeMillis();
         }
     }
 }

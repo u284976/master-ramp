@@ -186,6 +186,41 @@ public class ClientMeasurer extends Thread{
                         
                         
                         break;
+                    
+                    case MeasureMessage.Test_PacketPair:
+
+                        String[] dest = E2EComm.ipReverse(up.getSource());
+                        int destNodeID = up.getSourceNodeId();
+                        int destPort = mm.getClientPort();
+                        int protocol = E2EComm.UDP;
+
+                        timeDataType packet = new timeDataType();
+                        packet.setPayloadSize(1000);
+
+                        for(int i=0 ; i<5 ; i++){
+                            packet.setSeqNumber(i);
+                            packet.setSendTime(System.currentTimeMillis());
+                            
+                            try{
+                                E2EComm.sendUnicast(
+                                    dest,
+                                    destNodeID,
+                                    destPort,
+                                    protocol,
+                                    false,
+                                    GenericPacket.UNUSED_FIELD,
+                                    E2EComm.DEFAULT_BUFFERSIZE,
+                                    GenericPacket.UNUSED_FIELD,
+                                    GenericPacket.UNUSED_FIELD,
+                                    GenericPacket.UNUSED_FIELD,
+                                    0,
+                                    GenericPacket.UNUSED_FIELD,
+                                    E2EComm.serialize(packet)
+                                );
+                            } catch (Exception e){
+                            }
+                        }
+                    
                     case MeasureMessage.Test_Done:
                         releaseOccupy();
                         break;

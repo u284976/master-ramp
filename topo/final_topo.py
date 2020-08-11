@@ -76,9 +76,10 @@ def myNetwork():
 
     net.addLink(sta6, sta7)
 
-    net.addLink(sta7, sta8,delay="40ms")
+    net.addLink(sta7, sta8,bw=10,delay="40ms")
 
-    net.addLink(sta8, sta9,bw=20,delay="20ms")
+    # net.addLink(sta8, sta9,bw=20,delay="20ms")
+    net.addLink(sta8, sta9,bw=5)
 
     net.addLink(sta9, sta10)
     net.addLink(sta9, sta11)

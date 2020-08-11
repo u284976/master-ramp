@@ -27,8 +27,8 @@ public class SetupFinalTest2 implements SetupTestBatch {
         return PathSelectionMetric.BREADTH_FIRST;
     }
     public TrafficEngineeringPolicy getTrafficEngineeringPolicy(){
-        return TrafficEngineeringPolicy.NO_FLOW_POLICY;
-        // return TrafficEngineeringPolicy.TRAFFIC_SHAPING;
+        // return TrafficEngineeringPolicy.NO_FLOW_POLICY;
+        return TrafficEngineeringPolicy.TRAFFIC_SHAPING;
     }
     public int getNumberOfClient(){
         return 11;
