@@ -25,6 +25,7 @@
 ./src/test/iotos/testbatch/SetupTestBatch.java
 ./src/test/iotos/testbatch/SetupFinalTest.java
 ./src/test/iotos/testbatch/SetupSimpleTest.java
+./src/test/iotos/singlePacketSender.java
 ./src/test/iotos/messagetype/MeasureMessage.java
 ./src/test/iotos/messagetype/CollectNetworkInfoRequest.java
 ./src/test/iotos/messagetype/timeDataType.java
@@ -46,6 +47,7 @@
 ./src/test/iotos/bfs.java
 ./src/test/iotos/oct.java
 ./src/test/iotos/graphdisplaytest.java
+./src/test/iotos/singlePacketReceiver.java
 ./src/test/iotos/SDNClient.java
 ./src/test/distributedactuator/DistributedActuatorClientTest.java
 ./src/test/distributedactuator/DistributedActuatorTest.java

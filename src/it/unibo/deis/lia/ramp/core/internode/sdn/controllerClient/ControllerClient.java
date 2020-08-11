@@ -2393,6 +2393,7 @@ public class ControllerClient extends Thread implements ControllerClientInterfac
 
                                 long[] sendTime = new long[5];
                                 long[] receiveTime = new long[5];
+                                List<Long> realReceiveTime = new ArrayList<>();
 
                                 
                                 BoundReceiveSocket PacketPairSocket = E2EComm.bindPreReceive(E2EComm.UDP);
@@ -2408,6 +2409,7 @@ public class ControllerClient extends Thread implements ControllerClientInterfac
                                 // first measure message
                                 try {
                                     pp_up = (UnicastPacket)E2EComm.receive(PacketPairSocket);
+                                    realReceiveTime.add(System.currentTimeMillis());
                                     new PacketPairListener(pp_up, sendTime, receiveTime).start();
                                 } catch (Exception e) {
                                 }
@@ -2419,6 +2421,7 @@ public class ControllerClient extends Thread implements ControllerClientInterfac
                                         if(up==null){
                                             break;
                                         }
+                                        realReceiveTime.add(System.currentTimeMillis());
                                         new PacketPairListener(pp_up, sendTime, receiveTime).start();
                                     } catch (Exception e) {
                                         // System.out.println("no packet arrival , Packet Pair Test done");
@@ -2459,7 +2462,8 @@ public class ControllerClient extends Thread implements ControllerClientInterfac
 
                                 for(int i=0 ; i<sendTime.length ; i++){
                                     System.out.println("seq = " + i);
-                                    System.out.print(sendTime[i] + "        " + receiveTime[i]);
+                                    System.out.print(sendTime[i] + "        " + realReceiveTime.get(i) + "      " + (realReceiveTime.get(i)-sendTime[i])
+                                                     + "        " + receiveTime[i] + "      " + (receiveTime[i]-sendTime[i]));
                                     System.out.println();
                                 }
                                 System.out.println("predict :");
@@ -2649,17 +2653,17 @@ class PacketPairListener extends Thread{
             /**
              * output file of client measure info
              */
-            CSVWriter writer = new CSVWriter(new FileWriter(outputFile, true), ','); 
-            String sendNode = Integer.toString(up.getSourceNodeId());
-            String sendTime = Long.toString(payload.getSendTime());
-            String currentTime = Long.toString(System.currentTimeMillis());
-            String seqNum = Integer.toString(payload.getSeqNumber());
-            String payloadSize = Integer.toString(payload.getPayloadSize());
-            String diff = Long.toString(System.currentTimeMillis() - payload.getSendTime());
+            // CSVWriter writer = new CSVWriter(new FileWriter(outputFile, true), ','); 
+            // String sendNode = Integer.toString(up.getSourceNodeId());
+            // String sendTime = Long.toString(payload.getSendTime());
+            // String currentTime = Long.toString(System.currentTimeMillis());
+            // String seqNum = Integer.toString(payload.getSeqNumber());
+            // String payloadSize = Integer.toString(payload.getPayloadSize());
+            // String diff = Long.toString(System.currentTimeMillis() - payload.getSendTime());
             
-            String[] entry = {sendNode, seqNum, payloadSize, sendTime, currentTime, diff};
-            writer.writeNext(entry);
-            writer.close();
+            // String[] entry = {sendNode, seqNum, payloadSize, sendTime, currentTime, diff};
+            // writer.writeNext(entry);
+            // writer.close();
 
         } catch (Exception e){
 
