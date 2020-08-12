@@ -15,6 +15,7 @@
 ./src/test/iotos/GeneticPacketForward.java
 ./src/test/iotos/copyARMap.java
 ./src/test/iotos/GeneticAlgo.java
+./src/test/iotos/RoundTripPacketReceiver.java
 ./src/test/iotos/callbyRef.java
 ./src/test/iotos/testbatch/SetupMinaTestBatch.java
 ./src/test/iotos/testbatch/SetupGAtest.java
@@ -29,6 +30,7 @@
 ./src/test/iotos/messagetype/MeasureMessage.java
 ./src/test/iotos/messagetype/CollectNetworkInfoRequest.java
 ./src/test/iotos/messagetype/timeDataType.java
+./src/test/iotos/RoundTripPacketSender.java
 ./src/test/iotos/dfs.java
 ./src/test/iotos/wifi_test_receive.java
 ./src/test/iotos/ControllerMessageReady.java
