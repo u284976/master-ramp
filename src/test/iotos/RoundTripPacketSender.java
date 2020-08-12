@@ -19,7 +19,7 @@ public class RoundTripPacketSender {
 
     public static void main(String[] args){
         try {
-            InetAddress address = InetAddress.getByName("10.0.89.9");
+            InetAddress address = InetAddress.getByName("192.168.72.8");
 
             
             DatagramSocket ds_s = new DatagramSocket();

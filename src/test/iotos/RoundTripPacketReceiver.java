@@ -22,7 +22,7 @@ public class RoundTripPacketReceiver {
             
             DatagramSocket ds_r = new DatagramSocket(3000);
             DatagramSocket ds_s = new DatagramSocket(3001);
-            InetAddress address = InetAddress.getByName("10.0.89.8");
+            InetAddress address = InetAddress.getByName("192.168.72.6");
      
             long[] sendTime = new long[number_of_packet];
             long[] receiveTime = new long[number_of_packet];
@@ -63,7 +63,7 @@ public class RoundTripPacketReceiver {
 
                 realReceiveTimes.clear();
             }
-            
+
             ds_s.close();
             ds_r.close();
 
