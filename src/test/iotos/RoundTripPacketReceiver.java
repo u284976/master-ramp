@@ -23,6 +23,7 @@ public class RoundTripPacketReceiver {
             DatagramSocket ds_r = new DatagramSocket(3000);
             DatagramSocket ds_s = new DatagramSocket(3001);
             InetAddress address = InetAddress.getByName("192.168.72.6");
+            System.out.println("Start Receiver echo to 192.168.72.6");
      
             long[] sendTime = new long[number_of_packet];
             long[] receiveTime = new long[number_of_packet];
