@@ -7,3 +7,5 @@ rm ~/ramp/12-node/it/ -r
 
 cp ~/master-ramp/classes/it ~/ramp/12-node/ -r
 cp ~/master-ramp/classes/test ~/ramp/12-node/ -r
+
+rm ~/master-ramp/classes -r
