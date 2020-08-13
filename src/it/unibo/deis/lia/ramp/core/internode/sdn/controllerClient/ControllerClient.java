@@ -2391,13 +2391,14 @@ public class ControllerClient extends Thread implements ControllerClientInterfac
                                 // measure link method 2020/06/17~2020/08/09
                                 // Packet Pair (on google calendar 2020/08/08)
 
-                                long[] sendTime = new long[5];
-                                long[] receiveTime = new long[5];
+                                int number_of_PacketPair = 10;
+
+                                long[] sendTime = new long[number_of_PacketPair];
                                 List<Long> realReceiveTime = new ArrayList<>();
 
                                 
                                 BoundReceiveSocket PacketPairSocket = E2EComm.bindPreReceive(E2EComm.UDP);
-                                msg = new MeasureMessage(MeasureMessage.Test_PacketPair, PacketPairSocket.getLocalPort());
+                                msg = new MeasureMessage(MeasureMessage.Test_PacketPair, PacketPairSocket.getLocalPort(),Integer.toString(number_of_PacketPair));
                                 E2EComm.sendUnicast(
                                     service.getServerDest(),
                                     service.getServerPort(),
@@ -2410,7 +2411,7 @@ public class ControllerClient extends Thread implements ControllerClientInterfac
                                 try {
                                     pp_up = (UnicastPacket)E2EComm.receive(PacketPairSocket);
                                     realReceiveTime.add(System.currentTimeMillis());
-                                    new PacketPairListener(pp_up, sendTime, receiveTime).start();
+                                    new PacketPairListener(pp_up, sendTime, number_of_PacketPair).start();
                                 } catch (Exception e) {
                                 }
 
@@ -2422,7 +2423,7 @@ public class ControllerClient extends Thread implements ControllerClientInterfac
                                             break;
                                         }
                                         realReceiveTime.add(System.currentTimeMillis());
-                                        new PacketPairListener(pp_up, sendTime, receiveTime).start();
+                                        new PacketPairListener(pp_up, sendTime, number_of_PacketPair).start();
                                     } catch (Exception e) {
                                         // System.out.println("no packet arrival , Packet Pair Test done");
                                     }
@@ -2441,14 +2442,15 @@ public class ControllerClient extends Thread implements ControllerClientInterfac
                                 PacketPairSocket.close();
                                 clientMeasurer.releaseOccupy();
 
-                                
+
+                                // double[] gap = new double[number_of_PacketPair];      // delay[i] - delay[i-1], without first and second packet
 
                                 long minReceive = Long.MAX_VALUE;
                                 long maxReceive = Long.MIN_VALUE;
                                 long minSend = Long.MAX_VALUE;
-                                for(int i=0 ; i<receiveTime.length ; i++){
-                                    minReceive = Math.min(minReceive, receiveTime[i]);
-                                    maxReceive = Math.max(maxReceive, receiveTime[i]);
+                                for(int i=0 ; i<number_of_PacketPair ; i++){
+                                    minReceive = Math.min(minReceive, realReceiveTime.get(i));
+                                    maxReceive = Math.max(maxReceive, realReceiveTime.get(i));
                                 }
                                 for(int i=0 ; i<sendTime.length ; i++){
                                     minSend = Math.min(minSend, sendTime[i]);
@@ -2456,24 +2458,33 @@ public class ControllerClient extends Thread implements ControllerClientInterfac
 
                                 double delay = (double)(minReceive - minSend);
 
-                                long time_diff = maxReceive - minReceive;
-                                double packetSize = 1364*5;     // obtain by the wireshark : header (364) + payload (1000)
+
+                                /**
+                                 * packet receive gap  only take 2 and later
+                                 */
+                                // for(int i=1 ; i<number_of_PacketPair ;){
+                                //     gap[i] = realReceiveTime.get(i) - realReceiveTime.get(i-1);
+                                // }
+                                double total_gap = 0;
+                                for(int i=2 ; i<number_of_PacketPair ; i++){
+                                    total_gap = total_gap + (realReceiveTime.get(i) - realReceiveTime.get(i-1));
+                                }
+
+                                long time_diff = Math.round(total_gap/(double)(number_of_PacketPair - 2));
+                                double packetSize = 1000;
                                 double throughput = (packetSize/(double)time_diff) * 1000;      // change to bytes / per second
 
-                                for(int i=0 ; i<sendTime.length ; i++){
-                                    System.out.println("seq = " + i);
-                                    System.out.print(sendTime[i] + "        " + realReceiveTime.get(i) + "      " + (realReceiveTime.get(i)-sendTime[i])
-                                                     + "        " + receiveTime[i] + "      " + (receiveTime[i]-sendTime[i]));
-                                    System.out.println();
+                                for(int i=0 ; i<number_of_PacketPair ; i++){
+                                    System.out.println(sendTime[i]+"    "+realReceiveTime.get(i)+"    "+(realReceiveTime.get(i)-sendTime[i]));
+                                }
+                               
+                                if(time_diff == 0){
+                                    throughput = 5000000;       // by previous work "Test_Tx", limit this value for GA will take this value as node throughput
                                 }
                                 System.out.println("predict :");
                                 System.out.println("delay = " + delay + " ms");
                                 System.out.println("throughput = " + throughput + " bytes / per second");
                                 System.out.println(" = " + throughput/1024/1024*8 + "Mbit/s");
-
-                                if(time_diff == 0){
-                                    throughput = Double.MAX_VALUE;
-                                }
 
                                 // store
                                 String neighborAddress = service.getServerDest()[0];
@@ -2632,14 +2643,14 @@ class tx_Listener extends Thread{
  */
 class PacketPairListener extends Thread{
     long[] sendTime;
-    long[] receiveTime;
+    int number_of_PacketPair;
     UnicastPacket up;
     String nodeID = Dispatcher.getLocalRampIdString();
     String outputFile = "../0-outputFile/" + "Measure_on_" + nodeID + ".csv";
 
-    PacketPairListener(UnicastPacket up , long[] sendTime, long[] receiveTime){
+    PacketPairListener(UnicastPacket up , long[] sendTime, int number_of_PacketPair){
         this.sendTime = sendTime;
-        this.receiveTime = receiveTime;
+        this.number_of_PacketPair = number_of_PacketPair;
         this.up = up;
     }
 
@@ -2671,9 +2682,8 @@ class PacketPairListener extends Thread{
 
         int sequence = payload.getSeqNumber();
         
-        if(sequence < 5){
+        if(sequence < number_of_PacketPair){
             sendTime[sequence] = payload.getSendTime();
-            receiveTime[sequence] = System.currentTimeMillis();
         }
     }
 }

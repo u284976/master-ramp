@@ -192,12 +192,13 @@ public class ClientMeasurer extends Thread{
                         String[] dest = E2EComm.ipReverse(up.getSource());
                         int destNodeID = up.getSourceNodeId();
                         int destPort = mm.getClientPort();
+                        int number_of_packet = Integer.parseInt(mm.getFilename());
                         int protocol = E2EComm.UDP;
 
                         timeDataType packet = new timeDataType();
                         packet.setPayloadSize(1000);
 
-                        for(int i=0 ; i<5 ; i++){
+                        for(int i=0 ; i<number_of_packet ; i++){
                             packet.setSeqNumber(i);
                             packet.setSendTime(System.currentTimeMillis());
 
