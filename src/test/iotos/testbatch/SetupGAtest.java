@@ -1,5 +1,6 @@
 package test.iotos.testbatch;
 
+import it.unibo.deis.lia.ramp.core.e2e.E2EComm;
 import it.unibo.deis.lia.ramp.core.internode.sdn.applicationRequirements.ApplicationRequirements;
 import it.unibo.deis.lia.ramp.core.internode.sdn.applicationRequirements.TrafficType;
 import it.unibo.deis.lia.ramp.core.internode.sdn.pathSelection.PathSelectionMetric;
@@ -42,11 +43,11 @@ public class SetupGAtest implements SetupTestBatch {
         }
         return targetID;
     }
-    public boolean getReceive(String nodeID){
-        boolean receive = false;
-        switch(nodeID){
+    public int getReceive(String nodeID){
+        int receive = -1;
+        switch (nodeID) {
             case "5":
-                receive = true;
+                receive = E2EComm.UDP;
                 break;
         }
         return receive;

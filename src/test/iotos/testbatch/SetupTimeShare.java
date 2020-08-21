@@ -46,8 +46,8 @@ public class SetupTimeShare implements SetupTestBatch {
         }
         return targetID;
     }
-    public boolean getReceive(String nodeID){
-        return false;
+    public int getReceive(String nodeID){
+        return -1;
     }
     public ApplicationRequirements getApplicationRequirement(String nodeID){
         ApplicationRequirements applicationRequirements = null;

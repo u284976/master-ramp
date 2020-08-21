@@ -39,17 +39,19 @@ def myNetwork():
     sta5 = net.addStation('sta5', ip='10.0.0.5/24',
                            position='5.0,300.0,0')
     sta6 = net.addStation('sta6', ip='10.0.0.6/24',
-                           position='270.0,600.0,0')
+                           position='150.0,800.0,0')
     sta7 = net.addStation('sta7', ip='10.0.0.7/24',
-                           position='450.0,500.0,0')
+                           position='350.0,650.0,0')
     sta8 = net.addStation('sta8', ip='10.0.0.8/24',
-                           position='562.0,300.0,0')
+                           position='500,600,0')
     sta9 = net.addStation('sta9', ip='10.0.0.9/24',
-                           position='750.0,300.0,0')
+                           position='562.0,300.0,0')
     sta10 = net.addStation('sta10', ip='10.0.0.10/24',
-                           position='900.0,400.0,0')
+                           position='750.0,300.0,0')
     sta11 = net.addStation('sta11', ip='10.0.0.11/24',
-                           position='900.0,200.0,0')
+                           position='900.0,500.0,0')
+    sta12 = net.addStation('sta12', ip='10.0.0.12/24',
+                           position='900.0,100.0,0')
 
     info("*** Configuring Propagation Model\n")
     net.setPropagationModel(model="logDistance", exp=3)
@@ -81,8 +83,10 @@ def myNetwork():
                 ssid='adhocNet', mode='g', channel=5)
     net.addLink(sta11, cls=adhoc, intf='sta11-wlan0',
                 ssid='adhocNet', mode='g', channel=5)
+    net.addLink(sta12, cls=adhoc, intf='sta12-wlan0',
+                ssid='adhocNet', mode='g', channel=5)
 
-    net.plotGraph(max_x=1000, max_y=1000)
+    # net.plotGraph(max_x=1000, max_y=1000)
 
     info( '*** Starting network\n')
     net.build()
@@ -93,6 +97,9 @@ def myNetwork():
     info( '*** Starting switches/APs\n')
 
     info( '*** Post configure nodes\n')
+
+    sta7.cmd("tc qdisc add dev sta7-wlan0 root netem delay 40ms")
+    sta8.cmd("tc qdisc add dev sta8-wlan0 root netem delay 40ms")
     
     CLI.do_openXterm = openXterm
     CLI.do_execute = execute
@@ -101,7 +108,7 @@ def myNetwork():
     net.stop()
     
 Threads = []
-activeQueue = [2,3,4,5,6,7,8,9,10,11]
+activeQueue = [2,3,4,5,6,7,8,9,10,11,12]
 def execute(self, line):
     args = line.split()
     for i in range(0,len(activeQueue)):

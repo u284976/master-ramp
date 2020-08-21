@@ -2096,7 +2096,7 @@ public class ControllerClient extends Thread implements ControllerClientInterfac
                 addr[0] = address.toString().substring(1);
             
                 Long lastMeasureTime = lastMeasureTimes.get(addr[0]);
-                if(lastMeasureTime != null && System.currentTimeMillis() - lastMeasureTime < TIME_INTERVAL){
+                if(lastMeasureTime != null && System.currentTimeMillis() - lastMeasureTime < 1*TIME_INTERVAL){
                     continue;
                 }
                 System.out.println("======================================");
@@ -2481,6 +2481,7 @@ public class ControllerClient extends Thread implements ControllerClientInterfac
                                 if(time_diff == 0){
                                     throughput = 5000000;       // by previous work "Test_Tx", limit this value for GA will take this value as node throughput
                                 }
+                                System.out.println("avg time diff = " + time_diff);
                                 System.out.println("predict :");
                                 System.out.println("delay = " + delay + " ms");
                                 System.out.println("throughput = " + throughput + " bytes / per second");

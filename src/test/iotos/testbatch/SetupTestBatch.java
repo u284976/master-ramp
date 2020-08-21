@@ -53,7 +53,11 @@ public interface SetupTestBatch {
     public int getTestSecond();
 
     public String getAppTarget(String nodeID);
-    public boolean getReceive(String nodeID);
+    /**
+     * getReceive will decide receive node create TCP or UDP service, 1,0 respective
+     * if "-1" is not receive
+     */
+    public int getReceive(String nodeID);
     public ApplicationRequirements getApplicationRequirement(String nodeID);
     
     

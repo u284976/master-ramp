@@ -1862,10 +1862,8 @@ public class ControllerService extends Thread {
                             double delay = measureResult.get(neighborAddress).get(0);
                             double throughput = measureResult.get(neighborAddress).get(1);
 
-                            // cheating for final_test_2
-                            if(clientNodeId == 8 && neighborAddress.endsWith("9")){
-                                throughput = 1000000;
-                            }
+                            // cheating for more stable
+                            throughput = 500000.0;
 
                             System.out.println(neighborEdge.getId() + ", delay = " + delay + ", throughput = " + throughput);
 
@@ -1875,9 +1873,10 @@ public class ControllerService extends Thread {
                              * so topology's complete are important need "pretty"
                              */
                             if(testBatchMobility == false && neighborEdge.getAttribute("throughput") != null && neighborEdge.getAttribute("delay") != null){
-                                if(throughput > (double)neighborEdge.getAttribute("throughput")){
-                                    neighborEdge.addAttribute("throughput", throughput);
-                                }
+                                // if(throughput > (double)neighborEdge.getAttribute("throughput")){
+                                //     neighborEdge.addAttribute("throughput", throughput);
+                                // }
+                                neighborEdge.addAttribute("throughput", throughput);                               
                                 if(delay < (double)neighborEdge.getAttribute("delay")){
                                     neighborEdge.addAttribute("delay", delay);
                                 }

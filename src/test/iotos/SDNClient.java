@@ -24,6 +24,7 @@ import test.iotos.messagetype.timeDataType;
 
 import test.iotos.testbatch.SetupFinalTest;
 import test.iotos.testbatch.SetupFinalTest2;
+import test.iotos.testbatch.SetupFinalTest3;
 import test.iotos.testbatch.SetupTestBatch;
 
 public class SDNClient{
@@ -47,7 +48,7 @@ public class SDNClient{
     public static void main(String[] args){
         
         // change here to change testBatch
-        testBatch = new SetupFinalTest2();
+        testBatch = new SetupFinalTest3();
         TestTime = testBatch.getTestBatchTime();
         PathSelectionMetric testMetric = testBatch.getPathSelectionMetric();
         
@@ -90,41 +91,39 @@ public class SDNClient{
         }));
 
         controllerClient = ControllerClient.getInstance();
-        // cheating for final topo let network resource more sufficient
-        if(nodeID.equals("9") || nodeID.equals("6")){
-            controllerClient.disableMeasure();
-        }else{
-            controllerClient.enableMeasure();
-        }
+        controllerClient.enableMeasure();
         
 
         System.out.println("========================================");
         System.out.println("get controller client instance done!!!!!");
         System.out.println("========================================");
-        try {
-            Thread.sleep(5000);
-        } catch (Exception e) {
-            //TODO: handle exception
-        }
+        // try {
+        //     Thread.sleep(5000);
+        // } catch (Exception e) {
+        //     //TODO: handle exception
+        // }
 
         /**
          * register service and waiting message by other client
          */
+        int applicationProtocol = testBatch.getReceive(nodeID);
+        if(applicationProtocol != -1){
+            try{
+                applicationSocket = E2EComm.bindPreReceive(applicationProtocol);
+            }catch(Exception e){
+                e.printStackTrace();
+            }
+            ServiceManager.getInstance(false).registerService(
+                "application" + nodeID,             // serviceName
+                applicationSocket.getLocalPort(),   // servicePort
+                applicationProtocol                 // protocol
+            );
+
+            // start application listen
+            listener = new receiveThread(TestTime,applicationSocket,nodeID);
+            listener.start();
+        }
         
-        int protocol = E2EComm.UDP;
-        if(nodeID.equals("11")){
-            protocol = E2EComm.TCP;
-        }
-        try{
-            applicationSocket = E2EComm.bindPreReceive(protocol);
-        }catch(Exception e){
-            e.printStackTrace();
-        }
-        ServiceManager.getInstance(false).registerService(
-            "application" + nodeID,             // serviceName
-            applicationSocket.getLocalPort(),   // servicePort
-            protocol                            // protocol
-        );
 
         System.out.println("========================================");
         System.out.println("register Service to local management done!!");
@@ -150,15 +149,7 @@ public class SDNClient{
             } catch (Exception e) {
                 //TODO: handle exception
             }
-        }
-
-        // start listen
-        boolean IamReceive = testBatch.getReceive(nodeID);
-        if(IamReceive){
-            listener = new receiveThread(TestTime,applicationSocket,nodeID);
-            listener.start();
-        }
-        
+        }       
 
         ServiceResponse appService = null;
         String targetID = testBatch.getAppTarget(nodeID);

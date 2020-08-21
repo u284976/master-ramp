@@ -21,6 +21,7 @@
 ./src/test/iotos/testbatch/SetupGAtest.java
 ./src/test/iotos/testbatch/SetupFinalTest2.java
 ./src/test/iotos/testbatch/SetupTimeShare.java
+./src/test/iotos/testbatch/SetupFinalTest3.java
 ./src/test/iotos/testbatch/SetupMeshTestBatch.java
 ./src/test/iotos/testbatch/SetupGA_Change_Test.java
 ./src/test/iotos/testbatch/SetupTestBatch.java

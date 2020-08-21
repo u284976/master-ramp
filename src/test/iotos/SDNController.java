@@ -9,6 +9,7 @@ import it.unibo.deis.lia.ramp.core.internode.sdn.controllerService.ControllerSer
 import it.unibo.deis.lia.ramp.service.management.ServiceManager;
 import test.iotos.testbatch.SetupFinalTest;
 import test.iotos.testbatch.SetupFinalTest2;
+import test.iotos.testbatch.SetupFinalTest3;
 import test.iotos.testbatch.SetupTestBatch;
 
 public class SDNController{
@@ -33,7 +34,7 @@ public class SDNController{
     public static void main(String[] args){
 		
 		// change here to change testBatch
-		testBatch = new SetupFinalTest2();
+		testBatch = new SetupFinalTest3();
 		
 		testBatchName = testBatch.getTestBatchName();
 		testTime = testBatch.getTestBatchTime();
