@@ -82,7 +82,7 @@ def myNetwork():
 
     net.addLink(sta8, sta9)
 
-    net.addLink(sta9, sta10,bw=1)
+    net.addLink(sta9, sta10,bw=20)
 
     net.addLink(sta10, sta11)
     net.addLink(sta10, sta12)
